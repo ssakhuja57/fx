@@ -1,7 +1,6 @@
 package session;
 
-import java.util.HashMap;
-
+import info.Pairs;
 import listeners.ResponseListener;
 import listeners.SessionStatusListener;
 import tables.Accounts;
@@ -12,7 +11,6 @@ import tables.Summaries;
 import tables.Trades;
 import actions.PositionActions;
 
-import com.fxcore2.Constants;
 import com.fxcore2.O2GOrderTableRow;
 import com.fxcore2.O2GResponse;
 import com.fxcore2.O2GSession;
@@ -32,19 +30,18 @@ public class SessionManager {
 	public DBManager dbMgr;
 	
 	//tables
-	public Accounts accounts;
-	public ClosedTrades closedTrades;
-	public Offers offers;
-	public Orders orders;
-	public Summaries summaries;
-	public Trades trades;
+	public Accounts accountsTable;
+	public ClosedTrades closedTradesTable;
+	public Offers offersTable;
+	public Orders ordersTable;
+	public Summaries summariesTable;
+	public Trades tradesTable;
 	
-	String longAccount;
-	String shortAccount;
-	
+	String[] accounts;
 	
 	
-	public SessionManager(String login, String password, String DemoOrReal, String longAccount, String shortAccount){
+	
+	public SessionManager(String login, String password, String DemoOrReal, String account1, String account2){
 		
 		session = O2GTransport.createSession();
 		
@@ -60,19 +57,18 @@ public class SessionManager {
         	System.exit(1);
         }
         
-        this.longAccount = longAccount;
-        this.shortAccount = shortAccount;
+        accounts = new String[]{account1, account2};
         
         tableMgr = session.getTableManager();
         dbMgr = new DBManager();
         
         //initialize tables
-        accounts = new Accounts(tableMgr);
-        closedTrades = new ClosedTrades(tableMgr);
-        offers = new Offers(tableMgr);
-        orders = new Orders(tableMgr);
-        summaries = new Summaries(tableMgr);
-        trades = new Trades(tableMgr);
+        accountsTable = new Accounts(tableMgr);
+        closedTradesTable = new ClosedTrades(tableMgr);
+        offersTable = new Offers(tableMgr);
+        ordersTable = new Orders(tableMgr);
+        summariesTable = new Summaries(tableMgr);
+        tradesTable = new Trades(tableMgr);
 	}
 	
 	
@@ -86,7 +82,7 @@ public class SessionManager {
 	}
 	
 	public String createMarketOrder(String pair, String buySell, int amount) throws InterruptedException{
-		String accountID = getAccount(buySell);
+		String accountID = getAccountID(pair);
 		String requestID = PositionActions.createMarketOrder(this, accountID, pair, buySell, amount, responseListener);
 		O2GResponse resp = responseListener.getResponse(requestID);
 		return requestID;
@@ -95,7 +91,7 @@ public class SessionManager {
 	
 	public String createEntryStopOrder(String pair, String buySell, int amount, double rate, 
 			double stopOffset, boolean trailStop) throws InterruptedException{
-		String accountID = getAccount(buySell);
+		String accountID = getAccountID(pair);
 		String requestID = PositionActions.createEntryOrderWithStop(this, accountID, pair, buySell, amount, rate, 
 				stopOffset, trailStop, responseListener);
 		responseListener.getResponse(requestID);
@@ -103,7 +99,7 @@ public class SessionManager {
 	}
 	
 	public String closeTrade(String pair, String buySell) throws InterruptedException{
-		O2GTradeTableRow trade = trades.getTradeRow(pair, buySell);
+		O2GTradeTableRow trade = tradesTable.getTradeRow(pair, buySell);
 		if (trade == null){
 			System.out.println("No open positions found for " + pair + ":" + buySell);
 			return null;
@@ -115,14 +111,15 @@ public class SessionManager {
 	}
 	
 	public String cancelOrder(String pair, String buySell) throws InterruptedException{
-		O2GOrderTableRow order = orders.getTradeRow(pair, buySell);
+		O2GOrderTableRow order = ordersTable.getTradeRow(pair, buySell);
 		String requestID = PositionActions.cancelOrder(this, order.getAccountID(), order.getOrderID(), responseListener);
 		return requestID;
 	}
 	
-	private String getAccount(String buySell){
-		return buySell.equals(Constants.Buy) ? longAccount : shortAccount;
+	private String getAccountID(String pair){
+		return accounts[Pairs.getAccount(pair) - 1];
 	}
+	
 	
 	
 	

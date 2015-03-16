@@ -12,8 +12,8 @@ public class Main {
 		//System.out.println(sm.orders.getTradeIDs("GBP/AUD", Constants.Buy));
 		//System.out.println(sm.trades.getTradeIDs("GBP/AUD", Constants.Buy));
 		//System.out.println(sm.closedTrades.getTradeIDs("GBP/AUD", Constants.Buy));
-		sm.orders.printTable();
-		sm.trades.printTable();
+		sm.ordersTable.printTable();
+		sm.tradesTable.printTable();
 		//sm.closedTrades.printTable();
 		try {
 			//System.out.println(sm.createMarketOrder("EUR/AUD", Constants.Buy, 1000));

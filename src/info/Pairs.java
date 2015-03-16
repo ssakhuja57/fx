@@ -58,6 +58,10 @@ public class Pairs {
 		return attributes.get(pair)[0].toString();
 	}
 	
+	public static int getAccount(String pair){
+		return attributes.get(pair)[1];
+	}
+	
 //	public static void main(String[] args){
 //		HashMap<String,Integer[]> counts = new HashMap<String,Integer[]>();
 //		counts.put("USD", new Integer[]{0,0});
