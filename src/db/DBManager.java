@@ -90,12 +90,12 @@ public class DBManager {
 	}
 	
 	
-	public LinkedList<Integer> getLinkedPairs(String pair){
-		ResultSet rs = readData("select pairID from pairs where base='" + pair + "' or quote = '" + pair + "'");
-		LinkedList<Integer> res = new LinkedList<Integer>();
+	public LinkedList<String> getRelatedPairs(String currency){
+		ResultSet rs = readData("select name from pairs where base='" + currency + "' or quote = '" + currency + "'");
+		LinkedList<String> res = new LinkedList<String>();
 		try {
 			while(rs.next()){
-				res.add(rs.getInt(1));
+				res.add(rs.getString(1));
 			}
 			return res;
 		} catch (SQLException e) {

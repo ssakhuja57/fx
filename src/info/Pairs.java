@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 public class Pairs {
 	
-	private static HashMap<String, Integer[]> attributes = new HashMap<String, Integer[]>();
+	public static final HashMap<String, Integer[]> attributes = new HashMap<String, Integer[]>();
 	
 	static
 	{

@@ -27,7 +27,7 @@ public class PositionActions {
 
 			
 	   public static String createEntryOrderWithStop(SessionManager sessionMgr, String accountID, String pair, String buySell, 
-			   					int amount, double rate, double stopOffset, boolean trailStop, ResponseListener responseListener) 
+			   					int amount, double rate, int stopOffset, boolean trailStop, ResponseListener responseListener) 
 			   							throws InterruptedException { 
 		   
 		   stopOffset = buySell.equals(Constants.Buy) ? -stopOffset : stopOffset; // make offset negative if buy 
@@ -36,7 +36,7 @@ public class PositionActions {
 	        
 	        valuemap.setString(O2GRequestParamsEnum.ORDER_TYPE, Constants.Orders.StopEntry);
 	        valuemap.setString(O2GRequestParamsEnum.PEG_TYPE_STOP, Constants.Peg.FromClose);
-	        valuemap.setDouble(O2GRequestParamsEnum.PEG_OFFSET_STOP, stopOffset);
+	        valuemap.setInt(O2GRequestParamsEnum.PEG_OFFSET_STOP, stopOffset);
 	        valuemap.setDouble(O2GRequestParamsEnum.RATE, rate);
 	        if(trailStop){
 	        	valuemap.setInt(O2GRequestParamsEnum.TRAIL_STEP_STOP, 1);
@@ -44,6 +44,37 @@ public class PositionActions {
 	        
 	        return createOrder(sessionMgr, valuemap, responseListener);
 	    }
+	   
+	   public static String createOpposingOCOEntryOrdersWithStops(SessionManager sessionMgr, String accountID, String pair,
+			   int amount, double longRate, double shortRate, int stopOffset, boolean trailStop, ResponseListener responseListener){
+		   O2GValueMap parentValueMap = getEmptyValMap(sessionMgr);
+		   parentValueMap.setString(O2GRequestParamsEnum.COMMAND, Constants.Commands.CreateOCO);
+		   
+		   O2GValueMap buyMap = getDefaultValMap(sessionMgr, accountID, pair, Constants.Buy, amount);
+	        buyMap.setString(O2GRequestParamsEnum.ORDER_TYPE, Constants.Orders.StopEntry);
+	        buyMap.setString(O2GRequestParamsEnum.PEG_TYPE_STOP, Constants.Peg.FromClose);
+	        buyMap.setInt(O2GRequestParamsEnum.PEG_OFFSET_STOP, -stopOffset);
+	        buyMap.setDouble(O2GRequestParamsEnum.RATE, longRate);
+	        if(trailStop){
+	        	buyMap.setInt(O2GRequestParamsEnum.TRAIL_STEP_STOP, 1);
+	        }
+	       O2GValueMap sellMap = getDefaultValMap(sessionMgr, accountID, pair, Constants.Sell, amount);
+	        sellMap.setString(O2GRequestParamsEnum.ORDER_TYPE, Constants.Orders.StopEntry);
+	        sellMap.setString(O2GRequestParamsEnum.PEG_TYPE_STOP, Constants.Peg.FromClose);
+	        sellMap.setInt(O2GRequestParamsEnum.PEG_OFFSET_STOP, stopOffset);
+	        sellMap.setDouble(O2GRequestParamsEnum.RATE, shortRate);
+	        if(trailStop){
+	        	sellMap.setInt(O2GRequestParamsEnum.TRAIL_STEP_STOP, 1);
+	        }
+	       
+	        parentValueMap.appendChild(buyMap);
+	        parentValueMap.appendChild(sellMap);
+	        
+	        System.out.println("Spike order on " + pair + " of " + amount + " with long at " + longRate + ", short at " + shortRate
+	        		+ " and stop offset of " + stopOffset);
+	        
+	        return createOrder(sessionMgr, parentValueMap, responseListener);
+	   }
 	   
 	   // this is an alternative to using TrueMarketClose
 	   public static String closeTrade(SessionManager sessionMgr, String accountID, String tradeID, String pair, String buySell, 

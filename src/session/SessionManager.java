@@ -3,6 +3,7 @@ package session;
 import info.Pairs;
 import listeners.ResponseListener;
 import listeners.SessionStatusListener;
+import rates.RateTools;
 import tables.Accounts;
 import tables.ClosedTrades;
 import tables.Offers;
@@ -12,7 +13,6 @@ import tables.Trades;
 import actions.PositionActions;
 
 import com.fxcore2.O2GOrderTableRow;
-import com.fxcore2.O2GResponse;
 import com.fxcore2.O2GSession;
 import com.fxcore2.O2GTableManager;
 import com.fxcore2.O2GTableManagerMode;
@@ -84,17 +84,25 @@ public class SessionManager {
 	public String createMarketOrder(String pair, String buySell, int amount) throws InterruptedException{
 		String accountID = getAccountID(pair);
 		String requestID = PositionActions.createMarketOrder(this, accountID, pair, buySell, amount, responseListener);
-		O2GResponse resp = responseListener.getResponse(requestID);
 		return requestID;
 		
 	}
 	
-	public String createEntryStopOrder(String pair, String buySell, int amount, double rate, 
-			double stopOffset, boolean trailStop) throws InterruptedException{
+	public String createEntryOrderWithStop(String pair, String buySell, int amount, double rate, 
+			int stopOffset, boolean trailStop) throws InterruptedException{
 		String accountID = getAccountID(pair);
 		String requestID = PositionActions.createEntryOrderWithStop(this, accountID, pair, buySell, amount, rate, 
 				stopOffset, trailStop, responseListener);
-		responseListener.getResponse(requestID);
+		return requestID;
+	}
+	
+	public String createOpposingOCOEntryOrdersWithStops(String pair, int amount, 
+			int pipBuffer, int stopOffset, boolean trailStop){
+		String accountID = getAccountID(pair);
+		double longRate = RateTools.addPips(offersTable.getBuyRate(pair), pipBuffer);
+		double shortRate = RateTools.addPips(offersTable.getSellRate(pair), -pipBuffer);
+		String requestID = PositionActions.createOpposingOCOEntryOrdersWithStops(this, accountID, 
+				pair, amount, longRate, shortRate, stopOffset, trailStop, responseListener);
 		return requestID;
 	}
 	
@@ -106,7 +114,6 @@ public class SessionManager {
 		}
 		String requestID = PositionActions.closeTrade(this, trade.getAccountID(), trade.getTradeID(), 
 				pair, buySell, trade.getAmount(), responseListener);
-		O2GResponse resp = responseListener.getResponse(requestID);
 		return requestID;
 	}
 	
