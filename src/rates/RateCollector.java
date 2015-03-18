@@ -1,17 +1,22 @@
 package rates;
 
+import java.util.Arrays;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import session.SessionManager;
 
-public class RateCollector implements Runnable{
+public class RateCollector{
 	
 	private SessionManager sm;
 	private String pair;
 	private int length;
 	private int frequency;
+	
+	private Timer timer;
 
 	private ConcurrentLinkedQueue<Double> buyRates;
 	private ConcurrentLinkedQueue<Double> sellRates;
@@ -43,7 +48,8 @@ public class RateCollector implements Runnable{
 				lowRates.add(0.0);
 			}
 			
-			run();
+			timer = new Timer();
+			timer.schedule(new Update(), 0, frequency);
 
 		}
 	
@@ -93,7 +99,20 @@ public class RateCollector implements Runnable{
 		int lastPoint = length - 1;
 		int basePoint = lastPoint - lastN_points;
 		return (rates[lastPoint] - rates[basePoint])/lastN_points;
-		
+	}
+	
+	public double getHigh(String type, int lastN_points){
+		double[] rates = getQueue(type);
+		int first = rates.length - lastN_points;
+		int last = length - 1;
+		return max(Arrays.copyOfRange(rates, first, last));
+	}
+	
+	public double getLow(String type, int lastN_points){
+		double[] rates = getQueue(type);
+		int first = rates.length - lastN_points;
+		int last = length - 1;
+		return min(Arrays.copyOfRange(rates, first, last));
 	}
 	
 	public double getStdDev(String type){
@@ -112,18 +131,33 @@ public class RateCollector implements Runnable{
 		return this.frequency;
 	}
 	
-	@Override
-	public void run() {
-		while (true){
+	class Update extends TimerTask{
+		public void run(){
 			updateRates();
-			try {
-				Thread.sleep(frequency*1000);
-			} catch (InterruptedException e) {
-
-			}
 		}
 		
 	}
+	
+	private double max(double[] arr){
+		double max = 0.0;
+		for (double d: arr){
+			if (d > max){
+				max = d;
+			}
+		}
+		return max;
+	}
+	
+	private double min(double[] arr){
+		double min = 0.0;
+		for (double d: arr){
+			if (d < min){
+				min = d;
+			}
+		}
+		return min;
+	}
+	
 	
 	
 	
