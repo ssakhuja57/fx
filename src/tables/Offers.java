@@ -19,11 +19,11 @@ public class Offers extends FXTable<O2GOffersTable, O2GOfferTableRow>{
 	}
 	
 	public double getBuyRate(String pair){
-		return getRateRow(pair).getBid();
+		return getRateRow(pair).getAsk();
 	}
 	
 	public double getSellRate(String pair){
-		return getRateRow(pair).getAsk();
+		return getRateRow(pair).getBid();
 	}
 	
 	public double getLow(String pair){
