@@ -60,7 +60,7 @@ public class SessionManager {
         accounts = new String[]{account1, account2};
         
         tableMgr = session.getTableManager();
-        dbMgr = new DBManager();
+        //dbMgr = new DBManager(); // disable for now, not needed
         
         //initialize tables
         accountsTable = new Accounts(tableMgr);
@@ -78,7 +78,7 @@ public class SessionManager {
         session.unsubscribeResponse(responseListener);
         session.unsubscribeSessionStatus(statusListener);
         session.dispose();
-        dbMgr.close();
+        //dbMgr.close(); //not needed for now
 	}
 	
 	public String createMarketOrder(String pair, String buySell, int amount) throws InterruptedException{
