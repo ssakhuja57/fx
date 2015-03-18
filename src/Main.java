@@ -8,7 +8,6 @@ public class Main {
 	public static void main(String[] args){
 		
 		SessionManager sm = new SessionManager("D172728472001", "817", "Demo", "02730876", "02730876");
-		//shubham sucks a big black...
 		//System.out.println(sm.orders.getTradeIDs("GBP/AUD", Constants.Buy));
 		//System.out.println(sm.trades.getTradeIDs("GBP/AUD", Constants.Buy));
 		//System.out.println(sm.closedTrades.getTradeIDs("GBP/AUD", Constants.Buy));
