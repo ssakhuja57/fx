@@ -1,11 +1,15 @@
 package info;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Set;
 
 public class Pairs {
 	
-	public static final HashMap<String, Integer[]> attributes = new HashMap<String, Integer[]>();
+	private static final HashMap<String, Integer[]> attributes = new HashMap<String, Integer[]>();
+	
+	public static final ArrayList<String> currencies = new ArrayList<String>();
 	
 	static
 	{
@@ -52,6 +56,15 @@ public class Pairs {
 		//ids.put("TRY/JPY", new Integer[] {98, 0});
 		//ids.put("USD/CNH", new Integer[] {105, 0});
 
+		for (String pair: getAllPairs()){
+			String[] currs = splitPair(pair);
+			if (!currencies.contains(currs[0])){
+				currencies.add(currs[0]);
+			}
+			if (!currencies.contains(currs[1])){
+				currencies.add(currs[1]);
+			}
+		}
 	}
 	
 	public static String getID(String pair){
@@ -62,7 +75,30 @@ public class Pairs {
 		return attributes.get(pair)[1];
 	}
 	
+	public static String[] splitPair(String pair){
+		return new String[]{pair.substring(0, 3), pair.substring(4, 7)};
+	}
+	
+	
+	public static ArrayList<String> getRelatedPairs(String currency){
+		ArrayList<String> pairs = new ArrayList<String>();
+		for (String pair: attributes.keySet()){
+			if(pair.substring(0, 3).equals(currency) || pair.substring(4, 7).equals(currency)){
+				pairs.add(pair);
+			}
+		}
+		return pairs;
+	}
+	
+	public static Collection<String> getAllPairs(){
+		return attributes.keySet();
+	}
+	
+
 //	public static void main(String[] args){
+//		for (String p: Pairs.getRelatedPairs("CHF")){
+//			System.out.println(p);
+//		}
 //		HashMap<String,Integer[]> counts = new HashMap<String,Integer[]>();
 //		counts.put("USD", new Integer[]{0,0});
 //		counts.put("EUR", new Integer[]{0,0});

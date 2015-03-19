@@ -12,6 +12,7 @@ import tables.Summaries;
 import tables.Trades;
 import actions.PositionActions;
 
+import com.fxcore2.Constants;
 import com.fxcore2.O2GOrderTableRow;
 import com.fxcore2.O2GSession;
 import com.fxcore2.O2GTableManager;
@@ -38,6 +39,7 @@ public class SessionManager {
 	public Trades tradesTable;
 	
 	String[] accounts;
+	public final int subscriptionLimit = 20;
 	
 	
 	
@@ -58,6 +60,7 @@ public class SessionManager {
         }
         
         accounts = new String[]{account1, account2};
+        
         
         tableMgr = session.getTableManager();
         //dbMgr = new DBManager(); // disable for now, not needed
@@ -106,6 +109,16 @@ public class SessionManager {
 		return requestID;
 	}
 	
+	public void adjustOpposingOCOEntryOrders(String pair, int pipBuffer){
+		String accountID = ordersTable.getOCOOrderIDs(pair, Constants.Buy)[0];
+		String longOrderID = ordersTable.getOCOOrderIDs(pair, Constants.Buy)[1];
+		String shortOrderID = ordersTable.getOCOOrderIDs(pair, Constants.Sell)[1];
+		double newLongRate = RateTools.addPips(offersTable.getBuyRate(pair), pipBuffer);
+		double newShortRate = RateTools.addPips(offersTable.getSellRate(pair), -pipBuffer);
+		PositionActions.adjustOpposingOCOEntryOrders(this, accountID, longOrderID, newLongRate, 
+				shortOrderID, newShortRate, responseListener);
+	}
+	
 	public String closeTrade(String pair, String buySell) throws InterruptedException{
 		O2GTradeTableRow trade = tradesTable.getTradeRow(pair, buySell);
 		if (trade == null){
@@ -121,6 +134,18 @@ public class SessionManager {
 		O2GOrderTableRow order = ordersTable.getTradeRow(pair, buySell);
 		String requestID = PositionActions.cancelOrder(this, order.getAccountID(), order.getOrderID(), responseListener);
 		return requestID;
+	}
+	
+	public void cancelAllOCOOrders() throws InterruptedException{
+		PositionActions.cancelAllOCOOrders(this, responseListener);
+	}
+	
+	public String setPairSubscription(String pair, String status){
+		return PositionActions.setPairSubscription(this, pair, status, responseListener);
+	}
+	
+	public void removeAllPairSubscriptions(String status){
+		PositionActions.removeAllPairSubscriptions(this, responseListener);
 	}
 	
 	private String getAccountID(String pair){

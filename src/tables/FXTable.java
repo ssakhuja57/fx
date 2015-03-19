@@ -35,16 +35,17 @@ public abstract class FXTable<TableClass extends O2GTable, TableRowClass extends
         
 	}
 	
+	
     // Print table using IO2GEachRowListener
     public void printTable() {
     	if (table.size() == 0)
             System.out.println("Table " + table.getType() + " is empty!");
         else {
-            table.forEachRow(new EachRowListener());
+            table.forEachRow(new EachRowListenerPrint());
         }
     }
     
-	protected static class EachRowListener implements IO2GEachRowListener {
+	protected static class EachRowListenerPrint implements IO2GEachRowListener {
 
 		@Override
 	    public void onEachRow(String rowID, O2GRow rowData) {
