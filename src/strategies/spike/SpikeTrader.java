@@ -21,23 +21,29 @@ public class SpikeTrader implements SessionHolder{
 	private Date eventDate;
 	
 	private SessionManager sm;
+	
+	private boolean recalibrate; // use recalibrator
 	private Timer recalibrator;
-	private final int recalibratorFreq = 1; //frequency in seconds at which to recalibrate orders
-	private final int recalibrateUntil = 30; //seconds before eventDate to stop recalibrating orders
+	private int recalibratorFreq = 1; //frequency in seconds at which to recalibrate orders
+	private int recalibrateUntil = 30; //seconds before eventDate to stop recalibrating orders
+	
 	private ArrayList<String> pairs;
 	private HashMap<String, RateCollector> rateCollectors = new HashMap<String, RateCollector>();
 	private HashMap<String, Integer[]> params = new HashMap<String, Integer[]>(); //spike buffer, 
 	
 	
-	public SpikeTrader(SessionManager sm, String currency, String eventDate_string){
+	public SpikeTrader(SessionManager sm, String currency, String eventDate_string,
+				boolean autoRecalibrate, int recalibratorFreq, int recalibrateUntil){
 		this.sm = sm;
 		this.currency = currency;
 		try {
 			this.eventDate = (new SimpleDateFormat("YYYY-MM-dd hh:mm", Locale.ENGLISH)).parse(eventDate_string);
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		this.recalibrate = autoRecalibrate;
+		this.recalibratorFreq = recalibratorFreq;
+		this.recalibrateUntil = recalibrateUntil;
 		
 		pairs = Pairs.getRelatedPairs(currency);
 		for (String pair:pairs){
@@ -54,10 +60,23 @@ public class SpikeTrader implements SessionHolder{
 				recalibrator.cancel();
 			}
 			recalibrateAllOrders();
-			
 		}
 	}
 	
+
+	private void startRecalibrator(){
+		if(recalibrate){
+			recalibrator = new Timer();
+			recalibrator.schedule(new Recalibrate(), 3*1000, recalibratorFreq*1000);
+		}
+	}
+	
+	private void stopRecalibrator(){
+		if(recalibrate){
+			recalibrator.cancel();
+		}
+	}
+
 	private int secondsDiff(Date d1, Date d2){
 		return (int) ((d2.getTime()-d1.getTime())/1000);
 	}
@@ -90,7 +109,7 @@ public class SpikeTrader implements SessionHolder{
 	
 	@Override
 	public void close(){
-		recalibrator.cancel();
+		stopRecalibrator();
 		sm.close();
 	}
 	
@@ -109,13 +128,12 @@ public class SpikeTrader implements SessionHolder{
 	
 	public void start(){
 		placeAllOrders();
-		recalibrator = new Timer();
-		recalibrator.schedule(new Recalibrate(), 3*1000, recalibratorFreq*1000);
+		startRecalibrator();
 	}
 	
 	public void stop(){
 		cancelAllOrders();
-		recalibrator.cancel();
+		stopRecalibrator();
 	}
 
 

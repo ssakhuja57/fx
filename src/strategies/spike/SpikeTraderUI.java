@@ -37,10 +37,14 @@ public class SpikeTraderUI extends JFrame{
 	
 	//conifg UI
 	SessionLoginUI login;
-	JPanel config = new JPanel(new GridLayout(2,2));
+	JPanel config = new JPanel(new GridLayout(0,2));
 	JComboBox<String> currencySelector;
 	JTextField eventDate;
 //	JSpinner eventDate;
+	JComboBox<Boolean> recalibrate;
+	JTextField recalibratorFreq;
+	JTextField recalibrateUntil;
+	
 	
 	//app UI
 	JPanel info = new JPanel(new GridLayout(4,1));
@@ -69,7 +73,7 @@ public class SpikeTraderUI extends JFrame{
 	public SpikeTraderUI(){
 		
 		super("Spike Trader");
-		this.setSize(400, 120);
+		this.setSize(500, 200);
 		this.setResizable(false);
 		currencySelector = new JComboBox<String>();
 		for (String currency: Pairs.currencies){
@@ -81,10 +85,22 @@ public class SpikeTraderUI extends JFrame{
 //		eventDate.setEditor(timeEditor);
 //		eventDate.setValue(new Date()); // will only show the current time
 //		config.add(eventDate);
+		recalibrate = new JComboBox<Boolean>();
+			recalibrate.addItem(true);
+			recalibrate.addItem(false);
+		recalibratorFreq = new JTextField("1");
+		recalibrateUntil = new JTextField("30");
+		
 		config.add(new JLabel("Currency:"));
 		config.add(currencySelector);
 		config.add(new JLabel("News Date (YYYY-MM-dd HH:mm):"));
 		config.add(eventDate);
+		config.add(new JLabel("Auto Recalibrate:"));
+		config.add(recalibrate);
+		config.add(new JLabel("Recalibrate Frequency (seconds):"));
+		config.add(recalibratorFreq);
+		config.add(new JLabel("Recalibrate Until X seconds before event:"));
+		config.add(recalibrateUntil);
 		
 		JPanel submit_pnl = new JPanel(new FlowLayout());
 		JButton submit = new JButton("Submit");
