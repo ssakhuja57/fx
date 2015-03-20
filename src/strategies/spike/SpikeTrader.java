@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import rates.RateCollector;
 import session.SessionHolder;
@@ -19,8 +21,12 @@ public class SpikeTrader implements SessionHolder{
 	private Date eventDate;
 	
 	private SessionManager sm;
+	private Timer recalibrator;
+	private final int recalibratorFreq = 1; //frequency in seconds at which to recalibrate orders
+	private final int recalibrateUntil = 30; //seconds before eventDate to stop recalibrating orders
 	private ArrayList<String> pairs;
-	private HashMap<String, RateCollector> rateCollectors;
+	private HashMap<String, RateCollector> rateCollectors = new HashMap<String, RateCollector>();
+	private HashMap<String, Integer[]> params = new HashMap<String, Integer[]>(); //spike buffer, 
 	
 	
 	public SpikeTrader(SessionManager sm, String currency, String eventDate_string){
@@ -33,12 +39,46 @@ public class SpikeTrader implements SessionHolder{
 			e.printStackTrace();
 		}
 		
-		rateCollectors = new HashMap<String, RateCollector>();
 		pairs = Pairs.getRelatedPairs(currency);
 		for (String pair:pairs){
 			rateCollectors.put(pair, new RateCollector(sm, pair));
 		}
+		
 	}
+	
+	private class Recalibrate extends TimerTask{
+
+		@Override
+		public void run() {
+			if (secondsDiff(new Date(), eventDate) <= recalibrateUntil){
+				recalibrator.cancel();
+			}
+			recalibrateAllOrders();
+			
+		}
+	}
+	
+	private int secondsDiff(Date d1, Date d2){
+		return (int) ((d2.getTime()-d1.getTime())/1000);
+	}
+	
+	
+	private void placeAllOrders(){
+		for (String pair: pairs){
+			Integer[] pairParams = params.get(pair); 
+			sm.createOpposingOCOEntryOrdersWithStops(pair, pairParams[0], pairParams[1], pairParams[2], true);
+		}
+	}
+	
+	private void cancelAllOrders(){
+		try {
+			sm.cancelAllOCOOrders();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	
 	public String getCurrency(){
 		return currency;
@@ -50,7 +90,32 @@ public class SpikeTrader implements SessionHolder{
 	
 	@Override
 	public void close(){
+		recalibrator.cancel();
 		sm.close();
+	}
+	
+	public void recalibrateAllOrders(){
+		for (String pair: pairs){
+			sm.adjustOpposingOCOEntryOrders(pair, params.get(pair)[1]);
+		}
+	}
+	
+	public boolean setParams(String pair, int lots, int spikeBuffer, int stopBuffer){
+		System.out.println("Setting parameters for " + pair + ": lots=" + lots + "K, SpikeBuffer=" 
+				+ spikeBuffer + "pips, StopBuffer=" + stopBuffer + "pips");
+		params.put(pair, new Integer[]{lots*1000, spikeBuffer, stopBuffer});
+		return true;
+	}
+	
+	public void start(){
+		placeAllOrders();
+		recalibrator = new Timer();
+		recalibrator.schedule(new Recalibrate(), 3*1000, recalibratorFreq*1000);
+	}
+	
+	public void stop(){
+		cancelAllOrders();
+		recalibrator.cancel();
 	}
 
 

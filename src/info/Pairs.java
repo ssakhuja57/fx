@@ -2,6 +2,7 @@ package info;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -56,6 +57,7 @@ public class Pairs {
 		//ids.put("TRY/JPY", new Integer[] {98, 0});
 		//ids.put("USD/CNH", new Integer[] {105, 0});
 
+		
 		for (String pair: getAllPairs()){
 			String[] currs = splitPair(pair);
 			if (!currencies.contains(currs[0])){
@@ -65,6 +67,7 @@ public class Pairs {
 				currencies.add(currs[1]);
 			}
 		}
+		Collections.sort(currencies);
 	}
 	
 	public static String getID(String pair){
@@ -87,6 +90,7 @@ public class Pairs {
 				pairs.add(pair);
 			}
 		}
+		Collections.sort(pairs);
 		return pairs;
 	}
 	
