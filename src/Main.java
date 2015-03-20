@@ -1,6 +1,6 @@
-import listeners.ResponseListener;
+import rates.RateHistory;
 import session.SessionManager;
-import actions.PositionActions;
+import strategies.spike.SpikeTrader;
 
 
 public class Main {
@@ -14,7 +14,8 @@ public class Main {
 		//sm.tradesTable.printTable();
 		//sm.closedTrades.printTable();
 		//sm.offersTable.printTable();
-		sm.ordersTable.printTable();
+		//sm.ordersTable.printTable();
+		//SpikeTraderUI ui = new SpikeTraderUI();
 		try {
 			//System.out.println(sm.createMarketOrder("EUR/AUD", Constants.Buy, 1000));
 			//sm.createEntryStopOrder("GBP/AUD", Constants.Buy, 1000, 1.93613, 2, true);
@@ -22,12 +23,16 @@ public class Main {
 			//System.out.println(sm.closeTrade("EUR/AUD", Constants.Buy));
 			//sm.cancelOrder("GBP/AUD", Constants.Buy);
 			//sm.createOpposingOCOEntryOrdersWithStops("EUR/GBP", 1000, 15, 5, true);
-			//sm.createOpposingOCOEntryOrdersWithStops("EUR/CHF", 1000, 20, 5, true);
-			//sm.adjustOpposingOCOEntryOrders("EUR/CHF", 50);
+			//sm.createOpposingOCOEntryOrdersWithStops("EUR/USD", 1000, 20, 5, true);
+			//sm.adjustOpposingOCOEntryOrders("EUR/USD", 1);
 			//PositionActions.removeAllPairSubscriptions(sm, new ResponseListener());
-			sm.cancelAllOCOOrders();
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
+			//sm.cancelAllOCOOrders();
+			//SpikeTrader st = new SpikeTrader(sm, "USD", "2015-01-01 10:00");
+			for (double d : RateHistory.getTickData(sm, "EUR/USD", 10, "buy")){
+				System.out.println(d);
+			}
+			Thread.sleep(5*1000);
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

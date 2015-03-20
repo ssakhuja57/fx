@@ -18,9 +18,9 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
 
-public class LoginUI extends JFrame{
+public class SessionLoginUI extends JFrame{
 
-	SessionManager sm;
+	private SessionManager sm;
 	
 	JLabel login_id_lbl;
 	JLabel passwd_lbl;
@@ -34,7 +34,7 @@ public class LoginUI extends JFrame{
 	JTextField account1;
 	JTextField account2;
 	
-	public LoginUI(SessionHolder sh){
+	public SessionLoginUI(){
 		
 		super("FX Login");
 		this.setSize(500, 200);
@@ -89,7 +89,7 @@ public class LoginUI extends JFrame{
 					return;
 				}
 				String account2_check = account2.getText().equals("") ? account1.getText() : account2.getText();
-				sh.setSession(new SessionManager(login_id.getText(), passwd.getText(), (String) account_type.getSelectedItem(), account1.getText(), account2_check));
+				sm = new SessionManager(login_id.getText(), passwd.getText(), (String) account_type.getSelectedItem(), account1.getText(), account2_check);
 				dispose();
 			}
 		});
@@ -99,9 +99,9 @@ public class LoginUI extends JFrame{
 	private boolean checkFields(){
 		return !login_id.getText().equals("") && !passwd.getText().equals("") && !account_type.getSelectedItem().equals("") && !account1.getText().equals("");
 	}
+
 	
-	public static void main(String[] args){
-		LoginUI l = new LoginUI(null);
-		l.setVisible(true);
+	public SessionManager getSessionManager(){
+		return this.sm;
 	}
 }

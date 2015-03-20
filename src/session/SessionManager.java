@@ -1,6 +1,9 @@
 package session;
 
 import info.Pairs;
+
+import java.util.ArrayList;
+
 import listeners.ResponseListener;
 import listeners.SessionStatusListener;
 import rates.RateTools;
@@ -28,6 +31,7 @@ public class SessionManager {
 	public O2GTableManager tableMgr;
 	public SessionStatusListener statusListener;
 	public ResponseListener responseListener;
+	private ArrayList<SessionDependent> dependents;
 	public DBManager dbMgr;
 	
 	//tables
@@ -46,6 +50,7 @@ public class SessionManager {
 	public SessionManager(String login, String password, String DemoOrReal, String account1, String account2){
 		
 		session = O2GTransport.createSession();
+		dependents = new ArrayList<SessionDependent>();
 		
         statusListener = new SessionStatusListener();
         responseListener = new ResponseListener();
@@ -81,7 +86,14 @@ public class SessionManager {
         session.unsubscribeResponse(responseListener);
         session.unsubscribeSessionStatus(statusListener);
         session.dispose();
+        for (SessionDependent dep:dependents){
+        	dep.end();
+        }
         //dbMgr.close(); //not needed for now
+	}
+	
+	public void registerDependent(SessionDependent dep){
+		dependents.add(dep);
 	}
 	
 	public String createMarketOrder(String pair, String buySell, int amount) throws InterruptedException{

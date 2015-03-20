@@ -7,9 +7,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
+import session.SessionDependent;
 import session.SessionManager;
 
-public class RateCollector{
+public class RateCollector implements SessionDependent{
 	
 	private SessionManager sm;
 	private String pair;
@@ -37,24 +38,36 @@ public class RateCollector{
 			this.length = length;
 			this.frequency = frequency;
 			
+			sm.registerDependent(this);
+			
 			buyRates = new ConcurrentLinkedQueue<Double>();
 			sellRates = new ConcurrentLinkedQueue<Double>();
 			highRates = new ConcurrentLinkedQueue<Double>();
 			lowRates = new ConcurrentLinkedQueue<Double>();
-			for (int i=0;i<length;i++){
-				buyRates.add(0.0);
-				sellRates.add(0.0);
-				highRates.add(0.0);
-				lowRates.add(0.0);
+			
+			try{
+				buyRates.addAll(RateHistory.getTickData(sm, pair, length, "buy"));
+				Thread.sleep(1000);
+				//sellRates.addAll(RateHistory.getTickData(sm, pair, length, "sell"));
+				//highRates.addAll(RateHistory.getTickData(sm, pair, length, "high"));
+				//lowRates.addAll(RateHistory.getTickData(sm, pair, length, "low"));
+			} catch (InterruptedException e){
+				e.printStackTrace();
 			}
 			
 			timer = new Timer();
-			timer.schedule(new Update(), 0, frequency);
+			//timer.schedule(new Update(), 0, frequency*1000);
 
 		}
 	
+	@Override
+	public void end(){
+		timer.cancel();
+	}
+	
 	
 	private void updateRates(){
+		System.out.println(pair + " at buy rate " + sm.offersTable.getBuyRate(pair));
 		buyRates.add(sm.offersTable.getBuyRate(pair));
 		sellRates.add(sm.offersTable.getSellRate(pair));
 		highRates.add(sm.offersTable.getHigh(pair));

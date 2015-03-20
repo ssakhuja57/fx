@@ -66,14 +66,15 @@ public class ResponseListener implements IO2GResponseListener{
 		}
 	}
 	
-	public O2GResponse getResponse(String requestID){
-		for (int i=0;i<10;i++){
+	public O2GResponse getResponse(String requestID, double waitFor){
+		for (int i=0;i<(1000*waitFor)/10;i++){
 			try {
 				Thread.sleep(100);
 				O2GResponse response = responses.get(requestID);
+				System.out.println("found response");
 				return response;
 			} catch (NullPointerException e){
-				//
+				System.out.println("waiting for response");
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

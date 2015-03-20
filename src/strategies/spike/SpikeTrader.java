@@ -15,36 +15,43 @@ import session.SessionManager;
 
 public class SpikeTrader implements SessionHolder{
 	
-	private String login;
-	private String passwd;
-	private String accountID;
-	
 	private String currency;
-	private Date newsTime;
+	private Date eventDate;
 	
 	private SessionManager sm;
 	private ArrayList<String> pairs;
 	private HashMap<String, RateCollector> rateCollectors;
 	
 	
-	public void initialize(String currency, String newsTime_string){
+	public SpikeTrader(SessionManager sm, String currency, String eventDate_string){
+		this.sm = sm;
 		this.currency = currency;
 		try {
-			this.newsTime = (new SimpleDateFormat("YYYY-MM-dd hh:mm", Locale.ENGLISH)).parse(newsTime_string);
+			this.eventDate = (new SimpleDateFormat("YYYY-MM-dd hh:mm", Locale.ENGLISH)).parse(eventDate_string);
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
+		rateCollectors = new HashMap<String, RateCollector>();
 		pairs = Pairs.getRelatedPairs(currency);
 		for (String pair:pairs){
 			rateCollectors.put(pair, new RateCollector(sm, pair));
 		}
 	}
-
-	@Override
-	public void setSession(SessionManager sm) {
-		this.sm = sm;
-		
+	
+	public String getCurrency(){
+		return currency;
 	}
+	
+	public String getEventDate(){
+		return new SimpleDateFormat("YYYY-MM-dd HH:mm").format(new Date());
+	}
+	
+	@Override
+	public void close(){
+		sm.close();
+	}
+
+
 }
