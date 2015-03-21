@@ -28,7 +28,7 @@ public class Main {
 			//PositionActions.removeAllPairSubscriptions(sm, new ResponseListener());
 			//sm.cancelAllOCOOrders();
 			//SpikeTrader st = new SpikeTrader(sm, "USD", "2015-01-01 10:00");
-			for (double d : RateHistory.getTickData(sm, "EUR/USD", 10, "buy")){
+			for (double d : RateHistory.getTickData(sm, "EUR/JPY", 10, "sell")){
 				System.out.println(d);
 			}
 			Thread.sleep(5*1000);

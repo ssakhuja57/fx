@@ -5,11 +5,14 @@ import info.Pairs;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import com.fxcore2.Constants;
 
 import rates.RateCollector;
 import session.SessionHolder;
@@ -18,9 +21,13 @@ import session.SessionManager;
 public class SpikeTrader implements SessionHolder{
 	
 	private String currency;
-	private Date eventDate;
+	private Calendar eventDate;
 	
 	private SessionManager sm;
+	private boolean isActive = false;
+	
+	private Timer expirationChecker;
+	private Calendar expirationDate;
 	
 	private boolean recalibrate; // use recalibrator
 	private Timer recalibrator;
@@ -32,42 +39,57 @@ public class SpikeTrader implements SessionHolder{
 	private HashMap<String, Integer[]> params = new HashMap<String, Integer[]>(); //spike buffer, 
 	
 	
-	public SpikeTrader(SessionManager sm, String currency, String eventDate_string,
+	public SpikeTrader(SessionManager sm, String currency, String eventDate_string, int expireAfter,
 				boolean autoRecalibrate, int recalibratorFreq, int recalibrateUntil){
 		this.sm = sm;
 		this.currency = currency;
 		try {
-			this.eventDate = (new SimpleDateFormat("YYYY-MM-dd hh:mm", Locale.ENGLISH)).parse(eventDate_string);
+			this.eventDate = Calendar.getInstance();
+			this.eventDate.setTime((new SimpleDateFormat("YYYY-MM-dd hh:mm", Locale.ENGLISH)).parse(eventDate_string));
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
+		this.expirationDate = Calendar.getInstance();
+		expirationDate.setTime(eventDate.getTime());
+		expirationDate.add(Calendar.SECOND, expireAfter);
+		
+		
 		this.recalibrate = autoRecalibrate;
 		this.recalibratorFreq = recalibratorFreq;
 		this.recalibrateUntil = recalibrateUntil;
 		
 		pairs = Pairs.getRelatedPairs(currency);
 		for (String pair:pairs){
-			rateCollectors.put(pair, new RateCollector(sm, pair));
+			//rateCollectors.put(pair, new RateCollector(sm, pair));
 		}
 		
+	}
+	
+	private class ExpirationCheck extends TimerTask{
+
+		@Override
+		public void run() {
+				expirationChecker.cancel();
+		}
 	}
 	
 	private class Recalibrate extends TimerTask{
 
 		@Override
 		public void run() {
-			if (secondsDiff(new Date(), eventDate) <= recalibrateUntil){
+			if(secondsDiff(Calendar.getInstance(), eventDate) <= recalibrateUntil){
 				recalibrator.cancel();
 			}
 			recalibrateAllOrders();
 		}
 	}
 	
+	
 
 	private void startRecalibrator(){
 		if(recalibrate){
 			recalibrator = new Timer();
-			recalibrator.schedule(new Recalibrate(), 3*1000, recalibratorFreq*1000);
+			recalibrator.schedule(new Recalibrate(), 2*1000, recalibratorFreq*1000);
 		}
 	}
 	
@@ -77,8 +99,8 @@ public class SpikeTrader implements SessionHolder{
 		}
 	}
 
-	private int secondsDiff(Date d1, Date d2){
-		return (int) ((d2.getTime()-d1.getTime())/1000);
+	private int secondsDiff(Calendar c1, Calendar c2){
+		return (int) ((c2.getTimeInMillis()-c1.getTimeInMillis())/1000);
 	}
 	
 	
@@ -110,7 +132,22 @@ public class SpikeTrader implements SessionHolder{
 	@Override
 	public void close(){
 		stopRecalibrator();
+		expirationChecker.cancel();
 		sm.close();
+	}
+	
+	public boolean getIsActive(){
+		return isActive;
+	}
+	
+	public void subscribeCurrency(){
+		for (String pair: pairs){
+			sm.setPairSubscription(pair, Constants.SubscriptionStatuses.Tradable);
+		}
+	}
+	
+	public void unsubscribeAll(){
+		sm.removeAllPairSubscriptions();
 	}
 	
 	public void recalibrateAllOrders(){
@@ -127,13 +164,17 @@ public class SpikeTrader implements SessionHolder{
 	}
 	
 	public void start(){
+		isActive = true;
 		placeAllOrders();
 		startRecalibrator();
+		expirationChecker.schedule(new ExpirationCheck(), expirationDate.getTime());
 	}
 	
 	public void stop(){
 		cancelAllOrders();
 		stopRecalibrator();
+		expirationChecker.cancel();
+		isActive = false;
 	}
 
 

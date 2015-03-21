@@ -31,7 +31,7 @@ import session.SessionLoginUI;
 
 public class SpikeTraderUI extends JFrame{
 	
-	SpikeTrader spikeTrader;
+	private SpikeTrader spikeTrader;
 	
 	private String currency; //this is temp
 	
@@ -41,9 +41,10 @@ public class SpikeTraderUI extends JFrame{
 	JComboBox<String> currencySelector;
 	JTextField eventDate;
 //	JSpinner eventDate;
+	JTextField expireAfter;		String defExpireAfter = "180";
 	JComboBox<Boolean> recalibrate;
-	JTextField recalibratorFreq;
-	JTextField recalibrateUntil;
+	JTextField recalibratorFreq;	String defRecalibratorFreq = "1";	
+	JTextField recalibrateUntil;	String defRecalibrateUntil = "30";
 	
 	
 	//app UI
@@ -73,7 +74,7 @@ public class SpikeTraderUI extends JFrame{
 	public SpikeTraderUI(){
 		
 		super("Spike Trader");
-		this.setSize(500, 200);
+		this.setSize(500, 225);
 		this.setResizable(false);
 		currencySelector = new JComboBox<String>();
 		for (String currency: Pairs.currencies){
@@ -85,21 +86,25 @@ public class SpikeTraderUI extends JFrame{
 //		eventDate.setEditor(timeEditor);
 //		eventDate.setValue(new Date()); // will only show the current time
 //		config.add(eventDate);
+		expireAfter = new JTextField(defExpireAfter);
+	
 		recalibrate = new JComboBox<Boolean>();
 			recalibrate.addItem(true);
 			recalibrate.addItem(false);
-		recalibratorFreq = new JTextField("1");
-		recalibrateUntil = new JTextField("30");
+		recalibratorFreq = new JTextField(defRecalibratorFreq);
+		recalibrateUntil = new JTextField(defRecalibrateUntil);
 		
 		config.add(new JLabel("Currency:"));
 		config.add(currencySelector);
-		config.add(new JLabel("News Date (YYYY-MM-dd HH:mm):"));
+		config.add(new JLabel("Event Date (YYYY-MM-dd HH:mm):"));
 		config.add(eventDate);
+		config.add(new JLabel("Expire orders X seconds after event date:"));
+		config.add(expireAfter);
 		config.add(new JLabel("Auto Recalibrate:"));
 		config.add(recalibrate);
-		config.add(new JLabel("Recalibrate Frequency (seconds):"));
+		config.add(new JLabel("Recalibrate every X seconds:"));
 		config.add(recalibratorFreq);
-		config.add(new JLabel("Recalibrate Until X seconds before event:"));
+		config.add(new JLabel("Recalibrate until X seconds before event:"));
 		config.add(recalibrateUntil);
 		
 		JPanel submit_pnl = new JPanel(new FlowLayout());
@@ -109,7 +114,15 @@ public class SpikeTraderUI extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				currency = (String) currencySelector.getSelectedItem();
-				//spikeTrader = new SpikeTrader(login.getSessionManager(), (String)currencySelector.getSelectedItem(), eventDate.getText());
+				spikeTrader = new SpikeTrader(
+						login.getSessionManager(), 
+						(String)currencySelector.getSelectedItem(), 
+						eventDate.getText(),
+						Integer.parseInt(expireAfter.getText()), 
+						(Boolean)recalibrate.getSelectedItem(), 
+						Integer.parseInt(recalibratorFreq.getText()),
+						Integer.parseInt(recalibrateUntil.getText())
+						);
 				activate();
 			}
 		});
@@ -129,6 +142,8 @@ public class SpikeTraderUI extends JFrame{
                 	try{
                 		login.getSessionManager().close();
                 		spikeTrader.close();
+                	} catch(NullPointerException npe){
+                		//
                 	} catch(Exception ex){
                 		ex.printStackTrace();
                 	} finally{
@@ -145,12 +160,24 @@ public class SpikeTraderUI extends JFrame{
 		this.getContentPane().removeAll();
 		this.setSize(600, 300);
 		this.setLayout(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
 		
 		currencySelected = new JLabel("Currency: " );//+ spikeTrader.getCurrency());
 		eventDateSelected = new JLabel("Event Date: " );//+ spikeTrader.getEventDate());
 		currencySubscribe = new JButton("Subscribe to " + currency + " Pairs");
 		unsubscribeAll = new JButton("Unsubscribe all Pairs");
+		currencySubscribe.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				spikeTrader.subscribeCurrency();
+			}
+		});
+		unsubscribeAll.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				spikeTrader.unsubscribeAll();
+			}
+		});
+		
 		info.add(currencySelected);
 		info.add(eventDateSelected);
 		info.add(currencySubscribe);
@@ -252,8 +279,10 @@ public class SpikeTraderUI extends JFrame{
 //					return;
 //				};
 			}
-			if (!valueErrors){
-				placeOrders.setEnabled(true);
+			if(!valueErrors){
+				if(!spikeTrader.getIsActive()){
+					placeOrders.setEnabled(true);
+				}
 			}
 			else{
 				saveParams.setEnabled(true);

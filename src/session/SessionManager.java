@@ -156,7 +156,7 @@ public class SessionManager {
 		return PositionActions.setPairSubscription(this, pair, status, responseListener);
 	}
 	
-	public void removeAllPairSubscriptions(String status){
+	public void removeAllPairSubscriptions(){
 		PositionActions.removeAllPairSubscriptions(this, responseListener);
 	}
 	

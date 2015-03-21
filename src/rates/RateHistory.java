@@ -25,7 +25,7 @@ public class RateHistory {
 		O2GTimeframe timeFrame = timeFrames.get("t1");
 		O2GRequest marketDataRequest = factory.createMarketDataSnapshotRequestInstrument(pair, timeFrame, lastN);
 		String requestID = marketDataRequest.getRequestId();
-		factory.fillMarketDataSnapshotRequestTime(marketDataRequest, null, null, false);
+		factory.fillMarketDataSnapshotRequestTime(marketDataRequest, null, null, true);
 		session.sendRequest(marketDataRequest);
 		O2GResponseReaderFactory readerFactory = session.getResponseReaderFactory();
 		O2GResponse response = sm.responseListener.getResponse(requestID, 3);
