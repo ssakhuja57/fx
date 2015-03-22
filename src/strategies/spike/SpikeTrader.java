@@ -167,6 +167,7 @@ public class SpikeTrader implements SessionHolder{
 		isActive = true;
 		placeAllOrders();
 		startRecalibrator();
+		expirationChecker = new Timer();
 		expirationChecker.schedule(new ExpirationCheck(), expirationDate.getTime());
 	}
 	

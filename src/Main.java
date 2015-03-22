@@ -1,13 +1,11 @@
-import rates.RateHistory;
-import session.SessionManager;
-import strategies.spike.SpikeTrader;
+import strategies.spike.SpikeTraderUI;
 
 
 public class Main {
 	
 	public static void main(String[] args){
 		
-		SessionManager sm = new SessionManager("D172741206001", "1008", "Demo", "02743608", "02743608");
+		//SessionManager sm = new SessionManager("D172741206001", "1008", "Demo", "02743608", "02743608");
 		//System.out.println(sm.orders.getTradeIDs("GBP/AUD", Constants.Buy));
 		//System.out.println(sm.trades.getTradeIDs("GBP/AUD", Constants.Buy));
 		//System.out.println(sm.closedTrades.getTradeIDs("GBP/AUD", Constants.Buy));
@@ -28,16 +26,17 @@ public class Main {
 			//PositionActions.removeAllPairSubscriptions(sm, new ResponseListener());
 			//sm.cancelAllOCOOrders();
 			//SpikeTrader st = new SpikeTrader(sm, "USD", "2015-01-01 10:00");
-			for (double d : RateHistory.getTickData(sm, "EUR/JPY", 10, "sell")){
-				System.out.println(d);
-			}
+//			for (double d : RateHistory.getTickData(sm, "EUR/JPY", 10, "sell")){
+//				System.out.println(d);
+//			}
+			SpikeTraderUI ui = new SpikeTraderUI();
 			Thread.sleep(5*1000);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		finally {
-			sm.close();
+			//sm.close();
 		}
 		
 		

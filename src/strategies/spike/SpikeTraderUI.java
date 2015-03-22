@@ -33,7 +33,7 @@ public class SpikeTraderUI extends JFrame{
 	
 	private SpikeTrader spikeTrader;
 	
-	private String currency; //this is temp
+	//private String currency; //this is temp
 	
 	//conifg UI
 	SessionLoginUI login;
@@ -113,7 +113,6 @@ public class SpikeTraderUI extends JFrame{
 			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				currency = (String) currencySelector.getSelectedItem();
 				spikeTrader = new SpikeTrader(
 						login.getSessionManager(), 
 						(String)currencySelector.getSelectedItem(), 
@@ -161,9 +160,9 @@ public class SpikeTraderUI extends JFrame{
 		this.setSize(600, 300);
 		this.setLayout(new GridBagLayout());
 		
-		currencySelected = new JLabel("Currency: " );//+ spikeTrader.getCurrency());
-		eventDateSelected = new JLabel("Event Date: " );//+ spikeTrader.getEventDate());
-		currencySubscribe = new JButton("Subscribe to " + currency + " Pairs");
+		currencySelected = new JLabel("Currency: " + spikeTrader.getCurrency());
+		eventDateSelected = new JLabel("Event Date: " + spikeTrader.getEventDate());
+		currencySubscribe = new JButton("Subscribe to " + spikeTrader.getCurrency() + " Pairs");
 		unsubscribeAll = new JButton("Unsubscribe all Pairs");
 		currencySubscribe.addActionListener(new ActionListener() {
 			@Override
@@ -190,7 +189,7 @@ public class SpikeTraderUI extends JFrame{
 		inputs.add(new JLabel("Spike Buffer"));
 		inputs.add(new JLabel("Stop Buffer"));
 		orderInputs = new HashMap<String,JTextField[]>();
-		for (String pair: Pairs.getRelatedPairs(currency)){
+		for (String pair: Pairs.getRelatedPairs(spikeTrader.getCurrency())){
 			inputs.add(new JLabel(pair + ":"));
 			JTextField amount = new JTextField();
 			JTextField spikeBuffer = new JTextField();
@@ -238,7 +237,7 @@ public class SpikeTraderUI extends JFrame{
 		public void actionPerformed(ActionEvent arg0) {
 			placeOrders.setEnabled(false);
 			cancelOrders.setEnabled(true);
-			//spikeTrader.start();
+			spikeTrader.start();
 		}
 	}
 	
@@ -248,7 +247,7 @@ public class SpikeTraderUI extends JFrame{
 		public void actionPerformed(ActionEvent e) {
 			cancelOrders.setEnabled(false);
 			saveParams.setEnabled(true);
-			//spikeTrader.stop();
+			spikeTrader.stop();
 		}
 	}
 	
@@ -259,11 +258,11 @@ public class SpikeTraderUI extends JFrame{
 			saveParams.setEnabled(false);
 			
 			boolean valueErrors = false;
-			for (String pair: Pairs.getRelatedPairs(currency)){
+			for (String pair: Pairs.getRelatedPairs(spikeTrader.getCurrency())){
 				
-				int lots;
-				int spikeBuffer;
-				int stopBuffer;
+				int lots = 0;
+				int spikeBuffer = 0;
+				int stopBuffer = 0;
 				JTextField[] paramsSet = orderInputs.get(pair);
 				
 				try{
@@ -275,9 +274,9 @@ public class SpikeTraderUI extends JFrame{
 					valueErrors = true;
 				}
 				
-//				if(!spikeTrader.setParams(pair, lots, spikeBuffer, stopBuffer)){
-//					return;
-//				};
+				if(!spikeTrader.setParams(pair, lots, spikeBuffer, stopBuffer)){
+					return;
+				};
 			}
 			if(!valueErrors){
 				if(!spikeTrader.getIsActive()){
