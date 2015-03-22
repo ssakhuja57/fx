@@ -80,7 +80,7 @@ public class SpikeTraderUI extends JFrame{
 		for (String currency: Pairs.currencies){
 			currencySelector.addItem(currency);
 		}
-		eventDate = new JTextField(new SimpleDateFormat("YYYY-MM-dd HH:mm").format(new Date()));
+		eventDate = new JTextField(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
 //		eventDate = new JSpinner( new SpinnerDateModel() );
 //		JSpinner.DateEditor timeEditor = new JSpinner.DateEditor(eventDate, "HH:mm:ss");
 //		eventDate.setEditor(timeEditor);
@@ -157,7 +157,7 @@ public class SpikeTraderUI extends JFrame{
 	private void activate(){
 		this.setVisible(false);
 		this.getContentPane().removeAll();
-		this.setSize(600, 300);
+		this.setSize(700, 300);
 		this.setLayout(new GridBagLayout());
 		
 		currencySelected = new JLabel("Currency: " + spikeTrader.getCurrency());
@@ -318,9 +318,9 @@ public class SpikeTraderUI extends JFrame{
 		cont.add(comp, c);
 	}
 	
-	public static void main(String[] args){
-		SpikeTraderUI ui = new SpikeTraderUI();
-	}
+//	public static void main(String[] args){
+//		SpikeTraderUI ui = new SpikeTraderUI();
+//	}
 	
 	
 	

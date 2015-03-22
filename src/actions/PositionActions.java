@@ -83,6 +83,8 @@ public class PositionActions {
 	   
 	   public static void adjustOpposingOCOEntryOrders(SessionManager sessionMgr, String accountID, String longOrderID, double newLongRate,
 			   String shortOrderID, double newShortRate, ResponseListener responseListener){
+		   
+		   //System.out.println("adjusting OCO orders " + longOrderID + "/" + shortOrderID);
 		   	
 		   O2GValueMap valuemapLong = getEmptyValMap(sessionMgr);
 		   	valuemapLong.setString(O2GRequestParamsEnum.COMMAND, Constants.Commands.EditOrder);
@@ -139,7 +141,7 @@ public class PositionActions {
 	   }
 	   
 	   public static void cancelAllOCOOrders(SessionManager sessionMgr, ResponseListener responseListener) throws InterruptedException{
-		   System.out.println("cancelling all orders");
+		   System.out.println("cancelling all OCO orders");
 		   for (String[] ids: sessionMgr.ordersTable.getAllOCOOrderIDs()){
 			   cancelOrder(sessionMgr, ids[0], ids[1], responseListener);
 		   }
@@ -174,6 +176,9 @@ public class PositionActions {
 	   
 	   public static void setPairSubscriptionByCurrency(SessionManager sessionMgr, String currency1, String currency2, ResponseListener responseListener){
 		   
+		   System.out.println("Setting all pairs related to " 
+				   + currency1 + (currency2.equals("")?"":" and " + currency2)
+				   + " to tradable");
 		   Collection<String> pairs = Pairs.getRelatedPairs(currency1);
 		   if (!currency2.equals("")){
 			   pairs.addAll(Pairs.getRelatedPairs(currency2));

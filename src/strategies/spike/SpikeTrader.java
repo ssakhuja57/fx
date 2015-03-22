@@ -24,15 +24,15 @@ public class SpikeTrader implements SessionHolder{
 	private Calendar eventDate;
 	
 	private SessionManager sm;
-	private boolean isActive = false;
+	private boolean isActive;
 	
 	private Timer expirationChecker;
 	private Calendar expirationDate;
 	
 	private boolean recalibrate; // use recalibrator
 	private Timer recalibrator;
-	private int recalibratorFreq = 1; //frequency in seconds at which to recalibrate orders
-	private int recalibrateUntil = 30; //seconds before eventDate to stop recalibrating orders
+	private int recalibratorFreq; //frequency in seconds at which to recalibrate orders
+	private int recalibrateUntil; //seconds before eventDate to stop recalibrating orders
 	
 	private ArrayList<String> pairs;
 	private HashMap<String, RateCollector> rateCollectors = new HashMap<String, RateCollector>();
@@ -45,7 +45,7 @@ public class SpikeTrader implements SessionHolder{
 		this.currency = currency;
 		try {
 			this.eventDate = Calendar.getInstance();
-			this.eventDate.setTime((new SimpleDateFormat("YYYY-MM-dd hh:mm", Locale.ENGLISH)).parse(eventDate_string));
+			this.eventDate.setTime((new SimpleDateFormat("yyyy-MM-dd hh:mm", Locale.ENGLISH)).parse(eventDate_string));
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
@@ -63,6 +63,8 @@ public class SpikeTrader implements SessionHolder{
 			//rateCollectors.put(pair, new RateCollector(sm, pair));
 		}
 		
+		System.out.println((this.recalibrate?"true ":"false ") + this.recalibratorFreq + " " + this.recalibrateUntil);
+		
 	}
 	
 	private class ExpirationCheck extends TimerTask{
@@ -78,6 +80,8 @@ public class SpikeTrader implements SessionHolder{
 		@Override
 		public void run() {
 			if(secondsDiff(Calendar.getInstance(), eventDate) <= recalibrateUntil){
+				System.out.println("ending recalibrator since " + Calendar.getInstance().getTime().toString() + " is within "
+						+ recalibrateUntil + " seconds of Event Date " + eventDate.getTime().toString());
 				recalibrator.cancel();
 			}
 			recalibrateAllOrders();
@@ -126,7 +130,8 @@ public class SpikeTrader implements SessionHolder{
 	}
 	
 	public String getEventDate(){
-		return new SimpleDateFormat("YYYY-MM-dd HH:mm").format(new Date());
+		//return new SimpleDateFormat("yyyy-MM-dd HH:mm").format(eventDate);
+		return eventDate.getTime().toString();
 	}
 	
 	@Override
@@ -152,7 +157,11 @@ public class SpikeTrader implements SessionHolder{
 	
 	public void recalibrateAllOrders(){
 		for (String pair: pairs){
-			sm.adjustOpposingOCOEntryOrders(pair, params.get(pair)[1]);
+			try{
+				sm.adjustOpposingOCOEntryOrders(pair, params.get(pair)[1]);
+			} catch(NullPointerException e){
+				System.out.println("Unable to recalibrate for " + pair + ", can't find OCO orders related to it");
+			}
 		}
 	}
 	
