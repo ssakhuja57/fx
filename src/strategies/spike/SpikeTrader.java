@@ -85,7 +85,7 @@ public class SpikeTrader implements SessionHolder{
 		@Override
 		public void run() {
 			System.out.println("reached expiration time of " + expireAfter + " seconds after Event Date");
-				cancelAllOrders();
+				stop();
 		}
 	}
 	
