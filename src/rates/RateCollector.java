@@ -25,12 +25,6 @@ public class RateCollector implements SessionDependent{
 	private ConcurrentLinkedQueue<Double> lowRates;
 	
 	
-	public RateCollector(SessionManager sm, String pair){
-		this(sm, pair, 20, 1);
-		this.length = 20;
-		this.frequency = 1;
-	}
-	
 	public RateCollector(SessionManager sm, String pair, int length, int frequency){
 		
 			this.sm = sm;
@@ -45,18 +39,25 @@ public class RateCollector implements SessionDependent{
 			highRates = new ConcurrentLinkedQueue<Double>();
 			lowRates = new ConcurrentLinkedQueue<Double>();
 			
-			try{
-				buyRates.addAll(RateHistory.getTickData(sm, pair, length, "buy"));
-				Thread.sleep(1000);
-				//sellRates.addAll(RateHistory.getTickData(sm, pair, length, "sell"));
-				//highRates.addAll(RateHistory.getTickData(sm, pair, length, "high"));
-				//lowRates.addAll(RateHistory.getTickData(sm, pair, length, "low"));
-			} catch (InterruptedException e){
-				e.printStackTrace();
+			//getting rate history gives errors most of the time for some reason
+//			try{
+//				//buyRates.addAll(RateHistory.getTickData(sm, pair, length, "buy"));
+//				//sellRates.addAll(RateHistory.getTickData(sm, pair, length, "sell"));
+//				//highRates.addAll(RateHistory.getTickData(sm, pair, length, "high"));
+//				//lowRates.addAll(RateHistory.getTickData(sm, pair, length, "low"));
+//			} catch (InterruptedException e){
+//				e.printStackTrace();
+//			}
+			
+			for (int i=0;i<length;i++){ //initialize with values
+				buyRates.add(sm.offersTable.getBuyRate(pair));
+				sellRates.add(sm.offersTable.getSellRate(pair));
+				highRates.add(sm.offersTable.getHigh(pair));
+				lowRates.add(sm.offersTable.getLow(pair));
 			}
 			
 			timer = new Timer();
-			//timer.schedule(new Update(), 0, frequency*1000);
+			timer.schedule(new Update(), 0, frequency*1000);
 
 		}
 	
@@ -67,7 +68,7 @@ public class RateCollector implements SessionDependent{
 	
 	
 	private void updateRates(){
-		System.out.println(pair + " at buy rate " + sm.offersTable.getBuyRate(pair));
+		//System.out.println(pair + " at buy rate " + sm.offersTable.getBuyRate(pair));
 		buyRates.add(sm.offersTable.getBuyRate(pair));
 		sellRates.add(sm.offersTable.getSellRate(pair));
 		highRates.add(sm.offersTable.getHigh(pair));
@@ -108,6 +109,9 @@ public class RateCollector implements SessionDependent{
 	}
 
 	public double getSlope(String type, int lastN_points){
+		if(lastN_points == 0){
+			lastN_points = length;
+		}
 		double[] rates = getQueue(type);
 		int lastPoint = length - 1;
 		int basePoint = lastPoint - lastN_points;
@@ -115,6 +119,9 @@ public class RateCollector implements SessionDependent{
 	}
 	
 	public double getHigh(String type, int lastN_points){
+		if(lastN_points == 0){
+			lastN_points = length;
+		}
 		double[] rates = getQueue(type);
 		int first = rates.length - lastN_points;
 		int last = length - 1;
@@ -122,6 +129,9 @@ public class RateCollector implements SessionDependent{
 	}
 	
 	public double getLow(String type, int lastN_points){
+		if(lastN_points == 0){
+			lastN_points = length;
+		}
 		double[] rates = getQueue(type);
 		int first = rates.length - lastN_points;
 		int last = length - 1;

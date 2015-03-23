@@ -7,9 +7,17 @@ import listeners.ResponseListener;
 import session.SessionManager;
 
 import com.fxcore2.Constants;
+import com.fxcore2.O2GAccountRow;
+import com.fxcore2.O2GAccountsTableResponseReader;
+import com.fxcore2.O2GLoginRules;
+import com.fxcore2.O2GMargin;
 import com.fxcore2.O2GRequest;
 import com.fxcore2.O2GRequestFactory;
 import com.fxcore2.O2GRequestParamsEnum;
+import com.fxcore2.O2GResponse;
+import com.fxcore2.O2GResponseReaderFactory;
+import com.fxcore2.O2GTableType;
+import com.fxcore2.O2GTradingSettingsProvider;
 import com.fxcore2.O2GValueMap;
 
 
@@ -187,6 +195,29 @@ public class PositionActions {
 			   setPairSubscription(sessionMgr, pair, Constants.SubscriptionStatuses.Tradable, responseListener);
 		   }
 	   }
+	   
+	   public static void updateMarginRequirements(SessionManager sessionMgr, ResponseListener responseListener) {
+		    O2GRequestFactory requestFactory = sessionMgr.session.getRequestFactory();
+		    if (requestFactory != null) {
+		    	O2GValueMap valuemap = getEmptyValMap(sessionMgr);
+		        valuemap.setString(O2GRequestParamsEnum.COMMAND, com.fxcore2.Constants.Commands.UpdateMarginRequirements);
+			    createOrder(sessionMgr, valuemap, responseListener);
+		    }
+		 }
+		 
+		public static double[] getMarginRequirements(SessionManager sessionMgr, String pair) {
+		        O2GLoginRules loginRules = sessionMgr.session.getLoginRules();
+		        O2GTradingSettingsProvider tradingSetting = loginRules.getTradingSettingsProvider();
+		        O2GResponse accountsResponse = loginRules.getTableRefreshResponse(O2GTableType.ACCOUNTS);
+		        O2GResponseReaderFactory responseReaderFactory = sessionMgr.session.getResponseReaderFactory();
+		        if (responseReaderFactory == null) {
+		            return null;
+		        }
+		        O2GAccountsTableResponseReader accounts = responseReaderFactory.createAccountsTableReader(accountsResponse);
+		        O2GAccountRow accountRow = accounts.getRow(0);
+		        O2GMargin margin = tradingSetting.getMargins(pair, accountRow);
+		        return new double[]{margin.getMMR(), margin.getEMR(), margin.getLMR()};
+		 }
 	   
 
 

@@ -44,6 +44,7 @@ public class SessionManager {
 	
 	String[] accounts;
 	public final int subscriptionLimit = 20;
+	public final double usableMargin = .799;
 	
 	
 	
@@ -159,10 +160,23 @@ public class SessionManager {
 	public void removeAllPairSubscriptions(){
 		PositionActions.removeAllPairSubscriptions(this, responseListener);
 	}
+
+	public void updateMarginsReqs(){
+		PositionActions.updateMarginRequirements(this, responseListener);
+	}
 	
-	private String getAccountID(String pair){
+	public double[] getMarginReqs(String pair){
+		return PositionActions.getMarginRequirements(this, pair);
+	}
+	
+	public String getAccountID(String pair){
 		return accounts[Pairs.getAccount(pair) - 1];
 	}
+	
+	public String getAccountID(int number){
+		return this.accounts[number-1];
+	}
+
 	
 	
 	

@@ -42,9 +42,15 @@ public class Offers extends FXTable<O2GOffersTable, O2GOfferTableRow>{
 		return getRateRow(pair).getHigh();
 	}
 	
+	public double getPipCost(String pair){
+		return getRateRow(pair).getPipCost();
+	}
+	
 	private O2GOfferTableRow getRateRow(String pair){
 		return table.getNextRowByColumnValue("OfferID", Pairs.getID(pair), new O2GTableIterator());
 	}
+	
+	
 	
 	
 }

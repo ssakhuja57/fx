@@ -5,7 +5,7 @@ public class Main {
 	
 	public static void main(String[] args){
 		
-		//SessionManager sm = new SessionManager("D172741206001", "1008", "Demo", "02743608", "02743608");
+		//SessionManager sm = new SessionManager("D172741206001", "1008", "Demo", "2743608", "2743608");
 		//System.out.println(sm.orders.getTradeIDs("GBP/AUD", Constants.Buy));
 		//System.out.println(sm.trades.getTradeIDs("GBP/AUD", Constants.Buy));
 		//System.out.println(sm.closedTrades.getTradeIDs("GBP/AUD", Constants.Buy));

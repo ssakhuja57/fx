@@ -16,6 +16,7 @@ import java.awt.event.WindowEvent;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.TimerTask;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -26,6 +27,8 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 import session.SessionLoginUI;
 
@@ -55,7 +58,8 @@ public class SpikeTraderUI extends JFrame{
 	JButton unsubscribeAll;
 	
 	JPanel data = new JPanel();
-	JTable pairs;
+	TableModel pairsDataModel;
+	JTable pairsData;
 	
 	JPanel inputs = new JPanel(new GridLayout(0,4));
 	HashMap<String,JTextField[]> orderInputs;
@@ -184,16 +188,26 @@ public class SpikeTraderUI extends JFrame{
 		addComponent(this, info, 1, 1);
 		
 		
+//		pairsDataModel = new DefaultTableModel(new String[]{"Pair" ,"Buy Min", "Buy Max", "Buy Diff", 
+//					"Sell Min", "Sell Max", "Sell Diff", "Slope", "Std Dev"},
+//					spikeTrader.getPairs().size());
+//		pairsData = new JTable(pairsDataModel);
+//		pairsData.setValueAt("test", 0, 0);
+//		data.add(pairsData);
+//		addComponent(this, data, 1, 2);
+		
+		
 		inputs.add(new JLabel("Pair"));
 		inputs.add(new JLabel("Amount (1K Lots)"));
 		inputs.add(new JLabel("Spike Buffer"));
 		inputs.add(new JLabel("Stop Buffer"));
 		orderInputs = new HashMap<String,JTextField[]>();
-		for (String pair: Pairs.getRelatedPairs(spikeTrader.getCurrency())){
+		for (String pair: spikeTrader.getPairs()){
 			inputs.add(new JLabel(pair + ":"));
-			JTextField amount = new JTextField();
-			JTextField spikeBuffer = new JTextField();
-			JTextField stopBuffer = new JTextField();
+			Integer[] calculated = spikeTrader.getParams().get(pair);
+			JTextField amount = new JTextField(calculated[0].toString());
+			JTextField spikeBuffer = new JTextField(calculated[1].toString());
+			JTextField stopBuffer = new JTextField(calculated[2].toString());
 			amount.getDocument().addDocumentListener(new InputValueChangeListener());
 			spikeBuffer.getDocument().addDocumentListener(new InputValueChangeListener());
 			stopBuffer.getDocument().addDocumentListener(new InputValueChangeListener());
@@ -317,6 +331,12 @@ public class SpikeTraderUI extends JFrame{
 		c.gridy = gridy;
 		cont.add(comp, c);
 	}
+	
+//	private class UpdatePairsData extends TimerTask{
+//		public void run(){
+//			pairsDataModel.
+//		}
+//	}
 	
 //	public static void main(String[] args){
 //		SpikeTraderUI ui = new SpikeTraderUI();
