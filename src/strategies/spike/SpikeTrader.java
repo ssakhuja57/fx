@@ -65,7 +65,7 @@ public class SpikeTrader implements SessionHolder{
 		
 		pairs = Pairs.getRelatedPairs(currency);
 		for (String pair:pairs){
-			rateCollectors.put(pair, new RateCollector(sm, pair, 300, 1));
+			//rateCollectors.put(pair, new RateCollector(sm, pair, 300, 1));
 		}
 		
 		dataCollector = new Timer();
