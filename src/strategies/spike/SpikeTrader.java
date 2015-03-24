@@ -65,7 +65,7 @@ public class SpikeTrader implements SessionHolder{
 		
 		pairs = Pairs.getRelatedPairs(currency);
 		for (String pair:pairs){
-			rateCollectors.put(pair, new RateCollector(sm, pair, 300, 1));
+			//rateCollectors.put(pair, new RateCollector(sm, pair, 300, 1));
 		}
 		
 		dataCollector = new Timer();
@@ -183,6 +183,11 @@ public class SpikeTrader implements SessionHolder{
 	
 	public void recalculateParams(){
 		sm.updateMarginsReqs();
+		try{
+			Thread.sleep(1000);
+		} catch (InterruptedException e){
+			e.printStackTrace();
+		}
 		double accountBalance = sm.accountsTable.getBalance(sm.getAccountID(1));
 		double usableMargin = sm.usableMargin;
 		double sum_pc_mmr = 0;
@@ -197,6 +202,7 @@ public class SpikeTrader implements SessionHolder{
 			int lots = (int)((accountBalance*usableMargin*pipCost)/(Math.pow(mmr, 2.0)*sum_pc_mmr));
 			int spikeBuffer = 15;
 			int stopBuffer = 12;
+			//System.out.println("For " + pair + " setting lots=" + lots + "K, SpikeBuffer=" + spikeBuffer + ", StopBuffer=" + stopBuffer);
 			params.put(pair, new Integer[]{ lots, spikeBuffer, stopBuffer });
 		}
 	}

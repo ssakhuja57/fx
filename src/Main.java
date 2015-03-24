@@ -1,3 +1,4 @@
+import session.SessionManager;
 import strategies.spike.SpikeTraderUI;
 
 
@@ -6,6 +7,7 @@ public class Main {
 	public static void main(String[] args){
 		
 		//SessionManager sm = new SessionManager("D172741206001", "1008", "Demo", "2743608", "2743608");
+		//SessionManager sm = new SessionManager("D26728250001", "6303", "Demo", "722858", "722858");
 		//System.out.println(sm.orders.getTradeIDs("GBP/AUD", Constants.Buy));
 		//System.out.println(sm.trades.getTradeIDs("GBP/AUD", Constants.Buy));
 		//System.out.println(sm.closedTrades.getTradeIDs("GBP/AUD", Constants.Buy));
@@ -13,6 +15,7 @@ public class Main {
 		//sm.closedTrades.printTable();
 		//sm.offersTable.printTable();
 		//sm.ordersTable.printTable();
+		//sm.accountsTable.printTable();
 		//SpikeTraderUI ui = new SpikeTraderUI();
 		try {
 			//System.out.println(sm.createMarketOrder("EUR/AUD", Constants.Buy, 1000));

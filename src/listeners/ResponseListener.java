@@ -26,6 +26,7 @@ public class ResponseListener implements IO2GResponseListener{
 		responses.put(requestID, response);
 		requestsCompleted.add(requestID);
 		requestsPending.remove(requestID);
+		//System.out.println("request type " + response.getType() + " completed");
 	}
 
 	@Override

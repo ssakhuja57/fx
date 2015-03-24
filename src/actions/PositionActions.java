@@ -200,7 +200,7 @@ public class PositionActions {
 		    O2GRequestFactory requestFactory = sessionMgr.session.getRequestFactory();
 		    if (requestFactory != null) {
 		    	O2GValueMap valuemap = getEmptyValMap(sessionMgr);
-		        valuemap.setString(O2GRequestParamsEnum.COMMAND, com.fxcore2.Constants.Commands.UpdateMarginRequirements);
+		        valuemap.setString(O2GRequestParamsEnum.COMMAND, Constants.Commands.UpdateMarginRequirements);
 			    createOrder(sessionMgr, valuemap, responseListener);
 		    }
 		 }

@@ -51,11 +51,12 @@ public class SpikeTraderUI extends JFrame{
 	
 	
 	//app UI
-	JPanel info = new JPanel(new GridLayout(4,1));
+	JPanel info = new JPanel(new GridLayout(0,1));
 	JLabel currencySelected;
 	JLabel eventDateSelected;
 	JButton currencySubscribe;
 	JButton unsubscribeAll;
+	JButton updateCalculated;
 	
 	JPanel data = new JPanel();
 	TableModel pairsDataModel;
@@ -168,6 +169,7 @@ public class SpikeTraderUI extends JFrame{
 		eventDateSelected = new JLabel("Event Date: " + spikeTrader.getEventDate());
 		currencySubscribe = new JButton("Subscribe to " + spikeTrader.getCurrency() + " Pairs");
 		unsubscribeAll = new JButton("Unsubscribe all Pairs");
+		updateCalculated = new JButton("Update Calculated Values");
 		currencySubscribe.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -180,11 +182,13 @@ public class SpikeTraderUI extends JFrame{
 				spikeTrader.unsubscribeAll();
 			}
 		});
+		updateCalculated.addActionListener(new UpdateCalculated());
 		
 		info.add(currencySelected);
 		info.add(eventDateSelected);
 		info.add(currencySubscribe);
 		info.add(unsubscribeAll);
+		info.add(updateCalculated);
 		addComponent(this, info, 1, 1);
 		
 		
@@ -204,10 +208,10 @@ public class SpikeTraderUI extends JFrame{
 		orderInputs = new HashMap<String,JTextField[]>();
 		for (String pair: spikeTrader.getPairs()){
 			inputs.add(new JLabel(pair + ":"));
-			Integer[] calculated = spikeTrader.getParams().get(pair);
-			JTextField amount = new JTextField(calculated[0].toString());
-			JTextField spikeBuffer = new JTextField(calculated[1].toString());
-			JTextField stopBuffer = new JTextField(calculated[2].toString());
+			//Integer[] calculated = spikeTrader.getParams().get(pair);
+			JTextField amount = new JTextField();
+			JTextField spikeBuffer = new JTextField();
+			JTextField stopBuffer = new JTextField();
 			amount.getDocument().addDocumentListener(new InputValueChangeListener());
 			spikeBuffer.getDocument().addDocumentListener(new InputValueChangeListener());
 			stopBuffer.getDocument().addDocumentListener(new InputValueChangeListener());
@@ -235,7 +239,7 @@ public class SpikeTraderUI extends JFrame{
 		
 		
 		placeOrders.setEnabled(false);
-		cancelOrders.setEnabled(false);
+		//cancelOrders.setEnabled(false);
 		
 		saveParams.addActionListener(new SetInputsListener());
 		placeOrders.addActionListener(new StartListener());
@@ -250,7 +254,7 @@ public class SpikeTraderUI extends JFrame{
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			placeOrders.setEnabled(false);
-			cancelOrders.setEnabled(true);
+			//cancelOrders.setEnabled(true);
 			spikeTrader.start();
 		}
 	}
@@ -259,7 +263,7 @@ public class SpikeTraderUI extends JFrame{
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			cancelOrders.setEnabled(false);
+			//cancelOrders.setEnabled(false);
 			saveParams.setEnabled(true);
 			spikeTrader.stop();
 		}
@@ -304,25 +308,34 @@ public class SpikeTraderUI extends JFrame{
 	}
 	
 	private class InputValueChangeListener implements DocumentListener{
-
 		@Override
 		public void changedUpdate(DocumentEvent e) {
 			placeOrders.setEnabled(false);
 			saveParams.setEnabled(true);
 		}
-
 		@Override
 		public void insertUpdate(DocumentEvent e) {
 			placeOrders.setEnabled(false);
 			saveParams.setEnabled(true);
 		}
-
 		@Override
 		public void removeUpdate(DocumentEvent e) {
 			placeOrders.setEnabled(false);
 			saveParams.setEnabled(true);
 		}
-		
+	}
+	
+	private class UpdateCalculated implements ActionListener{
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			spikeTrader.recalculateParams();
+			for (String pair: spikeTrader.getPairs()){
+				Integer[] calculated = spikeTrader.getParams().get(pair);
+				orderInputs.get(pair)[0].setText(calculated[0].toString());
+				orderInputs.get(pair)[1].setText(calculated[1].toString());
+				orderInputs.get(pair)[2].setText(calculated[2].toString());
+			}
+		}
 	}
 	
 	private void addComponent(Container cont, Component comp, int gridx, int gridy){
