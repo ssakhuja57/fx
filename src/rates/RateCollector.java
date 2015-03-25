@@ -1,5 +1,6 @@
 package rates;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -17,6 +18,7 @@ public class RateCollector implements SessionDependent{
 	private int length;
 	private int frequency;
 	
+	private int updatesCounter = 0; // keep track of how many points have been collected
 	private Timer timer;
 
 	private ConcurrentLinkedQueue<Double> buyRates;
@@ -61,10 +63,6 @@ public class RateCollector implements SessionDependent{
 
 		}
 	
-	@Override
-	public void end(){
-		timer.cancel();
-	}
 	
 	
 	private void updateRates(){
@@ -78,6 +76,8 @@ public class RateCollector implements SessionDependent{
 		sellRates.remove();
 		highRates.remove();
 		lowRates.remove();
+		
+		updatesCounter++;
 		
 	}
 	
@@ -99,13 +99,27 @@ public class RateCollector implements SessionDependent{
 		default:
 			return null;
 		}
-		int counter = 0;
+		Double[] source = q.toArray(new Double[length]);
 		double[] res = new double[length];
-		for(double d:q.toArray(new Double[length])){
-			res[counter] = d;
-			counter++;
+		for(int i=0;i<length;i++){
+			res[i] = source[i];
 		}
 		return res;
+	}
+	
+	public void printRates(String type, int lastN_points){
+		for (double d: getRates(type, lastN_points)){
+			System.out.print(d + " ");
+		}
+	}
+	
+	public double[] getRates(String type, int lastN_points){
+		if(lastN_points == 0){
+			lastN_points = length;
+		}
+		double[] rates = getQueue(type);
+		int first = length - lastN_points;
+		return Arrays.copyOfRange(rates, first, length);
 	}
 
 	public double getSlope(String type, int lastN_points){
@@ -124,8 +138,7 @@ public class RateCollector implements SessionDependent{
 		}
 		double[] rates = getQueue(type);
 		int first = rates.length - lastN_points;
-		int last = length - 1;
-		return max(Arrays.copyOfRange(rates, first, last));
+		return max(Arrays.copyOfRange(rates, first, length));
 	}
 	
 	public double getLow(String type, int lastN_points){
@@ -134,8 +147,7 @@ public class RateCollector implements SessionDependent{
 		}
 		double[] rates = getQueue(type);
 		int first = rates.length - lastN_points;
-		int last = length - 1;
-		return min(Arrays.copyOfRange(rates, first, last));
+		return min(Arrays.copyOfRange(rates, first, length));
 	}
 	
 	public double getStdDev(String type){
@@ -172,13 +184,23 @@ public class RateCollector implements SessionDependent{
 	}
 	
 	private double min(double[] arr){
-		double min = 0.0;
+		double min = 99999;
 		for (double d: arr){
 			if (d < min){
 				min = d;
 			}
 		}
 		return min;
+	}
+	
+	public boolean isFull(){ //this rate collector has collected at least as much data as intended by length
+		return updatesCounter >= length;
+	}
+	
+	@Override
+	public void end(){
+		System.out.println("cancelling rate collector for " + pair);
+		timer.cancel();
 	}
 	
 	

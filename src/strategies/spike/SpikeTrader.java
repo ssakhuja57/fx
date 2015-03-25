@@ -29,6 +29,9 @@ public class SpikeTrader implements SessionHolder{
 	private boolean isActive;
 	private ArrayList<String> pairs;
 	
+	private int defSpikeBuffer = 10;
+	private int defStopBuffer = 9;
+	
 	private int expireAfter;
 	private Timer expirationChecker;
 	private Calendar expirationDate;
@@ -59,17 +62,18 @@ public class SpikeTrader implements SessionHolder{
 		expirationDate.setTime(eventDate.getTime());
 		expirationDate.add(Calendar.SECOND, expireAfter);
 		
+		
 		this.recalibrate = autoRecalibrate;
 		this.recalibratorFreq = recalibratorFreq;
 		this.recalibrateUntil = recalibrateUntil;
 		
 		pairs = Pairs.getRelatedPairs(currency);
 		for (String pair:pairs){
-			//rateCollectors.put(pair, new RateCollector(sm, pair, 300, 1));
+			rateCollectors.put(pair, new RateCollector(sm, pair, 300, 1));
 		}
 		
 		dataCollector = new Timer();
-		//dataCollector.schedule(new DataCollector(), 0, 1*1000);
+		dataCollector.schedule(new DataCollector(), 0, 1*1000);
 		
 		recalculateParams();
 		
@@ -77,6 +81,9 @@ public class SpikeTrader implements SessionHolder{
 //			Integer[] paramrow = params.get(pair);
 //			System.out.println(pair + ": " + paramrow[0] + " " + paramrow[1] + " " + paramrow[2]);
 //		}
+		
+		expirationChecker = new Timer();
+		expirationChecker.schedule(new ExpirationTask(), expirationDate.getTime());
 		
 		
 	}
@@ -86,6 +93,7 @@ public class SpikeTrader implements SessionHolder{
 		public void run() {
 			System.out.println("reached expiration time of " + expireAfter + " seconds after Event Date");
 				stop();
+				close();
 		}
 	}
 	
@@ -130,7 +138,11 @@ public class SpikeTrader implements SessionHolder{
 	
 	private void stopRecalibrator(){
 		if(recalibrate){
-			recalibrator.cancel();
+			try{
+				recalibrator.cancel();
+			} catch(NullPointerException e){
+				//
+			}
 		}
 	}
 
@@ -150,7 +162,6 @@ public class SpikeTrader implements SessionHolder{
 		try {
 			sm.cancelAllOCOOrders();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -165,13 +176,6 @@ public class SpikeTrader implements SessionHolder{
 		return eventDate.getTime().toString();
 	}
 	
-	@Override
-	public void close(){
-		stopRecalibrator();
-		expirationChecker.cancel();
-		dataCollector.cancel();
-		sm.close();
-	}
 	
 	public ArrayList<String> getPairs(){
 		return (ArrayList<String>)pairs.clone();
@@ -197,12 +201,34 @@ public class SpikeTrader implements SessionHolder{
 		}
 		
 		for (String pair: pairs){
+			System.out.println("calculating values for " + pair);
 			double mmr = sm.getMarginReqs(pair)[0];
 			double pipCost = sm.offersTable.getPipCost(pair);
 			int lots = (int)((accountBalance*usableMargin*pipCost)/(Math.pow(mmr, 2.0)*sum_pc_mmr));
-			int spikeBuffer = 15;
-			int stopBuffer = 12;
+			System.out.println("setting lots to " + lots + "K");
+			
+			int spikeBuffer = defSpikeBuffer;
+			int buyDiff = (int)data.get(pair)[2];
+			int sellDiff = (int)data.get(pair)[5];
+			if(buyDiff > defSpikeBuffer || sellDiff > defSpikeBuffer){
+				if(sellDiff > buyDiff){
+					spikeBuffer = sellDiff;
+					System.out.println("setting spike buffer to sell diff of " + spikeBuffer);
+				}
+				else{
+					spikeBuffer = buyDiff;
+					System.out.println("setting spike buffer to buy diff of " + spikeBuffer);
+				}
+			}
+			else{
+				System.out.println("setting spike buffer to default value of " + spikeBuffer);
+			}
+			
+			int stopBuffer = defStopBuffer;
+			System.out.println("setting stop buffer to default of " + stopBuffer);
+			
 			//System.out.println("For " + pair + " setting lots=" + lots + "K, SpikeBuffer=" + spikeBuffer + ", StopBuffer=" + stopBuffer);
+			System.out.println("");
 			params.put(pair, new Integer[]{ lots, spikeBuffer, stopBuffer });
 		}
 	}
@@ -242,15 +268,32 @@ public class SpikeTrader implements SessionHolder{
 		isActive = true;
 		placeAllOrders();
 		startRecalibrator();
-		expirationChecker = new Timer();
-		expirationChecker.schedule(new ExpirationTask(), expirationDate.getTime());
+		//expirationChecker = new Timer();
+		//expirationChecker.schedule(new ExpirationTask(), expirationDate.getTime());
 	}
 	
 	public void stop(){
 		cancelAllOrders();
 		stopRecalibrator();
-		expirationChecker.cancel();
+		//expirationChecker.cancel();
 		isActive = false;
+	}
+	
+	@Override
+	public void close(){
+		try{
+			//cancelAllOrders();
+			stopRecalibrator();
+			expirationChecker.cancel();
+			dataCollector.cancel();
+			for (String pair: pairs){
+				rateCollectors.get(pair).end();
+			}
+//				Thread.sleep(5000); // wait for cleanup to finish
+		}
+		finally{
+			sm.close();
+		}
 	}
 
 

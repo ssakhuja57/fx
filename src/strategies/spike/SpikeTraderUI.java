@@ -44,7 +44,7 @@ public class SpikeTraderUI extends JFrame{
 	JComboBox<String> currencySelector;
 	JTextField eventDate;
 //	JSpinner eventDate;
-	JTextField expireAfter;		String defExpireAfter = "180";
+	JTextField expireAfter;		String defExpireAfter = "90";
 	JComboBox<Boolean> recalibrate;
 	JTextField recalibratorFreq;	String defRecalibratorFreq = "1";	
 	JTextField recalibrateUntil;	String defRecalibrateUntil = "30";
@@ -57,6 +57,7 @@ public class SpikeTraderUI extends JFrame{
 	JButton currencySubscribe;
 	JButton unsubscribeAll;
 	JButton updateCalculated;
+	JButton recalibrateOrders;
 	
 	JPanel data = new JPanel();
 	TableModel pairsDataModel;
@@ -170,6 +171,7 @@ public class SpikeTraderUI extends JFrame{
 		currencySubscribe = new JButton("Subscribe to " + spikeTrader.getCurrency() + " Pairs");
 		unsubscribeAll = new JButton("Unsubscribe all Pairs");
 		updateCalculated = new JButton("Update Calculated Values");
+		recalibrateOrders = new JButton("Recalibrate Orders");
 		currencySubscribe.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -183,12 +185,18 @@ public class SpikeTraderUI extends JFrame{
 			}
 		});
 		updateCalculated.addActionListener(new UpdateCalculated());
+		recalibrateOrders.addActionListener((new ActionListener(){
+			public void actionPerformed(ActionEvent arg0){
+				spikeTrader.recalibrateAllOrders();
+			}
+		}));
 		
 		info.add(currencySelected);
 		info.add(eventDateSelected);
 		info.add(currencySubscribe);
 		info.add(unsubscribeAll);
 		info.add(updateCalculated);
+		info.add(recalibrateOrders);
 		addComponent(this, info, 1, 1);
 		
 		
@@ -256,6 +264,7 @@ public class SpikeTraderUI extends JFrame{
 			placeOrders.setEnabled(false);
 			//cancelOrders.setEnabled(true);
 			spikeTrader.start();
+			setInputsEnabled(false);
 		}
 	}
 	
@@ -263,9 +272,10 @@ public class SpikeTraderUI extends JFrame{
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			spikeTrader.stop();
 			//cancelOrders.setEnabled(false);
 			saveParams.setEnabled(true);
-			spikeTrader.stop();
+			setInputsEnabled(true);
 		}
 	}
 	
@@ -336,6 +346,18 @@ public class SpikeTraderUI extends JFrame{
 				orderInputs.get(pair)[2].setText(calculated[2].toString());
 			}
 		}
+	}
+	
+	private void setInputsEnabled(boolean enabled){
+		updateCalculated.setEnabled(enabled);
+		for (JTextField[] jtfArr: orderInputs.values()){
+			for (JTextField jtf: jtfArr){
+				jtf.setEnabled(enabled);
+			}
+		}
+		defAmount.setEnabled(enabled);
+		defSpikeBuffer.setEnabled(enabled);
+		defStopBuffer.setEnabled(enabled);
 	}
 	
 	private void addComponent(Container cont, Component comp, int gridx, int gridy){
