@@ -33,7 +33,7 @@ public class Main {
 //				System.out.println(d);
 //			}
 			SpikeTraderUI ui = new SpikeTraderUI();
-			Thread.sleep(5*1000);
+			Thread.sleep(1*1000);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
