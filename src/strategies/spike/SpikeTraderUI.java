@@ -34,6 +34,7 @@ import session.SessionLoginUI;
 
 public class SpikeTraderUI extends JFrame{
 	
+
 	private SpikeTrader spikeTrader;
 	
 	//private String currency; //this is temp

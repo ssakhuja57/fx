@@ -32,7 +32,7 @@ public class Main {
 //			for (double d : RateHistory.getTickData(sm, "EUR/JPY", 10, "sell")){
 //				System.out.println(d);
 //			}
-			SpikeTraderUI ui = new SpikeTraderUI();
+			//SpikeTraderUI ui = new SpikeTraderUI();
 			Thread.sleep(1*1000);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

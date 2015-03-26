@@ -282,14 +282,16 @@ public class SpikeTrader implements SessionHolder{
 	@Override
 	public void close(){
 		try{
-			//cancelAllOrders();
+			cancelAllOrders();
 			stopRecalibrator();
 			expirationChecker.cancel();
 			dataCollector.cancel();
 			for (String pair: pairs){
 				rateCollectors.get(pair).end();
 			}
-//				Thread.sleep(5000); // wait for cleanup to finish
+			Thread.currentThread().sleep(3000); // wait for cleanup to finish
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 		finally{
 			sm.close();
