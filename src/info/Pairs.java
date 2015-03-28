@@ -86,11 +86,15 @@ public class Pairs {
 	}
 	
 	
-	public static ArrayList<String> getRelatedPairs(String currency){
+	public static ArrayList<String> getRelatedPairs(String[] currencies){
 		ArrayList<String> pairs = new ArrayList<String>();
 		for (String pair: attributes.keySet()){
-			if(pair.substring(0, 3).equals(currency) || pair.substring(4, 7).equals(currency)){
-				pairs.add(pair);
+			for(String currency: currencies){
+				if(!pairs.contains(pair) && 
+						(pair.substring(0, 3).equals(currency) || pair.substring(4, 7).equals(currency))
+						){
+						pairs.add(pair);
+				}
 			}
 		}
 		return pairs;

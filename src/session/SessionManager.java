@@ -3,6 +3,7 @@ package session;
 import info.Pairs;
 
 import java.util.ArrayList;
+import java.util.Properties;
 
 import listeners.ResponseListener;
 import listeners.SessionStatusListener;
@@ -28,6 +29,7 @@ import db.DBManager;
 public class SessionManager {
 	
 	public O2GSession session;
+	private Properties preferences;
 	public O2GTableManager tableMgr;
 	public SessionStatusListener statusListener;
 	public ResponseListener responseListener;
@@ -44,12 +46,11 @@ public class SessionManager {
 	
 	String[] accounts;
 	public final int subscriptionLimit = 20;
-	public final double usableMargin = .799;
 	
 	
-	
-	public SessionManager(String login, String password, String DemoOrReal, String account1, String account2){
+	public SessionManager(Properties preferences, String login, String password, String DemoOrReal, String account1, String account2){
 		
+		this.preferences = preferences;
 		session = O2GTransport.createSession();
 		dependents = new ArrayList<SessionDependent>();
 		

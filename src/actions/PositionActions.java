@@ -182,15 +182,11 @@ public class PositionActions {
 		   }
 	   }
 	   
-	   public static void setPairSubscriptionByCurrency(SessionManager sessionMgr, String currency1, String currency2, ResponseListener responseListener){
+	   public static void setPairSubscriptionByCurrency(SessionManager sessionMgr, String[] currencies, ResponseListener responseListener){
 		   
 		   System.out.println("Setting all pairs related to " 
-				   + currency1 + (currency2.equals("")?"":" and " + currency2)
-				   + " to tradable");
-		   Collection<String> pairs = Pairs.getRelatedPairs(currency1);
-		   if (!currency2.equals("")){
-			   pairs.addAll(Pairs.getRelatedPairs(currency2));
-		   }
+				   + currencies.toString() + " to tradable");
+		   Collection<String> pairs = Pairs.getRelatedPairs(currencies);
 		   for (String pair: pairs){
 			   setPairSubscription(sessionMgr, pair, Constants.SubscriptionStatuses.Tradable, responseListener);
 		   }

@@ -5,6 +5,7 @@ import info.Pairs;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -14,20 +15,22 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.TimerTask;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import session.SessionLoginUI;
@@ -42,19 +45,22 @@ public class SpikeTraderUI extends JFrame{
 	//conifg UI
 	SessionLoginUI login;
 	JPanel config = new JPanel(new GridLayout(0,2));
-	JComboBox<String> currencySelector;
+	//JComboBox<String> currencySelector;
+	JList<String> currencySelector;
 	JTextField eventDate;
 //	JSpinner eventDate;
+	JTextField accountUtilization; String defAccountUtilization = "80.0";
 	JTextField expireAfter;		String defExpireAfter = "90";
 	JComboBox<Boolean> recalibrate;
 	JTextField recalibratorFreq;	String defRecalibratorFreq = "1";	
-	JTextField recalibrateUntil;	String defRecalibrateUntil = "30";
+	JTextField recalibrateUntil;	String defRecalibrateUntil = "20";
 	
 	
 	//app UI
 	JPanel info = new JPanel(new GridLayout(0,1));
 	JLabel currencySelected;
 	JLabel eventDateSelected;
+	JLabel accountUtilizationSelected;
 	JButton currencySubscribe;
 	JButton unsubscribeAll;
 	JButton updateCalculated;
@@ -81,18 +87,22 @@ public class SpikeTraderUI extends JFrame{
 	public SpikeTraderUI(){
 		
 		super("Spike Trader");
-		this.setSize(500, 225);
+		this.setSize(500, 600);
 		this.setResizable(false);
-		currencySelector = new JComboBox<String>();
-		for (String currency: Pairs.currencies){
-			currencySelector.addItem(currency);
-		}
+		currencySelector = new JList<String>(Pairs.currencies.toArray(new String[Pairs.currencies.size()]));
+			currencySelector.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+			currencySelector.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+			currencySelector.setSelectedIndex(0);
+			JScrollPane currencyScroll = new JScrollPane(currencySelector);
+			currencyScroll.setPreferredSize(new Dimension(250, 70));
+			currencyScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		eventDate = new JTextField(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
 //		eventDate = new JSpinner( new SpinnerDateModel() );
 //		JSpinner.DateEditor timeEditor = new JSpinner.DateEditor(eventDate, "HH:mm:ss");
 //		eventDate.setEditor(timeEditor);
 //		eventDate.setValue(new Date()); // will only show the current time
 //		config.add(eventDate);
+		accountUtilization = new JTextField(defAccountUtilization);
 		expireAfter = new JTextField(defExpireAfter);
 	
 		recalibrate = new JComboBox<Boolean>();
@@ -102,9 +112,11 @@ public class SpikeTraderUI extends JFrame{
 		recalibrateUntil = new JTextField(defRecalibrateUntil);
 		
 		config.add(new JLabel("Currency:"));
-		config.add(currencySelector);
+		config.add(currencyScroll);
 		config.add(new JLabel("Event Date (YYYY-MM-dd HH:mm):"));
 		config.add(eventDate);
+		config.add(new JLabel("Account Utilization (%):"));
+		config.add(accountUtilization);
 		config.add(new JLabel("Expire orders X seconds after event date:"));
 		config.add(expireAfter);
 		config.add(new JLabel("Auto Recalibrate:"));
@@ -122,8 +134,9 @@ public class SpikeTraderUI extends JFrame{
 			public void actionPerformed(ActionEvent arg0) {
 				spikeTrader = new SpikeTrader(
 						login.getSessionManager(), 
-						(String)currencySelector.getSelectedItem(), 
+						currencySelector.getSelectedValuesList().toArray(new String[currencySelector.getSelectedValuesList().size()]), 
 						eventDate.getText(),
+						Double.parseDouble(accountUtilization.getText())/100,
 						Integer.parseInt(expireAfter.getText()), 
 						(Boolean)recalibrate.getSelectedItem(), 
 						Integer.parseInt(recalibratorFreq.getText()),
@@ -164,12 +177,13 @@ public class SpikeTraderUI extends JFrame{
 	private void activate(){
 		this.setVisible(false);
 		this.getContentPane().removeAll();
-		this.setSize(700, 300);
+		this.setSize(700, 100 + 25*spikeTrader.getPairs().size());
 		this.setLayout(new GridBagLayout());
 		
-		currencySelected = new JLabel("Currency: " + spikeTrader.getCurrency());
+		currencySelected = new JLabel("Currency: " + Arrays.toString(spikeTrader.getCurrencies()));
 		eventDateSelected = new JLabel("Event Date: " + spikeTrader.getEventDate());
-		currencySubscribe = new JButton("Subscribe to " + spikeTrader.getCurrency() + " Pairs");
+		accountUtilizationSelected = new JLabel("Account Utilization: " + spikeTrader.getAccountUtilization()*100 + "%");
+		currencySubscribe = new JButton("Subscribe to " + Arrays.toString(spikeTrader.getCurrencies()) + " Pairs");
 		unsubscribeAll = new JButton("Unsubscribe all Pairs");
 		updateCalculated = new JButton("Update Calculated Values");
 		recalibrateOrders = new JButton("Recalibrate Orders");
@@ -194,6 +208,7 @@ public class SpikeTraderUI extends JFrame{
 		
 		info.add(currencySelected);
 		info.add(eventDateSelected);
+		info.add(accountUtilizationSelected);
 		info.add(currencySubscribe);
 		info.add(unsubscribeAll);
 		info.add(updateCalculated);
@@ -287,7 +302,7 @@ public class SpikeTraderUI extends JFrame{
 			saveParams.setEnabled(false);
 			
 			boolean valueErrors = false;
-			for (String pair: Pairs.getRelatedPairs(spikeTrader.getCurrency())){
+			for (String pair: Pairs.getRelatedPairs(spikeTrader.getCurrencies())){
 				
 				int lots = 0;
 				int spikeBuffer = 0;
