@@ -32,6 +32,8 @@ public class SpikeTrader implements SessionHolder{
 	private int defSpikeBuffer = 10;
 	private int defStopBuffer = 9;
 	
+	private boolean dataCollect = false;
+	
 	private double accountUtilization;
 	
 	private boolean autoStart;
@@ -82,13 +84,15 @@ public class SpikeTrader implements SessionHolder{
 		this.recalibratorFreq = recalibratorFreq;
 		this.recalibrateUntil = recalibrateUntil;
 		
-		pairs = Pairs.getRelatedPairs(currencies);
-		for (String pair:pairs){
-			rateCollectors.put(pair, new RateCollector(sm, pair, 300, 1));
+		if(dataCollect){
+			pairs = Pairs.getRelatedPairs(currencies);
+			for (String pair:pairs){
+				rateCollectors.put(pair, new RateCollector(sm, pair, 300, 1));
+			}
+			
+			dataCollector = new Timer();
+			dataCollector.schedule(new DataCollector(), 0, 1*1000);
 		}
-		
-		dataCollector = new Timer();
-		dataCollector.schedule(new DataCollector(), 0, 1*1000);
 		
 		recalculateParams();
 		
@@ -242,20 +246,22 @@ public class SpikeTrader implements SessionHolder{
 			System.out.println("setting lots to " + lots + "K");
 			
 			int spikeBuffer = defSpikeBuffer;
-			int buyDiff = (int)data.get(pair)[2];
-			int sellDiff = (int)data.get(pair)[5];
-			if(buyDiff > defSpikeBuffer || sellDiff > defSpikeBuffer){
-				if(sellDiff > buyDiff){
-					spikeBuffer = sellDiff;
-					System.out.println("setting spike buffer to sell diff of " + spikeBuffer);
+			if(dataCollect){
+				int buyDiff = (int)data.get(pair)[2];
+				int sellDiff = (int)data.get(pair)[5];
+				if(buyDiff > defSpikeBuffer || sellDiff > defSpikeBuffer){
+					if(sellDiff > buyDiff){
+						spikeBuffer = sellDiff;
+						System.out.println("setting spike buffer to sell diff of " + spikeBuffer);
+					}
+					else{
+						spikeBuffer = buyDiff;
+						System.out.println("setting spike buffer to buy diff of " + spikeBuffer);
+					}
 				}
 				else{
-					spikeBuffer = buyDiff;
-					System.out.println("setting spike buffer to buy diff of " + spikeBuffer);
+					System.out.println("setting spike buffer to default value of " + spikeBuffer);
 				}
-			}
-			else{
-				System.out.println("setting spike buffer to default value of " + spikeBuffer);
 			}
 			
 			int stopBuffer = defStopBuffer;
