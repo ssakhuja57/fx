@@ -50,6 +50,8 @@ public class SpikeTraderUI extends JFrame{
 	JTextField eventDate;
 //	JSpinner eventDate;
 	JTextField accountUtilization; String defAccountUtilization = "80.0";
+	JComboBox<Boolean> autoStart;
+	JTextField autoStartBefore; String defAutoStartBefore = "600";
 	JTextField expireAfter;		String defExpireAfter = "90";
 	JComboBox<Boolean> recalibrate;
 	JTextField recalibratorFreq;	String defRecalibratorFreq = "1";	
@@ -61,6 +63,8 @@ public class SpikeTraderUI extends JFrame{
 	JLabel currencySelected;
 	JLabel eventDateSelected;
 	JLabel accountUtilizationSelected;
+	JLabel autoStartDateSelected;
+	JLabel expirationDateSelected;
 	JButton currencySubscribe;
 	JButton unsubscribeAll;
 	JButton updateCalculated;
@@ -87,15 +91,13 @@ public class SpikeTraderUI extends JFrame{
 	public SpikeTraderUI(){
 		
 		super("Spike Trader");
-		this.setSize(500, 600);
+		this.setSize(500, 750);
 		this.setResizable(false);
 		currencySelector = new JList<String>(Pairs.currencies.toArray(new String[Pairs.currencies.size()]));
 			currencySelector.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-			currencySelector.setLayoutOrientation(JList.HORIZONTAL_WRAP);
 			currencySelector.setSelectedIndex(0);
 			JScrollPane currencyScroll = new JScrollPane(currencySelector);
 			currencyScroll.setPreferredSize(new Dimension(250, 70));
-			currencyScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		eventDate = new JTextField(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()));
 //		eventDate = new JSpinner( new SpinnerDateModel() );
 //		JSpinner.DateEditor timeEditor = new JSpinner.DateEditor(eventDate, "HH:mm:ss");
@@ -103,8 +105,11 @@ public class SpikeTraderUI extends JFrame{
 //		eventDate.setValue(new Date()); // will only show the current time
 //		config.add(eventDate);
 		accountUtilization = new JTextField(defAccountUtilization);
+		autoStart = new JComboBox<Boolean>();
+			autoStart.addItem(false);
+			autoStart.addItem(true);
+		autoStartBefore = new JTextField(defAutoStartBefore);
 		expireAfter = new JTextField(defExpireAfter);
-	
 		recalibrate = new JComboBox<Boolean>();
 			recalibrate.addItem(true);
 			recalibrate.addItem(false);
@@ -117,6 +122,10 @@ public class SpikeTraderUI extends JFrame{
 		config.add(eventDate);
 		config.add(new JLabel("Account Utilization (%):"));
 		config.add(accountUtilization);
+		config.add(new JLabel("Automatically place orders:"));
+		config.add(autoStart);
+		config.add(new JLabel("Place orders X seconds before event:"));
+		config.add(autoStartBefore);
 		config.add(new JLabel("Expire orders X seconds after event date:"));
 		config.add(expireAfter);
 		config.add(new JLabel("Auto Recalibrate:"));
@@ -137,6 +146,8 @@ public class SpikeTraderUI extends JFrame{
 						currencySelector.getSelectedValuesList().toArray(new String[currencySelector.getSelectedValuesList().size()]), 
 						eventDate.getText(),
 						Double.parseDouble(accountUtilization.getText())/100,
+						(Boolean)autoStart.getSelectedItem(),
+						Integer.parseInt(autoStartBefore.getText()),
 						Integer.parseInt(expireAfter.getText()), 
 						(Boolean)recalibrate.getSelectedItem(), 
 						Integer.parseInt(recalibratorFreq.getText()),
@@ -183,6 +194,8 @@ public class SpikeTraderUI extends JFrame{
 		currencySelected = new JLabel("Currency: " + Arrays.toString(spikeTrader.getCurrencies()));
 		eventDateSelected = new JLabel("Event Date: " + spikeTrader.getEventDate());
 		accountUtilizationSelected = new JLabel("Account Utilization: " + spikeTrader.getAccountUtilization()*100 + "%");
+		autoStartDateSelected = new JLabel("Auto Start Time: " + spikeTrader.getAutoStartDate());
+		expirationDateSelected = new JLabel("Expire Time: " + spikeTrader.getExpirationDate());
 		currencySubscribe = new JButton("Subscribe to " + Arrays.toString(spikeTrader.getCurrencies()) + " Pairs");
 		unsubscribeAll = new JButton("Unsubscribe all Pairs");
 		updateCalculated = new JButton("Update Calculated Values");
@@ -209,6 +222,8 @@ public class SpikeTraderUI extends JFrame{
 		info.add(currencySelected);
 		info.add(eventDateSelected);
 		info.add(accountUtilizationSelected);
+		info.add(autoStartDateSelected);
+		info.add(expirationDateSelected);
 		info.add(currencySubscribe);
 		info.add(unsubscribeAll);
 		info.add(updateCalculated);
@@ -325,6 +340,9 @@ public class SpikeTraderUI extends JFrame{
 			if(!valueErrors){
 				if(!spikeTrader.getIsActive()){
 					placeOrders.setEnabled(true);
+				}
+				else{
+					System.out.println("spike trader is already active, can't save inputs");
 				}
 			}
 			else{

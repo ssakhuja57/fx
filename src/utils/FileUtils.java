@@ -66,7 +66,6 @@ public class FileUtils {
 	        final String name = entries.nextElement().getName();
 	        if (name.startsWith(resourceDir + "/") && !name.equals(resourceDir + "/")) { //filter according to the path
 	            res.add(name);
-	        	System.out.println(name);
 	        }
 	    }
 	    jar.close();

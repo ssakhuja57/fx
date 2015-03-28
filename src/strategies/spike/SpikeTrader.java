@@ -34,8 +34,13 @@ public class SpikeTrader implements SessionHolder{
 	
 	private double accountUtilization;
 	
+	private boolean autoStart;
+	private int autoStartBefore;
+	private Timer autoStartTimer;
+	private Calendar autoStartDate;
+	
 	private int expireAfter;
-	private Timer expirationChecker;
+	private Timer expirationTimer;
 	private Calendar expirationDate;
 	
 	private boolean recalibrate; // whether to use recalibrator
@@ -50,7 +55,8 @@ public class SpikeTrader implements SessionHolder{
 	
 	
 	public SpikeTrader(SessionManager sm, String[] currencies, String eventDate_string, double accountUtilization,
-			int expireAfter, boolean autoRecalibrate, int recalibratorFreq, int recalibrateUntil){
+			boolean autoStart, int autoStartBefore, int expireAfter, boolean autoRecalibrate, int recalibratorFreq, 
+			int recalibrateUntil){
 		this.sm = sm;
 		this.currencies = currencies;
 		try {
@@ -60,6 +66,12 @@ public class SpikeTrader implements SessionHolder{
 			e.printStackTrace();
 		}
 		this.accountUtilization = accountUtilization;
+		
+		this.autoStart = autoStart;
+		this.autoStartBefore = autoStartBefore;
+		autoStartDate = Calendar.getInstance();
+		autoStartDate.add(Calendar.SECOND, -autoStartBefore);
+		
 		this.expireAfter = expireAfter;
 		this.expirationDate = Calendar.getInstance();
 		expirationDate.setTime(eventDate.getTime());
@@ -80,18 +92,32 @@ public class SpikeTrader implements SessionHolder{
 		
 		recalculateParams();
 		
-		expirationChecker = new Timer();
-		expirationChecker.schedule(new ExpirationTask(), expirationDate.getTime());
+		expirationTimer = new Timer();
+		expirationTimer.schedule(new ExpirationTask(), expirationDate.getTime());
+		
+		autoStartTimer = new Timer();
+		if(autoStart){
+			autoStartTimer.schedule(new AutoStartTask(), autoStartDate.getTime());
+		}
 		
 		
+	}
+	
+	private class AutoStartTask extends TimerTask{
+		@Override
+		public void run(){
+			System.out.println("reached auto start time, placing orders");
+			start();
+			autoStartTimer.cancel();
+		}
 	}
 	
 	private class ExpirationTask extends TimerTask{
 		@Override
 		public void run() {
 			System.out.println("reached expiration time of " + expireAfter + " seconds after Event Date");
-				stop();
-				close();
+			stop();
+			close();
 		}
 	}
 	
@@ -170,8 +196,15 @@ public class SpikeTrader implements SessionHolder{
 	}
 	
 	public String getEventDate(){
-		//return new SimpleDateFormat("yyyy-MM-dd HH:mm").format(eventDate);
 		return eventDate.getTime().toString();
+	}
+	
+	public String getAutoStartDate(){
+		return autoStartDate.getTime().toString();
+	}
+	
+	public String getExpirationDate(){
+		return expirationDate.getTime().toString();
 	}
 	
 	public double getAccountUtilization(){
@@ -266,26 +299,29 @@ public class SpikeTrader implements SessionHolder{
 	}
 	
 	public void start(){
-		isActive = true;
-		placeAllOrders();
-		startRecalibrator();
-		//expirationChecker = new Timer();
-		//expirationChecker.schedule(new ExpirationTask(), expirationDate.getTime());
+		if (!isActive){
+			isActive = true;
+			placeAllOrders();
+			startRecalibrator();
+		}
+		else{
+			System.out.println("this spike trader instance is already active, can't start");
+		}
 	}
 	
 	public void stop(){
 		cancelAllOrders();
 		stopRecalibrator();
-		//expirationChecker.cancel();
 		isActive = false;
 	}
 	
 	@Override
 	public void close(){
 		try{
+			autoStartTimer.cancel();
 			cancelAllOrders();
 			stopRecalibrator();
-			expirationChecker.cancel();
+			expirationTimer.cancel();
 			dataCollector.cancel();
 			for (String pair: pairs){
 				rateCollectors.get(pair).end();
