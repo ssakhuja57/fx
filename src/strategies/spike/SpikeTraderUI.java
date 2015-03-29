@@ -288,7 +288,7 @@ public class SpikeTraderUI extends JFrame{
 		placeOrders.setEnabled(false);
 		//cancelOrders.setEnabled(false);
 		
-		saveParams.addActionListener(new SetInputsListener());
+		saveParams.addActionListener(new SaveInputsListener());
 		placeOrders.addActionListener(new StartListener());
 		cancelOrders.addActionListener(new StopListener());
 		
@@ -318,62 +318,62 @@ public class SpikeTraderUI extends JFrame{
 		}
 	}
 	
-	private class SetInputsListener implements ActionListener{
+	private class SaveInputsListener implements ActionListener{
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			saveParams.setEnabled(false);
-			
-			boolean valueErrors = false;
-			for (String pair: Pairs.getRelatedPairs(spikeTrader.getCurrencies())){
-				
-				int lots = 0;
-				int spikeBuffer = 0;
-				int stopBuffer = 0;
-				JTextField[] paramsSet = orderInputs.get(pair);
-				
-				try{
-					lots = !paramsSet[0].getText().equals("") ? Integer.parseInt(paramsSet[0].getText()) : Integer.parseInt(defAmount.getText());
-					spikeBuffer = !paramsSet[1].getText().equals("") ? Integer.parseInt(paramsSet[1].getText()) : Integer.parseInt(defSpikeBuffer.getText());
-					stopBuffer = !paramsSet[2].getText().equals("") ? Integer.parseInt(paramsSet[2].getText()) : Integer.parseInt(defStopBuffer.getText());
-				} catch (NumberFormatException nfe){
-					System.out.println("value error for " + pair + " or default value not set");
-					valueErrors = true;
-				}
-				
-				if(!spikeTrader.setParams(pair, lots, spikeBuffer, stopBuffer)){
-					return;
-				};
+			if(spikeTrader.isActive()){
+				spikeTrader.printIsRunning();
 			}
-			if(!valueErrors){
-				if(!spikeTrader.getIsActive()){
+			else{	
+				boolean valueErrors = false;
+				for (String pair: spikeTrader.getPairs()){
+					
+					int lots = 0;
+					int spikeBuffer = 0;
+					int stopBuffer = 0;
+					JTextField[] paramsSet = orderInputs.get(pair);
+					
+					try{
+						lots = !paramsSet[0].getText().equals("") ? Integer.parseInt(paramsSet[0].getText()) : Integer.parseInt(defAmount.getText());
+						spikeBuffer = !paramsSet[1].getText().equals("") ? Integer.parseInt(paramsSet[1].getText()) : Integer.parseInt(defSpikeBuffer.getText());
+						stopBuffer = !paramsSet[2].getText().equals("") ? Integer.parseInt(paramsSet[2].getText()) : Integer.parseInt(defStopBuffer.getText());
+					} catch (NumberFormatException nfe){
+						System.out.println("value error for " + pair + " or default value not set");
+						valueErrors = true;
+					}
+					
+					spikeTrader.setParams(pair, lots, spikeBuffer, stopBuffer);
+
+				}
+				if(!valueErrors){
 					placeOrders.setEnabled(true);
 				}
 				else{
-					System.out.println("spike trader is already active, can't save inputs");
+					saveParams.setEnabled(true);
 				}
-			}
-			else{
-				saveParams.setEnabled(true);
 			}
 		}
 	}
 	
 	private class InputValueChangeListener implements DocumentListener{
-		@Override
-		public void changedUpdate(DocumentEvent e) {
+		
+		private void update(){
 			placeOrders.setEnabled(false);
 			saveParams.setEnabled(true);
+		}
+		@Override
+		public void changedUpdate(DocumentEvent e) {
+			update();
 		}
 		@Override
 		public void insertUpdate(DocumentEvent e) {
-			placeOrders.setEnabled(false);
-			saveParams.setEnabled(true);
+			update();
 		}
 		@Override
 		public void removeUpdate(DocumentEvent e) {
-			placeOrders.setEnabled(false);
-			saveParams.setEnabled(true);
+			update();
 		}
 	}
 	

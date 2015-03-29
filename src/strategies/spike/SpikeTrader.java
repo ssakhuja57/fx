@@ -113,11 +113,6 @@ public class SpikeTrader implements SessionHolder{
 		public void run(){
 			System.out.println("reached auto start time, placing orders");
 			recalculateParams();
-			try {
-				Thread.currentThread().sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
 			start();
 			autoStartTimer.cancel();
 		}
@@ -201,6 +196,11 @@ public class SpikeTrader implements SessionHolder{
 		}
 	}
 	
+	public void printIsRunning(){
+		System.out.println("this spike trader instance is currently running, you must cancel before you" +
+				" can make changes");
+	}
+	
 	
 	public String[] getCurrencies(){
 		return currencies;
@@ -249,7 +249,7 @@ public class SpikeTrader implements SessionHolder{
 	public void recalculateParams(){
 		sm.updateMarginsReqs();
 		try{
-			Thread.sleep(1000);
+			Thread.currentThread().sleep(1000);
 		} catch (InterruptedException e){
 			e.printStackTrace();
 		}
@@ -265,7 +265,7 @@ public class SpikeTrader implements SessionHolder{
 			double mmr = sm.getMarginReqs(pair)[0];
 			double pipCost = sm.offersTable.getPipCost(pair);
 			int lots = (int)((accountBalance*accountUtilization*pipCost)/(Math.pow(mmr, 2.0)*sum_pc_mmr));
-			System.out.println("setting lots to " + lots + "K");
+			//System.out.println("setting lots to " + lots + "K");
 			
 			int spikeBuffer = defSpikeBuffer;
 			if(dataCollect){
@@ -290,15 +290,13 @@ public class SpikeTrader implements SessionHolder{
 			}
 			
 			int stopBuffer = defStopBuffer;
-			System.out.println("setting stop buffer to default of " + stopBuffer);
+			//System.out.println("setting stop buffer to default of " + stopBuffer);
 			
-			//System.out.println("For " + pair + " setting lots=" + lots + "K, SpikeBuffer=" + spikeBuffer + ", StopBuffer=" + stopBuffer);
-			System.out.println("");
-			params.put(pair, new Integer[]{ lots, spikeBuffer, stopBuffer });
+			setParams(pair, lots, spikeBuffer, stopBuffer);
 		}
 	}
 	
-	public boolean getIsActive(){
+	public boolean isActive(){
 		return isActive;
 	}
 	
@@ -322,11 +320,14 @@ public class SpikeTrader implements SessionHolder{
 		}
 	}
 	
-	public boolean setParams(String pair, int lots, int spikeBuffer, int stopBuffer){
+	public void setParams(String pair, int lots, int spikeBuffer, int stopBuffer){
+		if(isActive){
+			printIsRunning();
+			return;
+		}
 		System.out.println("Setting parameters for " + pair + ": lots=" + lots + "K, SpikeBuffer=" 
 				+ spikeBuffer + "pips, StopBuffer=" + stopBuffer + "pips");
 		params.put(pair, new Integer[]{lots*1000, spikeBuffer, stopBuffer});
-		return true;
 	}
 	
 	public void start(){
@@ -336,7 +337,7 @@ public class SpikeTrader implements SessionHolder{
 			startRecalibrator();
 		}
 		else{
-			System.out.println("this spike trader instance is already active, can't start");
+			printIsRunning();
 		}
 	}
 	
