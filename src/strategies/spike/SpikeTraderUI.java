@@ -383,9 +383,12 @@ public class SpikeTraderUI extends JFrame{
 			spikeTrader.recalculateParams();
 			for (String pair: spikeTrader.getPairs()){
 				Integer[] calculated = spikeTrader.getParams().get(pair);
-				orderInputs.get(pair)[0].setText(calculated[0].toString());
-				orderInputs.get(pair)[1].setText(calculated[1].toString());
-				orderInputs.get(pair)[2].setText(calculated[2].toString());
+				Integer lots = calculated[0]/1000;
+				Integer spikeBuffer = calculated[1];
+				Integer stopBuffer = calculated[2];
+				orderInputs.get(pair)[0].setText(lots.toString());
+				orderInputs.get(pair)[1].setText(spikeBuffer.toString());
+				orderInputs.get(pair)[2].setText(stopBuffer.toString());
 			}
 		}
 	}
