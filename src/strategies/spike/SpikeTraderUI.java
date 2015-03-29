@@ -65,6 +65,9 @@ public class SpikeTraderUI extends JFrame{
 	JLabel accountUtilizationSelected;
 	JLabel autoStartDateSelected;
 	JLabel expirationDateSelected;
+	JLabel recalibrateSelected;
+	
+	JPanel setup = new JPanel(new GridLayout(0,1));
 	JButton currencySubscribe;
 	JButton unsubscribeAll;
 	JButton updateCalculated;
@@ -188,14 +191,24 @@ public class SpikeTraderUI extends JFrame{
 	private void activate(){
 		this.setVisible(false);
 		this.getContentPane().removeAll();
-		this.setSize(700, 100 + 25*spikeTrader.getPairs().size());
+		this.setSize(700, 200 + 25*spikeTrader.getPairs().size());
 		this.setLayout(new GridBagLayout());
 		
 		currencySelected = new JLabel("Currency: " + Arrays.toString(spikeTrader.getCurrencies()));
 		eventDateSelected = new JLabel("Event Date: " + spikeTrader.getEventDate());
 		accountUtilizationSelected = new JLabel("Account Utilization: " + spikeTrader.getAccountUtilization()*100 + "%");
-		autoStartDateSelected = new JLabel("Auto Start Time: " + spikeTrader.getAutoStartDate());
+		autoStartDateSelected = new JLabel("Auto Start Time: " + (spikeTrader.autoStartEnabled() ? spikeTrader.getAutoStartDate() : "N/A"));
 		expirationDateSelected = new JLabel("Expire Time: " + spikeTrader.getExpirationDate());
+		recalibrateSelected = new JLabel("Recalibrate: " + (spikeTrader.recalibratorEnabled() ? "Until " + spikeTrader.getRecalibrateUntil() : "N/A"));
+		info.add(currencySelected);
+		info.add(eventDateSelected);
+		info.add(accountUtilizationSelected);
+		info.add(autoStartDateSelected);
+		info.add(expirationDateSelected);
+		info.add(recalibrateSelected);
+		addComponent(this, info, 1, 1);
+		
+		
 		currencySubscribe = new JButton("Subscribe to " + Arrays.toString(spikeTrader.getCurrencies()) + " Pairs");
 		unsubscribeAll = new JButton("Unsubscribe all Pairs");
 		updateCalculated = new JButton("Update Calculated Values");
@@ -219,16 +232,11 @@ public class SpikeTraderUI extends JFrame{
 			}
 		}));
 		
-		info.add(currencySelected);
-		info.add(eventDateSelected);
-		info.add(accountUtilizationSelected);
-		info.add(autoStartDateSelected);
-		info.add(expirationDateSelected);
-		info.add(currencySubscribe);
-		info.add(unsubscribeAll);
-		info.add(updateCalculated);
-		info.add(recalibrateOrders);
-		addComponent(this, info, 1, 1);
+		setup.add(currencySubscribe);
+		setup.add(unsubscribeAll);
+		setup.add(updateCalculated);
+		setup.add(recalibrateOrders);
+		addComponent(this, setup, 1, 3);
 		
 		
 //		pairsDataModel = new DefaultTableModel(new String[]{"Pair" ,"Buy Min", "Buy Max", "Buy Diff", 

@@ -128,5 +128,6 @@ public class Pairs {
 //		for (String currency:counts.keySet()){
 //			System.out.println(currency + ": " + counts.get(currency)[0] + " - " + counts.get(currency)[1]);
 //		}
+//
 //	}
 }

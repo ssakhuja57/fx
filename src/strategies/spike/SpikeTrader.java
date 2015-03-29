@@ -63,7 +63,7 @@ public class SpikeTrader implements SessionHolder{
 		this.currencies = currencies;
 		try {
 			this.eventDate = Calendar.getInstance();
-			this.eventDate.setTime((new SimpleDateFormat("yyyy-MM-dd hh:mm", Locale.ENGLISH)).parse(eventDate_string));
+			this.eventDate.setTime((new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.ENGLISH)).parse(eventDate_string));
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
@@ -72,6 +72,7 @@ public class SpikeTrader implements SessionHolder{
 		this.autoStart = autoStart;
 		this.autoStartBefore = autoStartBefore;
 		autoStartDate = Calendar.getInstance();
+		autoStartDate.setTime(eventDate.getTime());
 		autoStartDate.add(Calendar.SECOND, -autoStartBefore);
 		
 		this.expireAfter = expireAfter;
@@ -84,17 +85,17 @@ public class SpikeTrader implements SessionHolder{
 		this.recalibratorFreq = recalibratorFreq;
 		this.recalibrateUntil = recalibrateUntil;
 		
+		pairs = Pairs.getRelatedPairs(currencies);
+		
 		if(dataCollect){
-			pairs = Pairs.getRelatedPairs(currencies);
+			dataCollector = new Timer();
 			for (String pair:pairs){
 				rateCollectors.put(pair, new RateCollector(sm, pair, 300, 1));
 			}
 			
-			dataCollector = new Timer();
 			dataCollector.schedule(new DataCollector(), 0, 1*1000);
 		}
 		
-		recalculateParams();
 		
 		expirationTimer = new Timer();
 		expirationTimer.schedule(new ExpirationTask(), expirationDate.getTime());
@@ -203,12 +204,27 @@ public class SpikeTrader implements SessionHolder{
 		return eventDate.getTime().toString();
 	}
 	
+	public boolean autoStartEnabled(){
+		return autoStart;
+	}
+	
 	public String getAutoStartDate(){
 		return autoStartDate.getTime().toString();
 	}
 	
 	public String getExpirationDate(){
 		return expirationDate.getTime().toString();
+	}
+	
+	public boolean recalibratorEnabled(){
+		return this.recalibrate;
+	}
+	
+	public String getRecalibrateUntil(){
+		Calendar res = Calendar.getInstance();
+		res.setTime(eventDate.getTime());
+		res.add(Calendar.SECOND, -recalibrateUntil);
+		return res.getTime().toString();
 	}
 	
 	public double getAccountUtilization(){
@@ -262,6 +278,9 @@ public class SpikeTrader implements SessionHolder{
 				else{
 					System.out.println("setting spike buffer to default value of " + spikeBuffer);
 				}
+			}
+			else{
+				System.out.println("setting spike buffer to default value of " + spikeBuffer);
 			}
 			
 			int stopBuffer = defStopBuffer;
@@ -317,21 +336,36 @@ public class SpikeTrader implements SessionHolder{
 	
 	public void stop(){
 		cancelAllOrders();
+		try {
+			Thread.currentThread().sleep(500);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		cancelAllOrders();
 		stopRecalibrator();
 		isActive = false;
 	}
 	
 	@Override
 	public void close(){
+		autoStartTimer.cancel();
+		cancelAllOrders();
 		try{
-			autoStartTimer.cancel();
-			cancelAllOrders();
-			stopRecalibrator();
-			expirationTimer.cancel();
+			Thread.currentThread().sleep(500);
+		} catch(InterruptedException e){
+			e.printStackTrace();
+		}
+		cancelAllOrders();
+		stopRecalibrator();
+		expirationTimer.cancel();
+		if(dataCollect){
 			dataCollector.cancel();
 			for (String pair: pairs){
 				rateCollectors.get(pair).end();
 			}
+		}
+		try{
 			Thread.currentThread().sleep(3000); // wait for cleanup to finish
 		} catch (InterruptedException e) {
 			e.printStackTrace();
