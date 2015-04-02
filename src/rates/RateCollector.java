@@ -27,8 +27,12 @@ public class RateCollector implements SessionDependent{
 	private ConcurrentLinkedQueue<Double> lowRates;
 	
 	
-	public RateCollector(SessionManager sm, String pair, int length, int frequency){
-		
+	public RateCollector(SessionManager sm, String pair, int length, int frequency) throws IllegalArgumentException{
+			
+			if (length > 300){
+				throw new IllegalArgumentException("max allowed length of RateCollector is 300");
+			}
+			
 			this.sm = sm;
 			this.pair = pair;
 			this.length = length;
@@ -41,22 +45,17 @@ public class RateCollector implements SessionDependent{
 			highRates = new ConcurrentLinkedQueue<Double>();
 			lowRates = new ConcurrentLinkedQueue<Double>();
 			
-			//getting rate history gives errors most of the time for some reason
-//			try{
-//				//buyRates.addAll(RateHistory.getTickData(sm, pair, length, "buy"));
-//				//sellRates.addAll(RateHistory.getTickData(sm, pair, length, "sell"));
-//				//highRates.addAll(RateHistory.getTickData(sm, pair, length, "high"));
-//				//lowRates.addAll(RateHistory.getTickData(sm, pair, length, "low"));
-//			} catch (InterruptedException e){
-//				e.printStackTrace();
-//			}
+			buyRates.addAll(RateHistory.getTickData(sm, pair, length, "buy"));
+			sellRates.addAll(RateHistory.getTickData(sm, pair, length, "sell"));
+			highRates.addAll(RateHistory.getTickData(sm, pair, length, "high"));
+			lowRates.addAll(RateHistory.getTickData(sm, pair, length, "low"));
 			
-			for (int i=0;i<length;i++){ //initialize with values
-				buyRates.add(sm.offersTable.getBuyRate(pair));
-				sellRates.add(sm.offersTable.getSellRate(pair));
-				highRates.add(sm.offersTable.getHigh(pair));
-				lowRates.add(sm.offersTable.getLow(pair));
-			}
+//			for (int i=0;i<length;i++){ //initialize with values
+//				buyRates.add(sm.offersTable.getBuyRate(pair));
+//				sellRates.add(sm.offersTable.getSellRate(pair));
+//				highRates.add(sm.offersTable.getHigh(pair));
+//				lowRates.add(sm.offersTable.getLow(pair));
+//			}
 			
 			timer = new Timer();
 			timer.schedule(new Update(), 0, frequency*1000);
