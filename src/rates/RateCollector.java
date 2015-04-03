@@ -1,6 +1,5 @@
 package rates;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -23,15 +22,15 @@ public class RateCollector implements SessionDependent{
 
 	private ConcurrentLinkedQueue<Double> buyRates;
 	private ConcurrentLinkedQueue<Double> sellRates;
-	private ConcurrentLinkedQueue<Double> highRates;
-	private ConcurrentLinkedQueue<Double> lowRates;
+	//private ConcurrentLinkedQueue<Double> highRates;
+	//private ConcurrentLinkedQueue<Double> lowRates;
 	
 	
 	public RateCollector(SessionManager sm, String pair, int length, int frequency) throws IllegalArgumentException{
 			
-			if (length > 300){
-				throw new IllegalArgumentException("max allowed length of RateCollector is 300");
-			}
+//			if (length > 300){
+//				throw new IllegalArgumentException("max allowed length of RateCollector is 300");
+//			}
 			
 			this.sm = sm;
 			this.pair = pair;
@@ -42,13 +41,10 @@ public class RateCollector implements SessionDependent{
 			
 			buyRates = new ConcurrentLinkedQueue<Double>();
 			sellRates = new ConcurrentLinkedQueue<Double>();
-			highRates = new ConcurrentLinkedQueue<Double>();
-			lowRates = new ConcurrentLinkedQueue<Double>();
+			//highRates = new ConcurrentLinkedQueue<Double>();
+			//lowRates = new ConcurrentLinkedQueue<Double>();
 			
-			buyRates.addAll(RateHistory.getTickData(sm, pair, length, "buy"));
-			sellRates.addAll(RateHistory.getTickData(sm, pair, length, "sell"));
-			highRates.addAll(RateHistory.getTickData(sm, pair, length, "high"));
-			lowRates.addAll(RateHistory.getTickData(sm, pair, length, "low"));
+			initialFill();
 			
 //			for (int i=0;i<length;i++){ //initialize with values
 //				buyRates.add(sm.offersTable.getBuyRate(pair));
@@ -68,16 +64,43 @@ public class RateCollector implements SessionDependent{
 		//System.out.println(pair + " at buy rate " + sm.offersTable.getBuyRate(pair));
 		buyRates.add(sm.offersTable.getBuyRate(pair));
 		sellRates.add(sm.offersTable.getSellRate(pair));
-		highRates.add(sm.offersTable.getHigh(pair));
-		lowRates.add(sm.offersTable.getLow(pair));
+		//highRates.add(sm.offersTable.getHigh(pair));
+		//lowRates.add(sm.offersTable.getLow(pair));
 		
 		buyRates.remove();
 		sellRates.remove();
-		highRates.remove();
-		lowRates.remove();
+		//highRates.remove();
+		//lowRates.remove();
 		
 		updatesCounter++;
 		
+	}
+	
+	private void initialFill(){
+		final int iterations = (int)length/300 + 1;
+		int iteration = 0;
+		start_part
+		end_part = get_current_time - length - 1
+		
+		while(iteration <= iterations){
+			iteration++;
+			start_part = end_part + 1
+			end_part = start_part + length - 1
+			addAll(getSnapshotData(start_part, end_part))
+			addAll(getSnapshotData(start_part, end_part))
+		}
+		
+		extra = getSnapshotData(end_part + 1, get_current_time)
+		addAll(extra) // to make up for time that above while loop takes to complete
+		for (i=1 to extra.size()){ // to keep the size equal to length
+			remove
+			remove
+		}
+		//buyRates.addAll(RateHistory.getTickData(sm, pair, length, "buy"));
+		//sellRates.addAll(RateHistory.getTickData(sm, pair, length, "sell"));
+		//highRates.addAll(RateHistory.getTickData(sm, pair, length, "high"));
+		//lowRates.addAll(RateHistory.getTickData(sm, pair, length, "low"));
+		updatesCounter += length;
 	}
 	
 	private double[] getQueue(String type){
@@ -89,12 +112,12 @@ public class RateCollector implements SessionDependent{
 		case "sell":
 			q = sellRates;
 			break;
-		case "high":
-			q = highRates;
-			break;
-		case "low":
-			q = lowRates;
-			break;
+//		case "high":
+//			q = highRates;
+//			break;
+//		case "low":
+//			q = lowRates;
+//			break;
 		default:
 			return null;
 		}
