@@ -254,18 +254,20 @@ public class SpikeTrader implements SessionHolder{
 			e.printStackTrace();
 		}
 		double accountBalance = sm.accountsTable.getBalance(sm.getAccountID(1));
-		double sum_pc_mmr = 0;
+//		double sum_pc_mmr = 0;
 		
-		for(String pair: pairs){
-			sum_pc_mmr += (sm.offersTable.getPipCost(pair)/sm.getMarginReqs(pair)[0]);
-		}
+//		for(String pair: pairs){
+//			sum_pc_mmr += (sm.offersTable.getPipCost(pair)/sm.getMarginReqs(pair)[0]);
+//		}
+		int pairsCount = pairs.size();
 		
 		for (String pair: pairs){
 			System.out.println("calculating values for " + pair);
 			double mmr = sm.getMarginReqs(pair)[0];
-			double pipCost = sm.offersTable.getPipCost(pair);
-			int lots = (int)((accountBalance*accountUtilization*pipCost)/(Math.pow(mmr, 2.0)*sum_pc_mmr));
-			//System.out.println("setting lots to " + lots + "K");
+			//double pipCost = sm.offersTable.getPipCost(pair);
+			//int lots = (int)((accountBalance*accountUtilization*pipCost)/(Math.pow(mmr, 2.0)*sum_pc_mmr));
+			int lots = (int)((accountBalance*accountUtilization)/(pairsCount*mmr));
+			System.out.println("setting lots to " + lots + "K");
 			
 			int spikeBuffer = defSpikeBuffer;
 			if(dataCollect){
