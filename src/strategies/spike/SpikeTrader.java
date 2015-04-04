@@ -5,20 +5,18 @@ import info.Pairs;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.fxcore2.Constants;
-
 import rates.RateCollector;
 import rates.RateTools;
 import session.SessionHolder;
 import session.SessionManager;
+
+import com.fxcore2.Constants;
 
 public class SpikeTrader implements SessionHolder{
 	
@@ -167,7 +165,7 @@ public class SpikeTrader implements SessionHolder{
 				for (String pair: pairs){
 					if(recalibrateParams.get(pair)){
 						int spikeBuffer = (int)rateCollectors.get(pair).getMaxWindowRange();
-						System.out.println("calculated: " + spikeBuffer);
+						System.out.println(pair + ": buffer calculated = " + spikeBuffer);
 						if(spikeBuffer < spikeBufferFloor) spikeBuffer = spikeBufferFloor;
 						else if(spikeBuffer > spikeBufferCeiling) spikeBuffer = spikeBufferCeiling;
 						setParam(pair, 1, spikeBuffer);
