@@ -32,7 +32,11 @@ public class SpikeTrader implements SessionHolder{
 	private int defSpikeBuffer = 10;
 	private int defStopBuffer = 9;
 	
-	private boolean dataCollect = false;
+	private int spikeBufferFloor = 10;
+	private int spikeBufferCeiling = 18;
+	
+	private boolean dataCollect = true;
+	private int dataCollectLength = 1800;
 	
 	private double accountUtilization;
 	
@@ -49,6 +53,7 @@ public class SpikeTrader implements SessionHolder{
 	private Timer recalibrator;
 	private int recalibratorFreq; //frequency in seconds at which to recalibrate orders
 	private int recalibrateUntil; //seconds before eventDate to stop recalibrating orders
+	private HashMap<String, Boolean> recalibrateParams = new HashMap<String, Boolean>();
 	
 	private Timer dataCollector;
 	private HashMap<String, double[]> data = new HashMap<String, double[]>();
@@ -90,10 +95,14 @@ public class SpikeTrader implements SessionHolder{
 		if(dataCollect){
 			dataCollector = new Timer();
 			for (String pair:pairs){
-				rateCollectors.put(pair, new RateCollector(sm, pair, 300, 1));
+				rateCollectors.put(pair, new RateCollector(sm, pair, dataCollectLength, 1));
 			}
 			
 			dataCollector.schedule(new DataCollector(), 0, 1*1000);
+		}
+		
+		for (String pair:pairs){
+			recalibrateParams.put(pair, true);
 		}
 		
 		
@@ -154,6 +163,17 @@ public class SpikeTrader implements SessionHolder{
 				recalibrator.cancel();
 			}
 			recalibrateAllOrders();
+			if (dataCollect){
+				for (String pair: pairs){
+					if(recalibrateParams.get(pair)){
+						int spikeBuffer = (int)rateCollectors.get(pair).getMaxWindowRange();
+						System.out.println("calculated: " + spikeBuffer);
+						if(spikeBuffer < spikeBufferFloor) spikeBuffer = spikeBufferFloor;
+						else if(spikeBuffer > spikeBufferCeiling) spikeBuffer = spikeBufferCeiling;
+						setParam(pair, 1, spikeBuffer);
+					}
+				}
+			}
 		}
 	}
 	
@@ -255,18 +275,19 @@ public class SpikeTrader implements SessionHolder{
 		}
 		double accountBalance = sm.accountsTable.getBalance(sm.getAccountID(1));
 //		double sum_pc_mmr = 0;
+		double sum_mmr = 0;
 		
-//		for(String pair: pairs){
+		for(String pair: pairs){
 //			sum_pc_mmr += (sm.offersTable.getPipCost(pair)/sm.getMarginReqs(pair)[0]);
-//		}
-		int pairsCount = pairs.size();
+			sum_mmr += sm.getMarginReqs(pair)[0];
+		}
+		//int pairsCount = pairs.size();
 		
 		for (String pair: pairs){
 			System.out.println("calculating values for " + pair);
-			double mmr = sm.getMarginReqs(pair)[0];
 			//double pipCost = sm.offersTable.getPipCost(pair);
 			//int lots = (int)((accountBalance*accountUtilization*pipCost)/(Math.pow(mmr, 2.0)*sum_pc_mmr));
-			int lots = (int)((accountBalance*accountUtilization)/(pairsCount*mmr));
+			int lots = (int)((accountBalance*accountUtilization)/(sum_mmr));
 			System.out.println("setting lots to " + lots + "K");
 			
 			int spikeBuffer = defSpikeBuffer;
@@ -322,6 +343,11 @@ public class SpikeTrader implements SessionHolder{
 		}
 	}
 	
+	private void setParam(String pair, int index, int value){
+		params.get(pair)[index] = value;
+	}
+	
+	
 	public void setParams(String pair, int lots, int spikeBuffer, int stopBuffer){
 		if(isActive){
 			printIsRunning();
@@ -330,6 +356,10 @@ public class SpikeTrader implements SessionHolder{
 		System.out.println("Setting parameters for " + pair + ": lots=" + lots + "K, SpikeBuffer=" 
 				+ spikeBuffer + "pips, StopBuffer=" + stopBuffer + "pips");
 		params.put(pair, new Integer[]{lots*1000, spikeBuffer, stopBuffer});
+	}
+	
+	public void setRecalibrationOptions(String pair, boolean active){
+		recalibrateParams.put(pair, active);
 	}
 	
 	public void start(){
@@ -348,7 +378,6 @@ public class SpikeTrader implements SessionHolder{
 		try {
 			Thread.currentThread().sleep(500);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		cancelAllOrders();

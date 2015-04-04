@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.HashMap;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -77,8 +78,9 @@ public class SpikeTraderUI extends JFrame{
 	TableModel pairsDataModel;
 	JTable pairsData;
 	
-	JPanel inputs = new JPanel(new GridLayout(0,4));
-	HashMap<String,JTextField[]> orderInputs;
+	JPanel inputs = new JPanel(new GridLayout(0,5));
+	HashMap<String,JTextField[]> orderInputs = new HashMap<String,JTextField[]>();
+	HashMap<String, JCheckBox> recalibrateParamOptions = new HashMap<String, JCheckBox>();
 	JTextField defAmount;
 	JTextField defSpikeBuffer;
 	JTextField defStopBuffer;
@@ -191,7 +193,7 @@ public class SpikeTraderUI extends JFrame{
 	private void activate(){
 		this.setVisible(false);
 		this.getContentPane().removeAll();
-		this.setSize(700, 200 + 25*spikeTrader.getPairs().size());
+		this.setSize(800, 200 + 25*spikeTrader.getPairs().size());
 		this.setLayout(new GridBagLayout());
 		
 		currencySelected = new JLabel("Currency: " + Arrays.toString(spikeTrader.getCurrencies()));
@@ -252,20 +254,27 @@ public class SpikeTraderUI extends JFrame{
 		inputs.add(new JLabel("Amount (1K Lots)"));
 		inputs.add(new JLabel("Spike Buffer"));
 		inputs.add(new JLabel("Stop Buffer"));
-		orderInputs = new HashMap<String,JTextField[]>();
+		inputs.add(new JLabel("Recal Params"));
+
 		for (String pair: spikeTrader.getPairs()){
 			inputs.add(new JLabel(pair + ":"));
 			//Integer[] calculated = spikeTrader.getParams().get(pair);
 			JTextField amount = new JTextField();
 			JTextField spikeBuffer = new JTextField();
 			JTextField stopBuffer = new JTextField();
+			JCheckBox recalibrateParams = new JCheckBox("", true);
+			
 			amount.getDocument().addDocumentListener(new InputValueChangeListener());
 			spikeBuffer.getDocument().addDocumentListener(new InputValueChangeListener());
 			stopBuffer.getDocument().addDocumentListener(new InputValueChangeListener());
+			
 			inputs.add(amount);
 			inputs.add(spikeBuffer);
 			inputs.add(stopBuffer);
+			inputs.add(recalibrateParams);
+			
 			orderInputs.put(pair, new JTextField[]{amount, spikeBuffer, stopBuffer});
+			recalibrateParamOptions.put(pair, recalibrateParams);
 		}
 		inputs.add(new JLabel("Defaults:"));
 		defAmount = new JTextField();
@@ -344,7 +353,10 @@ public class SpikeTraderUI extends JFrame{
 						valueErrors = true;
 					}
 					
+					boolean recalibrateOption = recalibrateParamOptions.get(pair).isSelected();
+					
 					spikeTrader.setParams(pair, lots, spikeBuffer, stopBuffer);
+					spikeTrader.setRecalibrationOptions(pair, recalibrateOption);
 
 				}
 				if(!valueErrors){
@@ -421,6 +433,11 @@ public class SpikeTraderUI extends JFrame{
 //	public static void main(String[] args){
 //		SpikeTraderUI ui = new SpikeTraderUI();
 //	}
+	
+	public static void main(String[] args){
+		SpikeTraderUI ui = new SpikeTraderUI();
+		ui.activate();
+	}
 	
 	
 	

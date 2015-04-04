@@ -1,6 +1,9 @@
 package rates;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -9,6 +12,8 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import session.SessionDependent;
 import session.SessionManager;
+import utils.ArrayUtils;
+import utils.DateUtils;
 
 public class RateCollector implements SessionDependent{
 	
@@ -16,9 +21,14 @@ public class RateCollector implements SessionDependent{
 	private String pair;
 	private int length;
 	private int frequency;
+	public static final int MAX_REQUEST_LENGTH = 300;
 	
+	private boolean isActive = false;
 	private int updatesCounter = 0; // keep track of how many points have been collected
 	private Timer timer;
+	
+	private double maxWindowRange;
+	private Thread maxWindowRangeUpdater;
 
 	private ConcurrentLinkedQueue<Double> buyRates;
 	private ConcurrentLinkedQueue<Double> sellRates;
@@ -31,6 +41,10 @@ public class RateCollector implements SessionDependent{
 //			if (length > 300){
 //				throw new IllegalArgumentException("max allowed length of RateCollector is 300");
 //			}
+		
+			if (length%30 != 0){
+				throw new IllegalArgumentException("length must be a multiple of 30");
+			}
 			
 			this.sm = sm;
 			this.pair = pair;
@@ -55,6 +69,11 @@ public class RateCollector implements SessionDependent{
 			
 			timer = new Timer();
 			timer.schedule(new Update(), 0, frequency*1000);
+			
+			maxWindowRangeUpdater = new Thread(new WindowRangeUpdater());
+			maxWindowRangeUpdater.run();
+			
+			isActive = true;
 
 		}
 	
@@ -77,30 +96,57 @@ public class RateCollector implements SessionDependent{
 	}
 	
 	private void initialFill(){
-		final int iterations = (int)length/300 + 1;
-		int iteration = 0;
-		start_part
-		end_part = get_current_time - length - 1
 		
-		while(iteration <= iterations){
-			iteration++;
-			start_part = end_part + 1
-			end_part = start_part + length - 1
-			addAll(getSnapshotData(start_part, end_part))
-			addAll(getSnapshotData(start_part, end_part))
+		if(length <= MAX_REQUEST_LENGTH){
+			buyRates.addAll(RateHistory.getTickData(sm, pair, length, "buy"));
+			sellRates.addAll(RateHistory.getTickData(sm, pair, length, "sell"));
+			//highRates.addAll(RateHistory.getTickData(sm, pair, length, "high"));
+			//lowRates.addAll(RateHistory.getTickData(sm, pair, length, "low"));
 		}
+		else{
+			final int iterations = (int)(length/MAX_REQUEST_LENGTH);
+			int iteration = 1;
+			Calendar startPart = DateUtils.getUTCTime();
+			Calendar endPart = DateUtils.getUTCTime(); endPart.add(Calendar.SECOND, -(length + 1));
+			
+			while(iteration <= iterations){
+				startPart.setTime(endPart.getTime()); startPart.add(Calendar.SECOND, 1);
+				endPart.setTime(startPart.getTime()); endPart.add(Calendar.SECOND, MAX_REQUEST_LENGTH - 1);
+				
+				ArrayList<ArrayList<Double>> rates = RateHistory.getSnapshot(sm, pair, "t1", startPart, endPart);
+				int ratesSize = rates.get(0).size();
+				if(ratesSize < MAX_REQUEST_LENGTH){ // if requesting rates for time when trading is closed, you will not retrieve the number of rates requested
+					rates.get(0).addAll(Collections.nCopies(MAX_REQUEST_LENGTH - ratesSize, rates.get(0).get(ratesSize-1)));
+					rates.get(1).addAll(Collections.nCopies(MAX_REQUEST_LENGTH - ratesSize, rates.get(1).get(ratesSize-1)));
+				}
+				buyRates.addAll(rates.get(0));
+				sellRates.addAll(rates.get(1));
 		
-		extra = getSnapshotData(end_part + 1, get_current_time)
-		addAll(extra) // to make up for time that above while loop takes to complete
-		for (i=1 to extra.size()){ // to keep the size equal to length
-			remove
-			remove
+				iteration++;
+			}
+			
+			startPart.setTime(endPart.getTime()); startPart.add(Calendar.SECOND, 1);
+			ArrayList<ArrayList<Double>> extras = RateHistory.getSnapshot(sm, pair, "t1", startPart, DateUtils.getUTCTime());
+			buyRates.addAll(extras.get(0));
+			sellRates.addAll(extras.get(1));
+			for (int i=0; i < extras.get(0).size(); i++){ // to keep the size equal to length
+				buyRates.remove();
+				sellRates.remove();
+			}
 		}
-		//buyRates.addAll(RateHistory.getTickData(sm, pair, length, "buy"));
-		//sellRates.addAll(RateHistory.getTickData(sm, pair, length, "sell"));
-		//highRates.addAll(RateHistory.getTickData(sm, pair, length, "high"));
-		//lowRates.addAll(RateHistory.getTickData(sm, pair, length, "low"));
+
 		updatesCounter += length;
+		System.out.println("rate collector for " + pair + " initialized with " + buyRates.size() + " ticks");
+	}
+	
+	private class WindowRangeUpdater implements Runnable{
+		@Override
+		public void run() {
+			while(isActive){
+				maxWindowRange = RateTools.convertToPips(getMaxRangeByWindow(300), pair);
+			}
+		}
+		
 	}
 	
 	private double[] getQueue(String type){
@@ -160,7 +206,7 @@ public class RateCollector implements SessionDependent{
 		}
 		double[] rates = getQueue(type);
 		int first = rates.length - lastN_points;
-		return max(Arrays.copyOfRange(rates, first, length));
+		return ArrayUtils.max(Arrays.copyOfRange(rates, first, length));
 	}
 	
 	public double getLow(String type, int lastN_points){
@@ -169,12 +215,13 @@ public class RateCollector implements SessionDependent{
 		}
 		double[] rates = getQueue(type);
 		int first = rates.length - lastN_points;
-		return min(Arrays.copyOfRange(rates, first, length));
+		return ArrayUtils.min(Arrays.copyOfRange(rates, first, length));
 	}
 	
 	public double getStdDev(String type){
 		return (new DescriptiveStatistics(getQueue(type))).getStandardDeviation();
 	}
+	
 	
 	public String getPair(){
 		return this.pair;
@@ -188,6 +235,10 @@ public class RateCollector implements SessionDependent{
 		return this.frequency;
 	}
 	
+	public double getMaxWindowRange(){
+		return this.maxWindowRange;
+	}
+	
 	class Update extends TimerTask{
 		public void run(){
 			updateRates();
@@ -195,25 +246,15 @@ public class RateCollector implements SessionDependent{
 		
 	}
 	
-	private double max(double[] arr){
-		double max = 0.0;
-		for (double d: arr){
-			if (d > max){
-				max = d;
-			}
+	private double getMaxRangeByWindow(int windowLength){
+		double rangeBuy = ArrayUtils.getMaxRangeByWindowNaive(buyRates.toArray(new Double[length]), 300);
+		double rangeSell = ArrayUtils.getMaxRangeByWindowNaive(sellRates.toArray(new Double[length]), 300);
+		if(rangeBuy > rangeSell){
+			return rangeBuy;
 		}
-		return max;
+		return rangeSell;
 	}
 	
-	private double min(double[] arr){
-		double min = 99999;
-		for (double d: arr){
-			if (d < min){
-				min = d;
-			}
-		}
-		return min;
-	}
 	
 	public boolean isFull(){ //this rate collector has collected at least as much data as intended by length
 		return updatesCounter >= length;
@@ -223,6 +264,8 @@ public class RateCollector implements SessionDependent{
 	public void end(){
 		System.out.println("cancelling rate collector for " + pair);
 		timer.cancel();
+		isActive = false;
+		maxWindowRangeUpdater.interrupt();
 	}
 	
 	
