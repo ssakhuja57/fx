@@ -119,7 +119,9 @@ public class SpikeTrader implements SessionHolder{
 		@Override
 		public void run(){
 			System.out.println("reached auto start time, placing orders");
-			recalculateParams();
+			if(params.size() == 0){
+				recalculateParams();
+			}
 			start();
 			autoStartTimer.cancel();
 		}
