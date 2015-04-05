@@ -128,21 +128,27 @@ public class RateCollector implements SessionDependent{
 						rates.get(0).addAll(Collections.nCopies(MAX_REQUEST_LENGTH - ratesSize, rates.get(0).get(ratesSize-1)));
 						rates.get(1).addAll(Collections.nCopies(MAX_REQUEST_LENGTH - ratesSize, rates.get(1).get(ratesSize-1)));
 					}
-					buyRates.addAll(rates.get(0));
-					sellRates.addAll(rates.get(1));
-			
-					iteration++;
 					
 				} catch (IllegalArgumentException e) {
 					e.printStackTrace();
 				} catch (IllegalAccessException e) {
 					rates = new ArrayList<ArrayList<Double>>();
 					rates.add(new ArrayList<Double>()); rates.add(new ArrayList<Double>());
-					rates.get(0).addAll(Collections.nCopies(length - buyRates.size(), sm.offersTable.getBuyRate(pair)));
-					rates.get(1).addAll(Collections.nCopies(length - sellRates.size(), sm.offersTable.getSellRate(pair)));
+					double buyRate = sm.offersTable.getBuyRate(pair);
+					double sellRate = sm.offersTable.getSellRate(pair);
+					if(buyRates.size() != 0){
+						buyRate = (double) buyRates.toArray()[buyRates.size() - 1];
+					} 
+					if(sellRates.size() != 0){
+						sellRate = (double) sellRates.toArray()[sellRates.size() - 1];
+					} 
+					rates.get(0).addAll(Collections.nCopies(MAX_REQUEST_LENGTH, buyRate));
+					rates.get(1).addAll(Collections.nCopies(MAX_REQUEST_LENGTH, sellRate));
+				}
+				finally{
 					buyRates.addAll(rates.get(0));
 					sellRates.addAll(rates.get(1));
-					break;
+					iteration++;
 				}
 			}
 			
@@ -275,8 +281,8 @@ public class RateCollector implements SessionDependent{
 	}
 	
 	private double getMaxRangeByWindow(int windowLength){
-		double rangeBuy = ArrayUtils.getMaxRangeByWindowNaive(buyRates.toArray(new Double[length]), 300);
-		double rangeSell = ArrayUtils.getMaxRangeByWindowNaive(sellRates.toArray(new Double[length]), 300);
+		double rangeBuy = ArrayUtils.getMaxRangeByWindowNaive(buyRates.toArray(new Double[length]), windowLength);
+		double rangeSell = ArrayUtils.getMaxRangeByWindowNaive(sellRates.toArray(new Double[length]), windowLength);
 		if(rangeBuy > rangeSell){
 			return rangeBuy;
 		}

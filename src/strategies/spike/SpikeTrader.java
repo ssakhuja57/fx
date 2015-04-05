@@ -33,7 +33,7 @@ public class SpikeTrader implements SessionHolder{
 	private int spikeBufferFloor = 10;
 	private int spikeBufferCeiling = 18;
 	
-	private boolean dataCollect = true;
+	private boolean dataCollect = false;
 	private int dataCollectLength = 1800;
 	
 	private double accountUtilization;
