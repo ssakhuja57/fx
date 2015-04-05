@@ -98,10 +98,17 @@ public class RateCollector implements SessionDependent{
 	private void initialFill(){
 		
 		if(length <= MAX_REQUEST_LENGTH){
-			buyRates.addAll(RateHistory.getTickData(sm, pair, length, "buy"));
-			sellRates.addAll(RateHistory.getTickData(sm, pair, length, "sell"));
-			//highRates.addAll(RateHistory.getTickData(sm, pair, length, "high"));
-			//lowRates.addAll(RateHistory.getTickData(sm, pair, length, "low"));
+			try {
+				buyRates.addAll(RateHistory.getTickData(sm, pair, length, "buy"));
+				sellRates.addAll(RateHistory.getTickData(sm, pair, length, "sell"));
+				//highRates.addAll(RateHistory.getTickData(sm, pair, length, "high"));
+				//lowRates.addAll(RateHistory.getTickData(sm, pair, length, "low"));
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				buyRates.addAll(Collections.nCopies(length, sm.offersTable.getBuyRate(pair)));
+				sellRates.addAll(Collections.nCopies(length, sm.offersTable.getSellRate(pair)));
+			}
 		}
 		else{
 			final int iterations = (int)(length/MAX_REQUEST_LENGTH);
@@ -113,25 +120,46 @@ public class RateCollector implements SessionDependent{
 				startPart.setTime(endPart.getTime()); startPart.add(Calendar.SECOND, 1);
 				endPart.setTime(startPart.getTime()); endPart.add(Calendar.SECOND, MAX_REQUEST_LENGTH - 1);
 				
-				ArrayList<ArrayList<Double>> rates = RateHistory.getSnapshot(sm, pair, "t1", startPart, endPart);
-				int ratesSize = rates.get(0).size();
-				if(ratesSize < MAX_REQUEST_LENGTH){ // if requesting rates for time when trading is closed, you will not retrieve the number of rates requested
-					rates.get(0).addAll(Collections.nCopies(MAX_REQUEST_LENGTH - ratesSize, rates.get(0).get(ratesSize-1)));
-					rates.get(1).addAll(Collections.nCopies(MAX_REQUEST_LENGTH - ratesSize, rates.get(1).get(ratesSize-1)));
+				ArrayList<ArrayList<Double>> rates = null;
+				try {
+					rates = RateHistory.getSnapshot(sm, pair, "t1", startPart, endPart); //throws the exceptions
+					int ratesSize = rates.get(0).size();
+					if(ratesSize < MAX_REQUEST_LENGTH){ // if requesting rates for time when trading is closed, you will not retrieve the number of rates requested
+						rates.get(0).addAll(Collections.nCopies(MAX_REQUEST_LENGTH - ratesSize, rates.get(0).get(ratesSize-1)));
+						rates.get(1).addAll(Collections.nCopies(MAX_REQUEST_LENGTH - ratesSize, rates.get(1).get(ratesSize-1)));
+					}
+					buyRates.addAll(rates.get(0));
+					sellRates.addAll(rates.get(1));
+			
+					iteration++;
+					
+				} catch (IllegalArgumentException e) {
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					rates = new ArrayList<ArrayList<Double>>();
+					rates.add(new ArrayList<Double>()); rates.add(new ArrayList<Double>());
+					rates.get(0).addAll(Collections.nCopies(length - buyRates.size(), sm.offersTable.getBuyRate(pair)));
+					rates.get(1).addAll(Collections.nCopies(length - sellRates.size(), sm.offersTable.getSellRate(pair)));
+					buyRates.addAll(rates.get(0));
+					sellRates.addAll(rates.get(1));
+					break;
 				}
-				buyRates.addAll(rates.get(0));
-				sellRates.addAll(rates.get(1));
-		
-				iteration++;
 			}
 			
 			startPart.setTime(endPart.getTime()); startPart.add(Calendar.SECOND, 1);
-			ArrayList<ArrayList<Double>> extras = RateHistory.getSnapshot(sm, pair, "t1", startPart, DateUtils.getUTCTime());
-			buyRates.addAll(extras.get(0));
-			sellRates.addAll(extras.get(1));
-			for (int i=0; i < extras.get(0).size(); i++){ // to keep the size equal to length
-				buyRates.remove();
-				sellRates.remove();
+			ArrayList<ArrayList<Double>> extras = null;
+			try {
+				extras = RateHistory.getSnapshot(sm, pair, "t1", startPart, DateUtils.getUTCTime());
+				buyRates.addAll(extras.get(0));
+				sellRates.addAll(extras.get(1));
+				for (int i=0; i < extras.get(0).size(); i++){ // to keep the size equal to length
+					buyRates.remove();
+					sellRates.remove();
+				}
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				
 			}
 		}
 

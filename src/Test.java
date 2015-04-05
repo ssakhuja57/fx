@@ -30,6 +30,12 @@ public class Test {
 				System.out.println(d);
 			}
 
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} finally{
 			try {
 				Thread.currentThread().sleep(2000);

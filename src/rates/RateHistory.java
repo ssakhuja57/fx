@@ -23,7 +23,8 @@ import com.fxcore2.O2GTimeframeCollection;
 public class RateHistory {
 	
 	
-	public static Collection<Double> getTickData(SessionManager sm, String pair, int lastN, String type){
+	public static Collection<Double> getTickData(SessionManager sm, String pair, int lastN, String type) 
+			throws IllegalArgumentException, IllegalAccessException{
 		
 		O2GMarketDataSnapshotResponseReader marketSnapshotReader = null;
 		marketSnapshotReader = getData(sm, pair, "t1", null, null, lastN);
@@ -53,7 +54,7 @@ public class RateHistory {
 	}
 	
 	public static ArrayList<ArrayList<Double>> getSnapshot(SessionManager sm, String pair, String interval,
-			Calendar startTime, Calendar endTime){
+			Calendar startTime, Calendar endTime) throws IllegalArgumentException, IllegalAccessException{
 		O2GMarketDataSnapshotResponseReader snapshotReader = getData(sm, pair, interval, startTime, endTime, 1000);
 		ArrayList<Double> buys = new ArrayList<Double>();
 		ArrayList<Double> sells = new ArrayList<Double>();
@@ -69,7 +70,7 @@ public class RateHistory {
 	}
 	
 	public static LinkedHashMap<Calendar, double[]> getSnapshotMap(SessionManager sm, String pair, String interval, 
-			String startTimeString, String endTimeString) throws ParseException{
+			String startTimeString, String endTimeString) throws ParseException, IllegalArgumentException, IllegalAccessException{
 		
 		Calendar startTime = Calendar.getInstance(); 
 		startTime.setTime((new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.ENGLISH)).parse(startTimeString));
@@ -82,7 +83,7 @@ public class RateHistory {
 	}
 	
 	public static LinkedHashMap<Calendar, double[]> getSnapshotMap(SessionManager sm, String pair, String interval, 
-			Calendar startTime, Calendar endTime){
+			Calendar startTime, Calendar endTime) throws IllegalArgumentException, IllegalAccessException{
 
 		O2GMarketDataSnapshotResponseReader snapshotReader = getData(sm, pair, interval, startTime, endTime, 1000);
 		LinkedHashMap<Calendar, double[]> res = new LinkedHashMap<Calendar, double[]>();
@@ -94,7 +95,7 @@ public class RateHistory {
 	}
 	
 	private static O2GMarketDataSnapshotResponseReader getData(SessionManager sm, String pair, String interval,
-			Calendar startTime, Calendar endTime, int lastN){
+			Calendar startTime, Calendar endTime, int lastN) throws IllegalArgumentException, IllegalAccessException{
 		if(endTime != null && !endTime.after(startTime)){
 			throw new IllegalArgumentException("end time must be after start time");
 		}
@@ -109,6 +110,9 @@ public class RateHistory {
 		session.sendRequest(marketDataRequest);
 		O2GResponseReaderFactory readerFactory = session.getResponseReaderFactory();
 		O2GResponse response = sm.responseListener.getResponse(requestID, 2, "data request for " + pair ); //+ " --- " + startTime.getTime().toString() + " --- " + endTime.getTime().toString());
+		if (response == null){
+			throw new IllegalAccessException("there is no data available for this time period");
+		}
 		return readerFactory.createMarketDataSnapshotReader(response);
 	}
 	
