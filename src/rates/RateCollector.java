@@ -28,7 +28,7 @@ public class RateCollector implements SessionDependent{
 	private Timer timer;
 	
 	private double maxWindowRange;
-	private Thread maxWindowRangeUpdater;
+	private Timer maxWindowRangeUpdater;
 
 	private ConcurrentLinkedQueue<Double> buyRates;
 	private ConcurrentLinkedQueue<Double> sellRates;
@@ -70,8 +70,8 @@ public class RateCollector implements SessionDependent{
 			timer = new Timer();
 			timer.schedule(new Update(), 0, frequency*1000);
 			
-			maxWindowRangeUpdater = new Thread(new WindowRangeUpdater());
-			maxWindowRangeUpdater.run();
+			maxWindowRangeUpdater = new Timer();
+			maxWindowRangeUpdater.schedule(new WindowRangeUpdater(), 0, 1000);
 			
 			isActive = true;
 
@@ -173,7 +173,7 @@ public class RateCollector implements SessionDependent{
 		System.out.println("rate collector for " + pair + " initialized with " + buyRates.size() + " ticks");
 	}
 	
-	private class WindowRangeUpdater implements Runnable{
+	private class WindowRangeUpdater extends TimerTask{
 		@Override
 		public void run() {
 			while(isActive){
@@ -299,7 +299,7 @@ public class RateCollector implements SessionDependent{
 		System.out.println("cancelling rate collector for " + pair);
 		timer.cancel();
 		isActive = false;
-		maxWindowRangeUpdater.interrupt();
+		maxWindowRangeUpdater.cancel();
 	}
 	
 	
