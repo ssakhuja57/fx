@@ -6,7 +6,6 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.util.Properties;
 
 import javax.swing.BorderFactory;
@@ -18,9 +17,8 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import org.apache.derby.iapi.services.io.FileUtil;
-
 import utils.FileUtils;
+import utils.Logger;
 
 public class SessionLoginUI extends JFrame{
 
@@ -98,7 +96,7 @@ public class SessionLoginUI extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				if(!checkFields()){
-					System.out.println("Need to specify all mandatory fields");
+					Logger.error("Need to specify all mandatory fields");
 					return;
 				}
 				String account2_check = account2.getText().equals("") ? account1.getText() : account2.getText();

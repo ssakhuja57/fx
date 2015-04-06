@@ -14,6 +14,7 @@ import tables.Offers;
 import tables.Orders;
 import tables.Summaries;
 import tables.Trades;
+import utils.Logger;
 import actions.PositionActions;
 
 import com.fxcore2.Constants;
@@ -136,7 +137,7 @@ public class SessionManager {
 	public String closeTrade(String pair, String buySell) throws InterruptedException{
 		O2GTradeTableRow trade = tradesTable.getTradeRow(pair, buySell);
 		if (trade == null){
-			System.out.println("No open positions found for " + pair + ":" + buySell);
+			Logger.error("No open positions found for " + pair + ":" + buySell);
 			return null;
 		}
 		String requestID = PositionActions.closeTrade(this, trade.getAccountID(), trade.getTradeID(), 

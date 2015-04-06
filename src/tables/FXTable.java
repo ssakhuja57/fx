@@ -1,5 +1,6 @@
 package tables;
 
+import utils.Logger;
 import info.Pairs;
 
 import com.fxcore2.IO2GEachRowListener;
@@ -39,7 +40,7 @@ public abstract class FXTable<TableClass extends O2GTable, TableRowClass extends
     // Print table using IO2GEachRowListener
     public void printTable() {
     	if (table.size() == 0)
-            System.out.println("Table " + table.getType() + " is empty!");
+            Logger.error("Table " + table.getType() + " is empty!");
         else {
             table.forEachRow(new EachRowListenerPrint());
         }
@@ -53,9 +54,8 @@ public abstract class FXTable<TableClass extends O2GTable, TableRowClass extends
 	        O2GTableColumnCollection collection = rowData.getColumns();
 	        for (int i = 0; i < collection.size(); i++) {
 	           O2GTableColumn column = collection.get(i);
-	           System.out.print(column.getId() + "=" + rowData.getCell(i) + ";");
+	           Logger.debug(column.getId() + "=" + rowData.getCell(i) + ";");
 	        }
-	        System.out.println();
 		}
 	}
 	

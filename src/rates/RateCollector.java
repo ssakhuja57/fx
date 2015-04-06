@@ -14,6 +14,7 @@ import session.SessionDependent;
 import session.SessionManager;
 import utils.ArrayUtils;
 import utils.DateUtils;
+import utils.Logger;
 
 public class RateCollector implements SessionDependent{
 	
@@ -170,7 +171,7 @@ public class RateCollector implements SessionDependent{
 		}
 
 		updatesCounter += length;
-		System.out.println("rate collector for " + pair + " initialized with " + buyRates.size() + " ticks");
+		Logger.debug("rate collector for " + pair + " initialized with " + buyRates.size() + " ticks");
 	}
 	
 	private class WindowRangeUpdater extends TimerTask{
@@ -281,8 +282,8 @@ public class RateCollector implements SessionDependent{
 	}
 	
 	private double getMaxRangeByWindow(int windowLength){
-		double rangeBuy = ArrayUtils.getMaxRangeByWindowNaive(buyRates.toArray(new Double[length]), windowLength);
-		double rangeSell = ArrayUtils.getMaxRangeByWindowNaive(sellRates.toArray(new Double[length]), windowLength);
+		double rangeBuy = ArrayUtils.getMaxRangeByWindow(buyRates.toArray(new Double[length]), windowLength);
+		double rangeSell = ArrayUtils.getMaxRangeByWindow(sellRates.toArray(new Double[length]), windowLength);
 		if(rangeBuy > rangeSell){
 			return rangeBuy;
 		}
@@ -296,7 +297,7 @@ public class RateCollector implements SessionDependent{
 	
 	@Override
 	public void end(){
-		System.out.println("cancelling rate collector for " + pair);
+		Logger.debug("cancelling rate collector for " + pair);
 		timer.cancel();
 		isActive = false;
 		maxWindowRangeUpdater.cancel();
