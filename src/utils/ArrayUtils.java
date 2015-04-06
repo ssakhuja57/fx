@@ -1,5 +1,9 @@
 package utils;
 
+import java.util.Comparator;
+
+import com.google.common.collect.MinMaxPriorityQueue;
+
 
 public class ArrayUtils {
 
@@ -78,6 +82,48 @@ public class ArrayUtils {
 		return range;
 	}
 	
+	public static double getMaxRangeByWindow(Double[] array, int windowSize){
+		int length = array.length;
+		if(windowSize > length){
+			throw new IllegalArgumentException("window size cannot be larger than array size");
+		}
+		MinMaxPriorityQueue<Double> heap = MinMaxPriorityQueue
+											.maximumSize(windowSize)
+											.expectedSize(windowSize)
+											.create();
+		for(int i=0; i < windowSize; i++){
+			heap.add(array[i]);
+		}
+		double maxRange = 0;
+		int windowStart = 0;;
+		for(int j=0; j < length - windowSize + 1; j++){
+			double range = heap.peekLast() - heap.peekFirst();
+			
+//			for(int x=windowStart; x < windowStart + windowSize; x++){
+//				System.out.print(array[x] + "  ");
+//			}
+			for(Double d: heap){
+				System.out.print(d + "  ");
+			}
+			System.out.print("range = " + range);
+			if (range > maxRange) System.out.print("*");
+			System.out.println();
+			
+			if (range > maxRange) maxRange = range;
+				
+			heap.remove(array[windowStart]);
+			try{
+				heap.add(array[windowStart + windowSize]);
+			} catch(ArrayIndexOutOfBoundsException e){
+				break;
+			}
+			windowStart++;
+		}
+		
+		return maxRange;
+	}
+	
+	
 //	public static getMaxRangeByWindow(double[] array, int windowLength){
 //		double[] extrema = getMinMax2(Arrays.copyOfRange(array, 0, windowLength));
 //		double min = array[0];
@@ -93,5 +139,10 @@ public class ArrayUtils {
 //		}
 //		
 //	}
+	
+	public static void main(String[] args){
+		Double[] arr = new Double[]{ 3.0, 1.2, 1.3, -1.4, 1.5, 1.6, 1.7, 1.8, 11.9, 0.0 };
+		System.out.println(getMaxRangeByWindow(arr, 3));
+	}
 
 }

@@ -281,8 +281,8 @@ public class RateCollector implements SessionDependent{
 	}
 	
 	private double getMaxRangeByWindow(int windowLength){
-		double rangeBuy = ArrayUtils.getMaxRangeByWindowNaive(buyRates.toArray(new Double[length]), windowLength);
-		double rangeSell = ArrayUtils.getMaxRangeByWindowNaive(sellRates.toArray(new Double[length]), windowLength);
+		double rangeBuy = ArrayUtils.getMaxRangeByWindow(buyRates.toArray(new Double[length]), windowLength);
+		double rangeSell = ArrayUtils.getMaxRangeByWindow(sellRates.toArray(new Double[length]), windowLength);
 		if(rangeBuy > rangeSell){
 			return rangeBuy;
 		}
