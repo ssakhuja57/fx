@@ -1,4 +1,6 @@
 package listeners;
+import utils.Logger;
+
 import com.fxcore2.IO2GSessionStatus;
 import com.fxcore2.O2GSessionStatusCode;
 
@@ -9,14 +11,14 @@ public class SessionStatusListener implements IO2GSessionStatus{
 	
 	@Override
 	public void onLoginFailed(String arg0) {
-		System.out.println("Unable to login:");
-		System.out.println(arg0);
+		Logger.error("Unable to login:");
+		Logger.error(arg0);
 	}
 
 	@Override
 	public void onSessionStatusChanged(O2GSessionStatusCode statusCode) {
 		sessionStatus = statusCode.name().toString();
-		System.out.println(statusCode.name().toString());
+		Logger.info(statusCode.name().toString());
 	}
 	
 	public boolean waitForLogin(){

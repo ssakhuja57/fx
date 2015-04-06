@@ -1,7 +1,5 @@
 package db;
 
-import info.Pairs;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -9,6 +7,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedList;
+
+import utils.Logger;
 
 public class DBManager {
 	
@@ -25,7 +25,7 @@ public class DBManager {
 			    
 				String url = "jdbc:derby:" + project_location + db;
 				conn = DriverManager.getConnection(url);
-				System.out.println("Connected to " + db);
+				Logger.info("Connected to " + db);
 			} catch (ClassNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -36,7 +36,7 @@ public class DBManager {
 	}
 	
 	public void close(){
-		System.out.println("Disconnecting from " + db);
+		Logger.info("Disconnecting from " + db);
 		try {
 			conn.close();
 			String url = "jdbc:derby:;shutdown=true";

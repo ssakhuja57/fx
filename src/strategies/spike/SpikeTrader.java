@@ -15,6 +15,7 @@ import rates.RateCollector;
 import rates.RateTools;
 import session.SessionHolder;
 import session.SessionManager;
+import utils.Logger;
 
 import com.fxcore2.Constants;
 
@@ -118,7 +119,7 @@ public class SpikeTrader implements SessionHolder{
 	private class AutoStartTask extends TimerTask{
 		@Override
 		public void run(){
-			System.out.println("reached auto start time, placing orders");
+			Logger.info("reached auto start time, placing orders");
 			if(params.size() == 0){
 				recalculateParams();
 			}
@@ -130,7 +131,7 @@ public class SpikeTrader implements SessionHolder{
 	private class ExpirationTask extends TimerTask{
 		@Override
 		public void run() {
-			System.out.println("reached expiration time of " + expireAfter + " seconds after Event Date");
+			Logger.info("reached expiration time of " + expireAfter + " seconds after Event Date");
 			stop();
 			close();
 		}
@@ -158,7 +159,7 @@ public class SpikeTrader implements SessionHolder{
 		@Override
 		public void run() {
 			if(secondsDiff(Calendar.getInstance(), eventDate) <= recalibrateUntil){
-				System.out.println("ending recalibrator since " + Calendar.getInstance().getTime().toString() + " is within "
+				Logger.info("ending recalibrator since " + Calendar.getInstance().getTime().toString() + " is within "
 						+ recalibrateUntil + " seconds of Event Date " + eventDate.getTime().toString());
 				recalibrator.cancel();
 			}
@@ -167,7 +168,7 @@ public class SpikeTrader implements SessionHolder{
 				for (String pair: pairs){
 					if(recalibrateParams.get(pair)){
 						int spikeBuffer = (int)rateCollectors.get(pair).getMaxWindowRange();
-						System.out.println(pair + ": buffer calculated = " + spikeBuffer);
+						Logger.debug(pair + ": buffer calculated = " + spikeBuffer);
 						if(spikeBuffer < spikeBufferFloor) spikeBuffer = spikeBufferFloor;
 						else if(spikeBuffer > spikeBufferCeiling) spikeBuffer = spikeBufferCeiling;
 						setParam(pair, 1, spikeBuffer);
@@ -216,8 +217,8 @@ public class SpikeTrader implements SessionHolder{
 		}
 	}
 	
-	public void printIsRunning(){
-		System.out.println("this spike trader instance is currently running, you must cancel before you" +
+	public void logIsRunning(){
+		Logger.error("this spike trader instance is currently running, you must cancel before you" +
 				" can make changes");
 	}
 	
@@ -284,11 +285,11 @@ public class SpikeTrader implements SessionHolder{
 		//int pairsCount = pairs.size();
 		
 		for (String pair: pairs){
-			System.out.println("calculating values for " + pair);
+			Logger.debug("calculating values for " + pair);
 			//double pipCost = sm.offersTable.getPipCost(pair);
 			//int lots = (int)((accountBalance*accountUtilization*pipCost)/(Math.pow(mmr, 2.0)*sum_pc_mmr));
 			int lots = (int)((accountBalance*accountUtilization)/(sum_mmr));
-			System.out.println("setting lots to " + lots + "K");
+			Logger.debug("setting lots to " + lots + "K");
 			
 			int spikeBuffer = defSpikeBuffer;
 			if(dataCollect){
@@ -297,19 +298,19 @@ public class SpikeTrader implements SessionHolder{
 				if(buyDiff > defSpikeBuffer || sellDiff > defSpikeBuffer){
 					if(sellDiff > buyDiff){
 						spikeBuffer = sellDiff;
-						System.out.println("setting spike buffer to sell diff of " + spikeBuffer);
+						Logger.debug("setting spike buffer to sell diff of " + spikeBuffer);
 					}
 					else{
 						spikeBuffer = buyDiff;
-						System.out.println("setting spike buffer to buy diff of " + spikeBuffer);
+						Logger.debug("setting spike buffer to buy diff of " + spikeBuffer);
 					}
 				}
 				else{
-					System.out.println("setting spike buffer to default value of " + spikeBuffer);
+					Logger.debug("setting spike buffer to default value of " + spikeBuffer);
 				}
 			}
 			else{
-				System.out.println("setting spike buffer to default value of " + spikeBuffer);
+				Logger.debug("setting spike buffer to default value of " + spikeBuffer);
 			}
 			
 			int stopBuffer = defStopBuffer;
@@ -338,7 +339,7 @@ public class SpikeTrader implements SessionHolder{
 			try{
 				sm.adjustOpposingOCOEntryOrders(pair, params.get(pair)[1]);
 			} catch(NullPointerException e){
-				System.out.println("Unable to recalibrate for " + pair + ", can't find OCO orders related to it");
+				Logger.error("Unable to recalibrate for " + pair + ", can't find OCO orders related to it");
 			}
 		}
 	}
@@ -350,10 +351,10 @@ public class SpikeTrader implements SessionHolder{
 	
 	public void setParams(String pair, int lots, int spikeBuffer, int stopBuffer){
 		if(isActive){
-			printIsRunning();
+			logIsRunning();
 			return;
 		}
-		System.out.println("Setting parameters for " + pair + ": lots=" + lots + "K, SpikeBuffer=" 
+		Logger.info("Setting parameters for " + pair + ": lots=" + lots + "K, SpikeBuffer=" 
 				+ spikeBuffer + "pips, StopBuffer=" + stopBuffer + "pips");
 		params.put(pair, new Integer[]{lots*1000, spikeBuffer, stopBuffer});
 	}
@@ -369,7 +370,7 @@ public class SpikeTrader implements SessionHolder{
 			startRecalibrator();
 		}
 		else{
-			printIsRunning();
+			logIsRunning();
 		}
 	}
 	

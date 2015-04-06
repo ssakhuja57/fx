@@ -3,6 +3,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import utils.Logger;
+
 import com.fxcore2.IO2GResponseListener;
 import com.fxcore2.O2GResponse;
 
@@ -36,8 +38,8 @@ public class ResponseListener implements IO2GResponseListener{
 		}
 		requestsFailed.add(requestID);
 		requestsPending.remove(requestID);
-		System.out.println("Request Failed with:");
-		System.out.println(error);
+		Logger.error("Request Failed with:");
+		Logger.error(error);
 		
 	}
 	
@@ -73,15 +75,15 @@ public class ResponseListener implements IO2GResponseListener{
 				Thread.currentThread().sleep(100);
 				O2GResponse response = responses.get(requestID);
 				if(response != null){
-					System.out.println("received response (in " + i*0.1 + " sec): " + description);
+					Logger.debug("received response (in " + i*0.1 + " sec): " + description);
 					return response;
 				}
 				if(requestsFailed.contains(requestID)){
 					return null;
 				}
-				System.out.println("waiting for response: " + description);
+				Logger.debug("waiting for response: " + description);
 			} catch (NullPointerException e){
-				System.out.println("waiting for response: " + description);
+				Logger.debug("waiting for response: " + description);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

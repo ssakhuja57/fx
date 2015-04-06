@@ -35,6 +35,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.TableModel;
 
 import session.SessionLoginUI;
+import utils.Logger;
 
 public class SpikeTraderUI extends JFrame{
 	
@@ -333,7 +334,7 @@ public class SpikeTraderUI extends JFrame{
 		public void actionPerformed(ActionEvent e) {
 			saveParams.setEnabled(false);
 			if(spikeTrader.isActive()){
-				spikeTrader.printIsRunning();
+				spikeTrader.logIsRunning();
 			}
 			else{	
 				boolean valueErrors = false;
@@ -349,7 +350,7 @@ public class SpikeTraderUI extends JFrame{
 						spikeBuffer = !paramsSet[1].getText().equals("") ? Integer.parseInt(paramsSet[1].getText()) : Integer.parseInt(defSpikeBuffer.getText());
 						stopBuffer = !paramsSet[2].getText().equals("") ? Integer.parseInt(paramsSet[2].getText()) : Integer.parseInt(defStopBuffer.getText());
 					} catch (NumberFormatException nfe){
-						System.out.println("value error for " + pair + " or default value not set");
+						Logger.error("value error for " + pair + " or default value not set");
 						valueErrors = true;
 					}
 					

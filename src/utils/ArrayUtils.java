@@ -142,7 +142,7 @@ public class ArrayUtils {
 	
 	public static void main(String[] args){
 		Double[] arr = new Double[]{ 3.0, 1.2, 1.3, -1.4, 1.5, 1.6, 1.7, 1.8, 11.9, 0.0 };
-		System.out.println(getMaxRangeByWindow(arr, 3));
+		Logger.info(getMaxRangeByWindow(arr, 3) + "");
 	}
 
 }

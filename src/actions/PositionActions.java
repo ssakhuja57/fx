@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import listeners.ResponseListener;
 import session.SessionManager;
+import utils.Logger;
 
 import com.fxcore2.Constants;
 import com.fxcore2.O2GAccountRow;
@@ -31,7 +32,7 @@ public class PositionActions {
 	        
 	        valuemap.setString(O2GRequestParamsEnum.ORDER_TYPE, Constants.Orders.TrueMarketOpen);
 	        
-	        System.out.println("creating market order for " + pair + " of amount " + amount/1000 + "K and type " + buySell);
+	        Logger.info("creating market order for " + pair + " of amount " + amount/1000 + "K and type " + buySell);
 	        
 	        return createOrder(sessionMgr, valuemap, responseListener);
 	    }
@@ -52,7 +53,7 @@ public class PositionActions {
 	        if(trailStop){
 	        	valuemap.setInt(O2GRequestParamsEnum.TRAIL_STEP_STOP, 1);
 	        }
-	        System.out.println("Creating entry order on " + pair + "of amount " + amount/1000 + "K of type " + buySell + " with stop offset of "
+	        Logger.info("Creating entry order on " + pair + "of amount " + amount/1000 + "K of type " + buySell + " with stop offset of "
 	        		+ stopOffset + (trailStop ? " with trail" : ""));
 	        
 	        return createOrder(sessionMgr, valuemap, responseListener);
@@ -83,7 +84,7 @@ public class PositionActions {
 	        parentValueMap.appendChild(buyMap);
 	        parentValueMap.appendChild(sellMap);
 	        
-	        System.out.println("OCO orders on " + pair + " of amount " + amount/1000 + "K with long at " + longRate + ", short at " + shortRate
+	        Logger.info("OCO orders on " + pair + " of amount " + amount/1000 + "K with long at " + longRate + ", short at " + shortRate
 	        		+ " and stop offset of " + stopOffset);
 	        
 	        return createOrder(sessionMgr, parentValueMap, responseListener);
@@ -116,7 +117,7 @@ public class PositionActions {
 		
 		   String oppositeBuySell = buySell.equals(Constants.Buy) ? Constants.Sell : Constants.Buy; 
 
-		   System.out.println("Close requested for " + pair + ":" + buySell + " at amount " + amount + " on account " + accountID);
+		   Logger.info("Close requested for " + pair + ":" + buySell + " at amount " + amount + " on account " + accountID);
 		
 	        return createMarketOrder(sessionMgr, accountID, pair, oppositeBuySell, amount, responseListener);
 	   }
@@ -149,7 +150,7 @@ public class PositionActions {
 	   }
 	   
 	   public static void cancelAllOCOOrders(SessionManager sessionMgr, ResponseListener responseListener) throws InterruptedException{
-		   System.out.println("cancelling all OCO orders");
+		   Logger.info("cancelling all OCO orders");
 		   for (String[] ids: sessionMgr.ordersTable.getAllOCOOrderIDs()){
 			   cancelOrder(sessionMgr, ids[0], ids[1], responseListener);
 		   }
@@ -157,15 +158,17 @@ public class PositionActions {
 	   
 	   public static String setPairSubscription(SessionManager sessionMgr, String pair, String status, ResponseListener responseListener){
 		   
-		   if (status.equals("T")){
+		   if (status.equals(Constants.SubscriptionStatuses.Tradable)){
 			   int subscribed = sessionMgr.offersTable.getSubscriptionCount();
 			   int limit = sessionMgr.subscriptionLimit;
 			   if (subscribed >= limit){
-				   System.out.println("already subscribed to the set limit of " + limit);
-				   System.out.println("you must unsubscribe pairs first...");
+				   Logger.error("already subscribed to the set limit of " + limit);
+				   Logger.error("you must unsubscribe pairs first...");
 				   return null;
 			   }
 		   }
+		   
+		   Logger.info("Setting " + pair + " to " + status);
 		   
 		   O2GValueMap valuemap = getEmptyValMap(sessionMgr);
 	        valuemap.setString(O2GRequestParamsEnum.COMMAND, Constants.Commands.SetSubscriptionStatus);
@@ -176,7 +179,7 @@ public class PositionActions {
 	   }
 	   
 	   public static void removeAllPairSubscriptions(SessionManager sessionMgr, ResponseListener responseListener){
-		   System.out.println("unsubscribing from all pairs...");
+		   Logger.info("unsubscribing from all pairs...");
 		   for (String pair: Pairs.getAllPairs()){
 			   setPairSubscription(sessionMgr, pair, Constants.SubscriptionStatuses.Disable, responseListener);
 		   }
@@ -184,7 +187,7 @@ public class PositionActions {
 	   
 	   public static void setPairSubscriptionByCurrency(SessionManager sessionMgr, String[] currencies, ResponseListener responseListener){
 		   
-		   System.out.println("Setting all pairs related to " 
+		   Logger.info("Setting all pairs related to " 
 				   + currencies.toString() + " to tradable");
 		   Collection<String> pairs = Pairs.getRelatedPairs(currencies);
 		   for (String pair: pairs){
@@ -255,7 +258,7 @@ public class PositionActions {
 		            sessionMgr.session.sendRequest(request);
 		            return requestID;
 		        } else {
-		            System.out.println(reqFactory.getLastError());
+		            Logger.error(reqFactory.getLastError());
 		            return null;
 		        }
 		}

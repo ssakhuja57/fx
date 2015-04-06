@@ -14,6 +14,7 @@ import session.SessionDependent;
 import session.SessionManager;
 import utils.ArrayUtils;
 import utils.DateUtils;
+import utils.Logger;
 
 public class RateCollector implements SessionDependent{
 	
@@ -170,7 +171,7 @@ public class RateCollector implements SessionDependent{
 		}
 
 		updatesCounter += length;
-		System.out.println("rate collector for " + pair + " initialized with " + buyRates.size() + " ticks");
+		Logger.debug("rate collector for " + pair + " initialized with " + buyRates.size() + " ticks");
 	}
 	
 	private class WindowRangeUpdater implements Runnable{
@@ -296,7 +297,7 @@ public class RateCollector implements SessionDependent{
 	
 	@Override
 	public void end(){
-		System.out.println("cancelling rate collector for " + pair);
+		Logger.debug("cancelling rate collector for " + pair);
 		timer.cancel();
 		isActive = false;
 		maxWindowRangeUpdater.interrupt();
