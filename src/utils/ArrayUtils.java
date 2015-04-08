@@ -1,5 +1,6 @@
 package utils;
 
+import java.util.Arrays;
 import java.util.Comparator;
 
 import com.google.common.collect.MinMaxPriorityQueue;
@@ -99,15 +100,12 @@ public class ArrayUtils {
 		for(int j=0; j < length - windowSize + 1; j++){
 			double range = heap.peekLast() - heap.peekFirst();
 			
-//			for(int x=windowStart; x < windowStart + windowSize; x++){
-//				System.out.print(array[x] + "  ");
+//			for(Double d: heap){
+//				System.out.print(d + "  ");
 //			}
-			for(Double d: heap){
-				System.out.print(d + "  ");
-			}
-			System.out.print("range = " + range);
-			if (range > maxRange) System.out.print("*");
-			System.out.println();
+//			System.out.print("range = " + range);
+//			if (range > maxRange) System.out.print("*");
+//			System.out.println();
 			
 			if (range > maxRange) maxRange = range;
 				
@@ -141,8 +139,9 @@ public class ArrayUtils {
 //	}
 	
 	public static void main(String[] args){
-		Double[] arr = new Double[]{ 3.0, 1.2, 1.3, -1.4, 1.5, 1.6, 1.7, 1.8, 11.9, 0.0 };
-		Logger.info(getMaxRangeByWindow(arr, 3) + "");
+		Double[] arr = new Double[28000];
+		Arrays.fill(arr, 0.0);
+		Logger.info(getMaxRangeByWindow(arr, 300) + "");
 	}
 
 }

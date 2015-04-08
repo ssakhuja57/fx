@@ -15,7 +15,7 @@ import tables.Orders;
 import tables.Summaries;
 import tables.Trades;
 import utils.Logger;
-import actions.PositionActions;
+import actions.OrderActions;
 
 import com.fxcore2.Constants;
 import com.fxcore2.O2GOrderTableRow;
@@ -101,7 +101,7 @@ public class SessionManager {
 	
 	public String createMarketOrder(String pair, String buySell, int amount) throws InterruptedException{
 		String accountID = getAccountID(pair);
-		String requestID = PositionActions.createMarketOrder(this, accountID, pair, buySell, amount, responseListener);
+		String requestID = OrderActions.createMarketOrder(this, accountID, pair, buySell, amount, responseListener);
 		return requestID;
 		
 	}
@@ -109,7 +109,7 @@ public class SessionManager {
 	public String createEntryOrderWithStop(String pair, String buySell, int amount, double rate, 
 			int stopOffset, boolean trailStop) throws InterruptedException{
 		String accountID = getAccountID(pair);
-		String requestID = PositionActions.createEntryOrderWithStop(this, accountID, pair, buySell, amount, rate, 
+		String requestID = OrderActions.createEntryOrderWithStop(this, accountID, pair, buySell, amount, rate, 
 				stopOffset, trailStop, responseListener);
 		return requestID;
 	}
@@ -119,7 +119,7 @@ public class SessionManager {
 		String accountID = getAccountID(pair);
 		double longRate = RateTools.addPips(offersTable.getBuyRate(pair), pipBuffer);
 		double shortRate = RateTools.addPips(offersTable.getSellRate(pair), -pipBuffer);
-		String requestID = PositionActions.createOpposingOCOEntryOrdersWithStops(this, accountID, 
+		String requestID = OrderActions.createOpposingOCOEntryOrdersWithStops(this, accountID, 
 				pair, amount, longRate, shortRate, stopOffset, trailStop, responseListener);
 		return requestID;
 	}
@@ -130,7 +130,7 @@ public class SessionManager {
 		String shortOrderID = ordersTable.getOCOOrderIDs(pair, Constants.Sell)[1];
 		double newLongRate = RateTools.addPips(offersTable.getBuyRate(pair), pipBuffer);
 		double newShortRate = RateTools.addPips(offersTable.getSellRate(pair), -pipBuffer);
-		PositionActions.adjustOpposingOCOEntryOrders(this, accountID, longOrderID, newLongRate, 
+		OrderActions.adjustOpposingOCOEntryOrders(this, accountID, longOrderID, newLongRate, 
 				shortOrderID, newShortRate, responseListener);
 	}
 	
@@ -140,35 +140,35 @@ public class SessionManager {
 			Logger.error("No open positions found for " + pair + ":" + buySell);
 			return null;
 		}
-		String requestID = PositionActions.closeTrade(this, trade.getAccountID(), trade.getTradeID(), 
+		String requestID = OrderActions.closeTrade(this, trade.getAccountID(), trade.getTradeID(), 
 				pair, buySell, trade.getAmount(), responseListener);
 		return requestID;
 	}
 	
 	public String cancelOrder(String pair, String buySell) throws InterruptedException{
 		O2GOrderTableRow order = ordersTable.getTradeRow(pair, buySell);
-		String requestID = PositionActions.cancelOrder(this, order.getAccountID(), order.getOrderID(), responseListener);
+		String requestID = OrderActions.cancelOrder(this, order.getAccountID(), order.getOrderID(), responseListener);
 		return requestID;
 	}
 	
 	public void cancelAllOCOOrders() throws InterruptedException{
-		PositionActions.cancelAllOCOOrders(this, responseListener);
+		OrderActions.cancelAllOCOOrders(this, responseListener);
 	}
 	
 	public String setPairSubscription(String pair, String status){
-		return PositionActions.setPairSubscription(this, pair, status, responseListener);
+		return OrderActions.setPairSubscription(this, pair, status, responseListener);
 	}
 	
 	public void removeAllPairSubscriptions(){
-		PositionActions.removeAllPairSubscriptions(this, responseListener);
+		OrderActions.removeAllPairSubscriptions(this, responseListener);
 	}
 
 	public void updateMarginsReqs(){
-		PositionActions.updateMarginRequirements(this, responseListener);
+		OrderActions.updateMarginRequirements(this, responseListener);
 	}
 	
 	public double[] getMarginReqs(String pair){
-		return PositionActions.getMarginRequirements(this, pair);
+		return OrderActions.getMarginRequirements(this, pair);
 	}
 	
 	public String getAccountID(String pair){

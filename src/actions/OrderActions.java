@@ -4,6 +4,7 @@ import info.Pairs;
 import java.util.Collection;
 
 import listeners.ResponseListener;
+import rates.RateTools;
 import session.SessionManager;
 import utils.Logger;
 
@@ -22,7 +23,7 @@ import com.fxcore2.O2GTradingSettingsProvider;
 import com.fxcore2.O2GValueMap;
 
 
-public class PositionActions {
+public class OrderActions {
 	
 	
 	   public static String createMarketOrder(SessionManager sessionMgr, String accountID, String pair, String buySell, 
@@ -66,6 +67,9 @@ public class PositionActions {
 		   
 		   O2GValueMap buyMap = getDefaultValMap(sessionMgr, accountID, pair, Constants.Buy, amount);
 	        buyMap.setString(O2GRequestParamsEnum.ORDER_TYPE, Constants.Orders.StopEntry);
+		   //buyMap.setString(O2GRequestParamsEnum.ORDER_TYPE, "OR");
+		   //buyMap.setDouble(O2GRequestParamsEnum.RATE_MIN, RateTools.addPips(longRate, -10));//
+	       //buyMap.setDouble(O2GRequestParamsEnum.RATE_MAX, RateTools.addPips(longRate, 10));//
 	        buyMap.setString(O2GRequestParamsEnum.PEG_TYPE_STOP, Constants.Peg.FromClose);
 	        buyMap.setInt(O2GRequestParamsEnum.PEG_OFFSET_STOP, -stopOffset);
 	        buyMap.setDouble(O2GRequestParamsEnum.RATE, longRate);
@@ -74,6 +78,9 @@ public class PositionActions {
 	        }
 	       O2GValueMap sellMap = getDefaultValMap(sessionMgr, accountID, pair, Constants.Sell, amount);
 	        sellMap.setString(O2GRequestParamsEnum.ORDER_TYPE, Constants.Orders.StopEntry);
+	       //sellMap.setString(O2GRequestParamsEnum.ORDER_TYPE, "OR");
+	       //sellMap.setDouble(O2GRequestParamsEnum.RATE_MIN, RateTools.addPips(shortRate, -10));//
+	       //sellMap.setDouble(O2GRequestParamsEnum.RATE_MAX, RateTools.addPips(shortRate, 10));//
 	        sellMap.setString(O2GRequestParamsEnum.PEG_TYPE_STOP, Constants.Peg.FromClose);
 	        sellMap.setInt(O2GRequestParamsEnum.PEG_OFFSET_STOP, stopOffset);
 	        sellMap.setDouble(O2GRequestParamsEnum.RATE, shortRate);

@@ -72,7 +72,7 @@ public class RateCollector implements SessionDependent{
 			timer.schedule(new Update(), 0, frequency*1000);
 			
 			maxWindowRangeUpdater = new Timer();
-			maxWindowRangeUpdater.schedule(new WindowRangeUpdater(), 0, 1000);
+			maxWindowRangeUpdater.schedule(new WindowRangeUpdater(), 0, 5000);
 			
 			isActive = true;
 

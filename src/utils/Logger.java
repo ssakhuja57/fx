@@ -2,7 +2,7 @@ package utils;
 
 public class Logger {
 	
-	public static LogModes logModeSet = LogModes.INFO;
+	public static LogModes logModeSet = LogModes.DEBUG;
 	
 	
 	public static void info(String msg){
