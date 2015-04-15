@@ -1,9 +1,13 @@
 package utils;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class Logger {
 	
 	public static LogModes logModeSet = LogModes.DEBUG;
-	
+	private final static DateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
 	
 	public static void info(String msg){
 		log(msg, LogModes.INFO);
@@ -19,7 +23,7 @@ public class Logger {
 	
 	private static void log(String msg, LogModes logMode){
 		if(logMode.value <= logModeSet.value){
-			System.out.println(logMode.name + " - " + msg);
+			System.out.println(timeFormat.format(new Date()) + " - " + logMode.name + " - " + msg);
 		}
 	}
 	
