@@ -27,16 +27,16 @@ public class Pairs {
 		attributes.put("GBP/CHF", new Integer[] {13, 2});
 		attributes.put("GBP/JPY", new Integer[] {11, 2});
 		
-		attributes.put("AUD/NZD", new Integer[] {28, 2});
+		//attributes.put("AUD/NZD", new Integer[] {28, 2});
 		attributes.put("AUD/USD", new Integer[] {6, 1});
 		attributes.put("AUD/CAD", new Integer[] {16, 2});
-		attributes.put("AUD/CHF", new Integer[] {39, 1});
-		attributes.put("AUD/JPY", new Integer[] {17, 2});
+		//attributes.put("AUD/CHF", new Integer[] {39, 1});
+		//attributes.put("AUD/JPY", new Integer[] {17, 2});
 		
 		attributes.put("NZD/USD", new Integer[] {8, 1});
 		attributes.put("NZD/CAD", new Integer[] {91, 2});
-		attributes.put("NZD/CHF", new Integer[] {89, 1});
-		attributes.put("NZD/JPY", new Integer[] {19, 1});
+		//attributes.put("NZD/CHF", new Integer[] {89, 1});
+		//attributes.put("NZD/JPY", new Integer[] {19, 1});
 		
 		attributes.put("USD/CAD", new Integer[] {7, 2});
 		attributes.put("USD/CHF", new Integer[] {4, 2});
@@ -45,7 +45,9 @@ public class Pairs {
 		attributes.put("CAD/CHF", new Integer[] {90, 1});
 		attributes.put("CAD/JPY", new Integer[] {18, 1});
 		
-		attributes.put("CHF/JPY", new Integer[] {12, 1});
+		//attributes.put("CHF/JPY", new Integer[] {12, 1});
+		
+		
 		//ids.put("USD/SEK", new Integer[] {30, 0});
 		//ids.put("EUR/SEK", new Integer[] {32, 2});
 		//ids.put("EUR/NOK", new Integer[] {36, 1});
