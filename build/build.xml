@@ -5,7 +5,7 @@
     <target name="create_run_jar">
         <jar destfile="C:/Users/Shubham/git/fx/build/SpikeTrader.jar" filesetmanifest="mergewithoutmain">
             <manifest>
-                <attribute name="Main-Class" value="Main"/>
+                <attribute name="Main-Class" value="com.peebeekay.fx.Main"/>
                 <attribute name="Class-Path" value="."/>
             </manifest>
             <fileset dir="C:/Users/Shubham/git/fx/bin"/>

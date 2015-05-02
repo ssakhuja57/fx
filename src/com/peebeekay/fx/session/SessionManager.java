@@ -46,7 +46,7 @@ public class SessionManager {
 	public final int subscriptionLimit = 20;
 	
 	
-	public SessionManager(Properties preferences, String login, String password, String DemoOrReal, String account1, String account2){
+	public SessionManager(Credentials creds, Properties preferences){
 		
 		this.preferences = preferences;
 		session = O2GTransport.createSession();
@@ -59,12 +59,12 @@ public class SessionManager {
         session.subscribeResponse(responseListener);
         
         session.useTableManager(O2GTableManagerMode.YES, null);
-        session.login(login, password, "http://www.fxcorporate.com/Hosts.jsp", DemoOrReal);
+        session.login(creds.getLogin(), creds.getPassword(), "http://www.fxcorporate.com/Hosts.jsp", creds.getDemoOrReal());
         if (!statusListener.waitForLogin()){
         	System.exit(1);
         }
         
-        accounts = new String[]{account1, account2};
+        accounts = creds.getAccountNumbers();
         
         
         tableMgr = session.getTableManager();
