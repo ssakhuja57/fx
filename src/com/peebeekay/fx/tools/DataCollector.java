@@ -150,6 +150,11 @@ public class DataCollector implements Runnable{
 	
 	public static void main(String[] args) throws ParseException, IOException
 	{
+		
+		// modify these
+		String pair = "EUR/USD";
+		String baseFileName = "eur-usd";
+		
 		Credentials creds1 = new Credentials("D172741206001", "1008", "Demo", new String[]{"2743608", "2743608"});
 		Credentials creds2 = new Credentials("D172741206001", "1008", "Demo", new String[]{"2743608", "2743608"});
 		Credentials creds3 = new Credentials("D172741206001", "1008", "Demo", new String[]{"2743608", "2743608"});
@@ -164,12 +169,13 @@ public class DataCollector implements Runnable{
 		Date start5 = DateUtils.parseDate("09-01-2014 00:00:00"); Date end5 = DateUtils.parseDate("11-01-2014 00:00:00");
 		Date start6 = DateUtils.parseDate("11-01-2014 00:00:00"); Date end6 = DateUtils.parseDate("01-01-2015 00:00:00");
 		
-		new Thread(new DataCollector(creds1, "EUR/USD", "t1", start1, end1, 25, "C:\\temp\\fx\\eur_usd1.csv")).start();
-		new Thread(new DataCollector(creds2, "EUR/USD", "t1", start2, end2, 25, "C:\\temp\\fx\\eur_usd2.csv")).start();
-		new Thread(new DataCollector(creds3, "EUR/USD", "t1", start3, end3, 25, "C:\\temp\\fx\\eur_usd3.csv")).start();
-		new Thread(new DataCollector(creds4, "EUR/USD", "t1", start4, end4, 25, "C:\\temp\\fx\\eur_usd4.csv")).start();
-		new Thread(new DataCollector(creds5, "EUR/USD", "t1", start5, end5, 25, "C:\\temp\\fx\\eur_usd5.csv")).start();
-		new Thread(new DataCollector(creds6, "EUR/USD", "t1", start6, end6, 25, "C:\\temp\\fx\\eur_usd6.csv")).start();
+		
+		new Thread(new DataCollector(creds1, pair, "t1", start1, end1, 25, "C:\\temp\\fx\\" + baseFileName + "1.csv")).start();
+		new Thread(new DataCollector(creds2, pair, "t1", start2, end2, 25, "C:\\temp\\fx\\" + baseFileName + "2.csv")).start();
+		new Thread(new DataCollector(creds3, pair, "t1", start3, end3, 25, "C:\\temp\\fx\\" + baseFileName + "3.csv")).start();
+		new Thread(new DataCollector(creds4, pair, "t1", start4, end4, 25, "C:\\temp\\fx\\" + baseFileName + "4.csv")).start();
+		new Thread(new DataCollector(creds5, pair, "t1", start5, end5, 25, "C:\\temp\\fx\\" + baseFileName + "5.csv")).start();
+		new Thread(new DataCollector(creds6, pair, "t1", start6, end6, 25, "C:\\temp\\fx\\" + baseFileName + "6.csv")).start();
 		
 	}
 
