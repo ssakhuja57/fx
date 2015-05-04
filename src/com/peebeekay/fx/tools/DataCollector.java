@@ -150,17 +150,26 @@ public class DataCollector implements Runnable{
 	
 	public static void main(String[] args) throws ParseException, IOException
 	{
-//		Credentials creds = new Credentials("1709043322", "lemonds615", "Real", new String[]{"9043322", "9043322"});
-		Credentials creds = new Credentials("D172741206001", "1008", "Demo", new String[]{"2743608", "2743608"});
-		Date start = DateUtils.parseDate("01-01-2014 00:00:00");
-		Date end = DateUtils.parseDate("01-01-2015 00:00:00");
-		new Thread(new DataCollector(creds, "EUR/USD", "t1", start, end, 25, "C:\\temp\\fx\\eur_usd.csv")).start();
-		//new Thread(new DataCollector(creds, "EUR/GBP", "t1", start, end, 25, "C:\\temp\\fx\\eur_gbp.csv")).start();
-		//new Thread(new DataCollector(creds, "EUR/AUD", "t1", start, end, 25, "C:\\temp\\fx\\eur_aud.csv")).start();
-		//new Thread(new DataCollector(creds, "EUR/NZD", "t1", start, end, 25, "C:\\temp\\fx\\eur_nzd.csv")).start();
-		//new Thread(new DataCollector(creds, "EUR/CAD", "t1", start, end, 25, "C:\\temp\\fx\\eur_cad.csv")).start();
-		//new Thread(new DataCollector(creds, "GBP/USD", "t1", start, end, 25, "C:\\temp\\fx\\gbp_usd.csv")).start();
-		//new Thread(new DataCollector(creds, "GBP/AUD", "t1", start, end, 25, "C:\\temp\\fx\\gbp_aud.csv")).start();
+		Credentials creds1 = new Credentials("D172741206001", "1008", "Demo", new String[]{"2743608", "2743608"});
+		Credentials creds2 = new Credentials("D172741206001", "1008", "Demo", new String[]{"2743608", "2743608"});
+		Credentials creds3 = new Credentials("D172741206001", "1008", "Demo", new String[]{"2743608", "2743608"});
+		Credentials creds4 = new Credentials("D172741206001", "1008", "Demo", new String[]{"2743608", "2743608"});
+		Credentials creds5 = new Credentials("D172741206001", "1008", "Demo", new String[]{"2743608", "2743608"});
+		Credentials creds6 = new Credentials("D172741206001", "1008", "Demo", new String[]{"2743608", "2743608"});
+		
+		Date start1 = DateUtils.parseDate("01-01-2014 00:00:00"); Date end1 = DateUtils.parseDate("03-01-2014 00:00:00");
+		Date start2 = DateUtils.parseDate("03-01-2014 00:00:00"); Date end2 = DateUtils.parseDate("05-01-2014 00:00:00");
+		Date start3 = DateUtils.parseDate("05-01-2014 00:00:00"); Date end3 = DateUtils.parseDate("07-01-2014 00:00:00");
+		Date start4 = DateUtils.parseDate("07-01-2014 00:00:00"); Date end4 = DateUtils.parseDate("09-01-2014 00:00:00");
+		Date start5 = DateUtils.parseDate("09-01-2014 00:00:00"); Date end5 = DateUtils.parseDate("11-01-2014 00:00:00");
+		Date start6 = DateUtils.parseDate("11-01-2014 00:00:00"); Date end6 = DateUtils.parseDate("01-01-2015 00:00:00");
+		
+		new Thread(new DataCollector(creds1, "EUR/USD", "t1", start1, end1, 25, "C:\\temp\\fx\\eur_usd1.csv")).start();
+		new Thread(new DataCollector(creds2, "EUR/USD", "t1", start2, end2, 25, "C:\\temp\\fx\\eur_usd2.csv")).start();
+		new Thread(new DataCollector(creds3, "EUR/USD", "t1", start3, end3, 25, "C:\\temp\\fx\\eur_usd3.csv")).start();
+		new Thread(new DataCollector(creds4, "EUR/USD", "t1", start4, end4, 25, "C:\\temp\\fx\\eur_usd4.csv")).start();
+		new Thread(new DataCollector(creds5, "EUR/USD", "t1", start5, end5, 25, "C:\\temp\\fx\\eur_usd5.csv")).start();
+		new Thread(new DataCollector(creds6, "EUR/USD", "t1", start6, end6, 25, "C:\\temp\\fx\\eur_usd6.csv")).start();
 		
 	}
 
