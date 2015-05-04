@@ -15,6 +15,7 @@ import com.peebeekay.fx.rates.RateCollector;
 import com.peebeekay.fx.rates.RateTools;
 import com.peebeekay.fx.session.SessionHolder;
 import com.peebeekay.fx.session.SessionManager;
+import com.peebeekay.fx.utils.DateUtils;
 import com.peebeekay.fx.utils.Logger;
 
 public class SpikeTrader implements SessionHolder{
@@ -156,7 +157,7 @@ public class SpikeTrader implements SessionHolder{
 	private class Recalibrate extends TimerTask{
 		@Override
 		public void run() {
-			if(secondsDiff(Calendar.getInstance(), eventDate) <= recalibrateUntil){
+			if(DateUtils.secondsDiff(Calendar.getInstance(), eventDate) <= recalibrateUntil){
 				Logger.info("ending recalibrator since " + Calendar.getInstance().getTime().toString() + " is within "
 						+ recalibrateUntil + " seconds of Event Date " + eventDate.getTime().toString());
 				recalibrator.cancel();
@@ -193,10 +194,6 @@ public class SpikeTrader implements SessionHolder{
 				//
 			}
 		}
-	}
-
-	private int secondsDiff(Calendar c1, Calendar c2){
-		return (int) ((c2.getTimeInMillis()-c1.getTimeInMillis())/1000);
 	}
 	
 	

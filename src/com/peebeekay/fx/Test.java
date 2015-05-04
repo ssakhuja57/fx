@@ -3,6 +3,7 @@ import java.text.ParseException;
 import java.util.Collection;
 
 import com.peebeekay.fx.rates.RateHistory;
+import com.peebeekay.fx.session.Credentials;
 import com.peebeekay.fx.session.SessionManager;
 import com.peebeekay.fx.utils.DateUtils;
 
@@ -10,7 +11,8 @@ import com.peebeekay.fx.utils.DateUtils;
 public class Test {
 
 	public static void main(String[] args) throws ParseException {
-		SessionManager sm = new SessionManager(null, "D26728250001", "6303", "Demo", "722858", "722858");
+		Credentials creds = new Credentials("D26728250001", "6303", "Demo", new String[]{"722858", "722858"});
+		SessionManager sm = new SessionManager(creds, null);
 		try{
 //			LinkedHashMap<Calendar, double[]> ticks = null;
 //			try {
