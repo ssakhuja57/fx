@@ -23,6 +23,7 @@ import com.peebeekay.fx.utils.Logger;
 public class SessionLoginUI extends JFrame{
 
 	private SessionManager sm;
+	private Credentials creds;
 	
 	JLabel loginNicknameLabel = new JLabel("Saved Preferences:");
 	JLabel login_id_lbl = new JLabel("Login ID:");;
@@ -99,14 +100,17 @@ public class SessionLoginUI extends JFrame{
 					Logger.error("Need to specify all mandatory fields");
 					return;
 				}
+				
 				String account2_check = account2.getText().equals("") ? account1.getText() : account2.getText();
-				sm = new SessionManager(
-						FileUtils.PROPERTIES_MAP.get((String)loginNickname.getSelectedItem()),
+				creds = new Credentials(
 						login_id.getText(), 
 						passwd.getText(), 
 						(String) account_type.getSelectedItem(), 
-						account1.getText(), 
-						account2_check
+						new String[]{account1.getText(), account2_check}
+						);
+				sm = new SessionManager(
+						creds,
+						FileUtils.PROPERTIES_MAP.get((String)loginNickname.getSelectedItem())
 						);
 				dispose();
 			}
@@ -127,7 +131,11 @@ public class SessionLoginUI extends JFrame{
 	}
 	
 	public SessionManager getSessionManager(){
-		return this.sm;
+		return sm;
+	}
+	
+	public Credentials getCreds(){
+		return creds;
 	}
 	
 }
