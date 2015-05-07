@@ -46,7 +46,7 @@ public class SessionManager {
 	public final int subscriptionLimit = 20;
 	
 	
-	public SessionManager(Credentials creds, Properties preferences){
+	public SessionManager(Credentials creds, Properties preferences) throws IllegalAccessException{
 		
 		this.preferences = preferences;
 		session = O2GTransport.createSession();
@@ -61,7 +61,7 @@ public class SessionManager {
         session.useTableManager(O2GTableManagerMode.YES, null);
         session.login(creds.getLogin(), creds.getPassword(), "http://www.fxcorporate.com/Hosts.jsp", creds.getDemoOrReal());
         if (!statusListener.waitForLogin()){
-        	System.exit(1);
+        	throw new IllegalAccessException();
         }
         
         accounts = creds.getAccountNumbers();

@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
+import com.peebeekay.fx.listeners.RequestFailedException;
 import com.peebeekay.fx.session.SessionDependent;
 import com.peebeekay.fx.session.SessionManager;
 import com.peebeekay.fx.utils.ArrayUtils;
@@ -109,6 +110,7 @@ public class RateCollector implements SessionDependent{
 			} catch (IllegalAccessException e) {
 				buyRates.addAll(Collections.nCopies(length, sm.offersTable.getBuyRate(pair)));
 				sellRates.addAll(Collections.nCopies(length, sm.offersTable.getSellRate(pair)));
+			} catch (RequestFailedException e) {
 			}
 		}
 		else{
@@ -123,7 +125,10 @@ public class RateCollector implements SessionDependent{
 				
 				ArrayList<ArrayList<Double>> rates = null;
 				try {
-					rates = RateHistory.getSnapshot(sm, pair, "t1", startPart, endPart); //throws the exceptions
+					try {
+						rates = RateHistory.getSnapshot(sm, pair, "t1", startPart, endPart);
+					} catch (RequestFailedException e) {
+					}
 					int ratesSize = rates.get(0).size();
 					if(ratesSize < MAX_REQUEST_LENGTH){ // if requesting rates for time when trading is closed, you will not retrieve the number of rates requested
 						rates.get(0).addAll(Collections.nCopies(MAX_REQUEST_LENGTH - ratesSize, rates.get(0).get(ratesSize-1)));
@@ -156,7 +161,10 @@ public class RateCollector implements SessionDependent{
 			startPart.setTime(endPart.getTime()); startPart.add(Calendar.SECOND, 1);
 			ArrayList<ArrayList<Double>> extras = null;
 			try {
-				extras = RateHistory.getSnapshot(sm, pair, "t1", startPart, DateUtils.getUTCTime());
+				try {
+					extras = RateHistory.getSnapshot(sm, pair, "t1", startPart, DateUtils.getUTCTime());
+				} catch (RequestFailedException e) {
+				}
 				buyRates.addAll(extras.get(0));
 				sellRates.addAll(extras.get(1));
 				for (int i=0; i < extras.get(0).size(); i++){ // to keep the size equal to length

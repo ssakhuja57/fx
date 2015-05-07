@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
+import com.peebeekay.fx.listeners.RequestFailedException;
 import com.peebeekay.fx.rates.RateHistory;
 import com.peebeekay.fx.session.Credentials;
 import com.peebeekay.fx.session.SessionManager;
@@ -28,6 +29,7 @@ public class DataCollector implements Runnable{
 	private File output;
 	
 	private HashMap<Integer,Collector> collectors = new HashMap<Integer,Collector>();
+	private HashMap<Integer,Thread> collectorThreads = new HashMap<Integer,Thread>();
 	private final int MAX_REQUEST_LIMIT = 300;
 	
 	public DataCollector(Credentials creds, String pair, String interval,
@@ -62,8 +64,18 @@ public class DataCollector implements Runnable{
 				e.printStackTrace();
 			}
 			collectors.put(i, c);
-			Thread collectorThread = new Thread(c);
-			collectorThread.start();
+			Thread cThread = new Thread(c);
+			collectorThreads.put(i, cThread);
+			cThread.start();
+		}
+		
+		for(Thread t: collectorThreads.values()){
+			try {
+				t.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -84,7 +96,12 @@ public class DataCollector implements Runnable{
 			this.id = id;
 			fileName = output + "_" + id;
 			f = new File(fileName);
-			this.sm = new SessionManager(creds, null);
+			try {
+				this.sm = new SessionManager(creds, null);
+			} catch (IllegalAccessException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			this.start = start;
 			this.end = end;
 			
@@ -105,14 +122,16 @@ public class DataCollector implements Runnable{
 		
 		
 		void writeData(Calendar startTime, Calendar endTime) throws IllegalArgumentException, IllegalAccessException, IOException{
-			LinkedHashMap<Calendar,double[]> data = 
-					RateHistory.getSnapshotMap(sm, pair, interval, startTime, endTime);
-			for(Calendar time: data.keySet()){
-				double[] values = data.get(time);
-				bfw.write(DateUtils.dateToString(time.getTime()) + "," + values[0] + "," + values[1] + "\n");
+			LinkedHashMap<Calendar, double[]> data;
+			try {
+				data = RateHistory.getSnapshotMapGreedy(sm, pair, interval, startTime, endTime);
+				for(Calendar time: data.keySet()){
+					double[] values = data.get(time);
+					bfw.write(DateUtils.dateToString(time.getTime()) + "," + values[0] + "," + values[1] + "\n");
+				}
+			} catch (RequestFailedException e) {
 			}
 		}
-		
 		@Override
 		public void run() {
 			
@@ -141,10 +160,11 @@ public class DataCollector implements Runnable{
 				}
 			}
 			finally{
+				Logger.info("collector " + id + " completed");
 				sm.close();
 				try {
-					fw.close();
 					bfw.close();
+					fw.close();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -152,38 +172,51 @@ public class DataCollector implements Runnable{
 		}
 	}
 	
-	public static void main(String[] args) throws ParseException, IOException
+	public static void main(String[] args) throws Exception
 	{
 		
 		// modify these
-		String pair = "EUR/USD";
+		String pair = "EUR/CAD";
 		String parentFolder = "C:\\temp\\fx\\";
-		String folder = parentFolder + "\\eur-usd\\";
+		String folder = parentFolder + "\\eur-cad\\";
 		new File(folder).mkdirs();
-		int sessionLimit = 8;
+		int accounts = 12;
+		int sessionLimit = 25;
 		
-		Credentials creds1 = new Credentials("D172741206001", "1008", "Demo", new String[]{"2743608", "2743608"});
-		Credentials creds2 = new Credentials("D172791453001", "6270", "Demo", new String[]{"2743608", "2743608"});
-		Credentials creds3 = new Credentials("D172791454001", "7407", "Demo", new String[]{"2743608", "2743608"});
-		Credentials creds4 = new Credentials("D172791472001", "3550", "Demo", new String[]{"2743608", "2743608"});
-		Credentials creds5 = new Credentials("D172791475001", "5933", "Demo", new String[]{"2743608", "2743608"});
-		Credentials creds6 = new Credentials("D172791478001", "9048", "Demo", new String[]{"2743608", "2743608"});
+		Date[] starts = new Date[]{
+				DateUtils.parseDate("01-01-2014 00:00:00"),
+				DateUtils.parseDate("02-01-2014 00:00:00"),
+				DateUtils.parseDate("03-01-2014 00:00:00"),
+				DateUtils.parseDate("04-01-2014 00:00:00"),
+				DateUtils.parseDate("05-01-2014 00:00:00"),
+				DateUtils.parseDate("06-01-2014 00:00:00"),
+				DateUtils.parseDate("07-01-2014 00:00:00"),
+				DateUtils.parseDate("08-01-2014 00:00:00"),
+				DateUtils.parseDate("09-01-2014 00:00:00"),
+				DateUtils.parseDate("10-01-2014 00:00:00"),
+				DateUtils.parseDate("11-01-2014 00:00:00"),
+				DateUtils.parseDate("12-01-2014 00:00:00")
+		};
+		Date[] ends = new Date[]{
+				DateUtils.parseDate("02-01-2014 00:00:00"),
+				DateUtils.parseDate("03-01-2014 00:00:00"),
+				DateUtils.parseDate("04-01-2014 00:00:00"),
+				DateUtils.parseDate("05-01-2014 00:00:00"),
+				DateUtils.parseDate("06-01-2014 00:00:00"),
+				DateUtils.parseDate("07-01-2014 00:00:00"),
+				DateUtils.parseDate("08-01-2014 00:00:00"),
+				DateUtils.parseDate("09-01-2014 00:00:00"),
+				DateUtils.parseDate("10-01-2014 00:00:00"),
+				DateUtils.parseDate("11-01-2014 00:00:00"),
+				DateUtils.parseDate("12-01-2014 00:00:00"),
+				DateUtils.parseDate("01-01-2015 00:00:00")
+		};
+				
 		
-		Date start1 = DateUtils.parseDate("01-01-2014 00:00:00"); Date end1 = DateUtils.parseDate("03-01-2014 00:00:00");
-		Date start2 = DateUtils.parseDate("03-01-2014 00:00:00"); Date end2 = DateUtils.parseDate("05-01-2014 00:00:00");
-		Date start3 = DateUtils.parseDate("05-01-2014 00:00:00"); Date end3 = DateUtils.parseDate("07-01-2014 00:00:00");
-		Date start4 = DateUtils.parseDate("07-01-2014 00:00:00"); Date end4 = DateUtils.parseDate("09-01-2014 00:00:00");
-		Date start5 = DateUtils.parseDate("09-01-2014 00:00:00"); Date end5 = DateUtils.parseDate("11-01-2014 00:00:00");
-		Date start6 = DateUtils.parseDate("11-01-2014 00:00:00"); Date end6 = DateUtils.parseDate("01-01-2015 00:00:00");
-		
-		
-		new Thread(new DataCollector(creds1, pair, "t1", start1, end1, sessionLimit, folder + "1.csv")).start();
-		new Thread(new DataCollector(creds2, pair, "t1", start2, end2, sessionLimit, folder + "2.csv")).start();
-		new Thread(new DataCollector(creds3, pair, "t1", start3, end3, sessionLimit, folder + "3.csv")).start();
-		new Thread(new DataCollector(creds4, pair, "t1", start4, end4, sessionLimit, folder + "4.csv")).start();
-		new Thread(new DataCollector(creds5, pair, "t1", start5, end5, sessionLimit, folder + "5.csv")).start();
-		new Thread(new DataCollector(creds6, pair, "t1", start6, end6, sessionLimit, folder + "6.csv")).start();
-		
+		for(int i=0; i<accounts; i++){
+			Credentials creds = FXUtils.createDemoAccount();
+			new DataCollector(creds, pair, "t1", starts[i], ends[i], sessionLimit, folder + i + ".csv").run();
+		}
 	}
 
 }
