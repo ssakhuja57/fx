@@ -108,10 +108,15 @@ public class SessionLoginUI extends JFrame{
 						(String) account_type.getSelectedItem(), 
 						new String[]{account1.getText(), account2_check}
 						);
-				sm = new SessionManager(
-						creds,
-						FileUtils.PROPERTIES_MAP.get((String)loginNickname.getSelectedItem())
-						);
+				try {
+					sm = new SessionManager(
+							creds,
+							FileUtils.PROPERTIES_MAP.get((String)loginNickname.getSelectedItem())
+							);
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				dispose();
 			}
 		});

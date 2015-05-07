@@ -68,7 +68,7 @@ public class ResponseListener implements IO2GResponseListener{
 		}
 	}
 	
-	public O2GResponse getResponse(String requestID, double waitFor, String description){
+	public O2GResponse getResponse(String requestID, double waitFor, String description) throws RequestFailedException{
 		for (int i=0;i<(1000*waitFor)/100;i++){
 			try {
 				Thread.currentThread().sleep(100);
@@ -78,7 +78,7 @@ public class ResponseListener implements IO2GResponseListener{
 					return response;
 				}
 				if(requestsFailed.contains(requestID)){
-					return null;
+					throw new RequestFailedException("");
 				}
 				Logger.debug("waiting for response: " + description);
 			} catch (NullPointerException e){
