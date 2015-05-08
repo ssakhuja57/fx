@@ -4,11 +4,14 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.peebeekay.fx.listeners.RequestFailedException;
 import com.peebeekay.fx.rates.RateHistory;
@@ -176,9 +179,9 @@ public class DataCollector implements Runnable{
 	{
 		
 		// modify these
-		String pair = "EUR/CAD";
+		String pair = "EUR/AUD";
 		String parentFolder = "C:\\temp\\fx\\";
-		String folder = parentFolder + "\\eur-cad\\";
+		String folder = parentFolder + "\\eur-aud\\";
 		new File(folder).mkdirs();
 		int accounts = 12;
 		int sessionLimit = 25;
@@ -212,11 +215,24 @@ public class DataCollector implements Runnable{
 				DateUtils.parseDate("01-01-2015 00:00:00")
 		};
 				
+//		List<Thread> threads = new LinkedList<Thread>();
+//		for(int i=0; i<accounts; i++){
+//			Credentials creds = FXUtils.createDemoAccount();
+//			Thread t = new Thread(new DataCollector(creds, pair, "t1", starts[i], ends[i], sessionLimit, folder + i + ".csv"));
+//			threads.add(t);
+//			t.start();
+//		}
+//		
+//		for(Thread th: threads){
+//			th.join();
+//		}
 		
-		for(int i=0; i<accounts; i++){
-			Credentials creds = FXUtils.createDemoAccount();
-			new DataCollector(creds, pair, "t1", starts[i], ends[i], sessionLimit, folder + i + ".csv").run();
+		LinkedHashMap<Calendar, double[]> values = RateHistory.getSnapshotMap(new SessionManager(FXUtils.createDemoAccount(), null), "EUR/CAD", "t1",
+				"2014-01-08 16:48:40", "2014-01-08 16:49:24");
+		for (Entry<Calendar, double[]> entry: values.entrySet()){
+			System.out.println(DateUtils.dateToString(entry.getKey().getTime()) + "," + entry.getValue()[0] + "," + entry.getValue()[1]);
 		}
+		
 	}
 
 }

@@ -56,6 +56,12 @@ public class RateHistory {
 
 	}
 	
+//	public static LinkedHashMap<Calendar, double[]> getTickData(SessionManager sm, String pair, 
+//			Calendar startTime, Calendar endTime){
+//		LinkedHas
+//	}
+	
+	
 	public static ArrayList<ArrayList<Double>> getSnapshot(SessionManager sm, String pair, String interval,
 			Calendar startTime, Calendar endTime) throws IllegalArgumentException, IllegalAccessException, RequestFailedException{
 		O2GMarketDataSnapshotResponseReader snapshotReader = getData(sm, pair, interval, startTime, endTime, 1000, DEF_WAIT_FOR);
@@ -76,10 +82,10 @@ public class RateHistory {
 			String startTimeString, String endTimeString) throws ParseException, IllegalArgumentException, IllegalAccessException, RequestFailedException{
 		
 		Calendar startTime = Calendar.getInstance(); 
-		startTime.setTime((new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.ENGLISH)).parse(startTimeString));
+		startTime.setTime((new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH)).parse(startTimeString));
 
 		Calendar endTime = Calendar.getInstance();
-		endTime.setTime((new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.ENGLISH)).parse(endTimeString));
+		endTime.setTime((new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH)).parse(endTimeString));
 
 		return getSnapshotMap(sm, pair, interval, startTime, endTime);
 		
