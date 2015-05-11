@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Date;
+import java.util.Random;
 
 import com.peebeekay.fx.session.Credentials;
 
@@ -20,11 +21,16 @@ public class FXUtils {
 	
 	public static Credentials createDemoAccount() throws Exception {
 		
+		Logger.info("creating demo account");
+		
 		final String USER_AGENT = "Mozilla/5.0";
+		String email = StringUtils.randString(8) + "@" + StringUtils.randString(5) + ".com";
         String url = "https://secure4.fxcorporate.com/tr-demo/"
                 + "form/service/?format=jsonp&rb=fxcm"
-                + "&DB=PremiumDemo&demo.firstname=s&demo.lastname=s"
-                + "&demo.email_address=afsf@afsd.fasdfasfjjj&demo.phone=7779568456"
+                + "&DB=PremiumDemo"
+                + "&demo.firstname=s&demo.lastname=s"
+                + "&demo.email_address=" + email 
+                + "&demo.phone=7779568456"
                 + "&demo.country=united_states"
                 + "&coReg=fxcm3_demo100k_trading-station&callback=function_34092717552874717000";
 
@@ -62,7 +68,9 @@ public class FXUtils {
                 password = fieldSplit[1].replace("\"", "");
         }
         
-        return new Credentials(username, password, "Demo", null);
+        Thread.currentThread().sleep(1000);
+        
+        return new Credentials(username, password, Credentials.DEMO, null);
 }
 
 }

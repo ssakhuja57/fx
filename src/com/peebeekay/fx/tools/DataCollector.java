@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -49,8 +50,7 @@ public class DataCollector implements Runnable{
 	@Override
 	public void run(){
 
-		Logger.info("Creating collectors");
-		Logger.info("start: " + DateUtils.dateToString(startDate) + " end: " + DateUtils.dateToString(endDate));
+		Logger.info("Creating collectors - start: " + DateUtils.dateToString(startDate) + " end: " + DateUtils.dateToString(endDate));
 		int seconds = DateUtils.secondsDiff(startDate, endDate);
 		int step = seconds/sessionLimit;
 		
@@ -66,12 +66,13 @@ public class DataCollector implements Runnable{
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			collectors.put(i, c);
-			Thread cThread = new Thread(c);
-			collectorThreads.put(i, cThread);
-			cThread.start();
+//			collectors.put(i, c);
+//			Thread cThread = new Thread(c);
+//			collectorThreads.put(i, cThread);
+//			cThread.start();
+			c.run();
 		}
-		
+		/**
 		for(Thread t: collectorThreads.values()){
 			try {
 				t.join();
@@ -80,6 +81,7 @@ public class DataCollector implements Runnable{
 				e.printStackTrace();
 			}
 		}
+		*/
 	}
 	
 	private class Collector implements Runnable{
@@ -95,7 +97,7 @@ public class DataCollector implements Runnable{
 		BufferedWriter bfw;
 
 		Collector(int id, Date start, Date end) throws IOException{
-			Logger.info("creating collector " + id);
+			Logger.info("creating collector " + id + ": " + DateUtils.dateToString(start) + " to " + DateUtils.dateToString(end));
 			this.id = id;
 			fileName = output + "_" + id;
 			f = new File(fileName);
@@ -125,42 +127,26 @@ public class DataCollector implements Runnable{
 		
 		
 		void writeData(Calendar startTime, Calendar endTime) throws IllegalArgumentException, IllegalAccessException, IOException{
+			if(this.sm == null)
+				return;
 			LinkedHashMap<Calendar, double[]> data;
-			try {
-				data = RateHistory.getSnapshotMapGreedy(sm, pair, interval, startTime, endTime);
-				for(Calendar time: data.keySet()){
-					double[] values = data.get(time);
-					bfw.write(DateUtils.dateToString(time.getTime()) + "," + values[0] + "," + values[1] + "\n");
-				}
-			} catch (RequestFailedException e) {
+			data = RateHistory.getTickData(sm, pair, startTime, endTime);
+			for(Calendar time: data.keySet()){
+				double[] values = data.get(time);
+				fw.write(DateUtils.dateToString(time.getTime(), DateUtils.DATE_FORMAT_MILLI) + "," + values[0] + "," + values[1] + "\n\r");
+				fw.flush();
 			}
 		}
 		@Override
 		public void run() {
+			if(this.sm == null)
+				return;
 			
 			try{
-				Calendar startChunk = Calendar.getInstance();
-				Calendar endChunk = Calendar.getInstance();
-				startChunk.setTime(start);
-				endChunk.setTime(start);
-				endChunk.add(Calendar.SECOND, MAX_REQUEST_LIMIT - 1);
-				//Logger.info("Start chunk " + DateUtils.dateToString(startChunk.getTime()) + " End " + DateUtils.dateToString(end));
-				while(startChunk.getTime().before(end)){
-					try{
-						if(FXUtils.checkMarketOpen(startChunk.getTime())){
-							writeData(startChunk, endChunk);
-						}
-					} catch (IllegalArgumentException | IllegalAccessException
-							| IOException e) {
-						//e.printStackTrace();
-					}
-					finally{
-						startChunk.setTime(endChunk.getTime());
-						startChunk.add(Calendar.SECOND, 1);
-						endChunk.setTime(startChunk.getTime());
-						endChunk.add(Calendar.SECOND, MAX_REQUEST_LIMIT - 1);
-					}
-				}
+				writeData(DateUtils.getCalendar(start), DateUtils.getCalendar(end));
+			} catch (IllegalArgumentException | IllegalAccessException
+					| IOException e) {
+				e.printStackTrace();
 			}
 			finally{
 				Logger.info("collector " + id + " completed");
@@ -179,59 +165,77 @@ public class DataCollector implements Runnable{
 	{
 		
 		// modify these
-		String pair = "EUR/AUD";
-		String parentFolder = "C:\\temp\\fx\\";
-		String folder = parentFolder + "\\eur-aud\\";
+		String pair = "EUR/USD";
+		String parentFolder = "C:\\fx-data\\";
+		String folder = parentFolder + "\\EUR-USD\\";
 		new File(folder).mkdirs();
-		int accounts = 12;
-		int sessionLimit = 25;
+		int accounts = 6;
+		int sessionLimit = 10;
 		
 		Date[] starts = new Date[]{
-				DateUtils.parseDate("01-01-2014 00:00:00"),
-				DateUtils.parseDate("02-01-2014 00:00:00"),
-				DateUtils.parseDate("03-01-2014 00:00:00"),
-				DateUtils.parseDate("04-01-2014 00:00:00"),
-				DateUtils.parseDate("05-01-2014 00:00:00"),
-				DateUtils.parseDate("06-01-2014 00:00:00"),
-				DateUtils.parseDate("07-01-2014 00:00:00"),
-				DateUtils.parseDate("08-01-2014 00:00:00"),
-				DateUtils.parseDate("09-01-2014 00:00:00"),
-				DateUtils.parseDate("10-01-2014 00:00:00"),
-				DateUtils.parseDate("11-01-2014 00:00:00"),
-				DateUtils.parseDate("12-01-2014 00:00:00")
+				DateUtils.parseDate("2014-01-01 00:00:00"),
+				DateUtils.parseDate("2014-02-01 00:00:00"),
+				DateUtils.parseDate("2014-03-01 00:00:00"),
+				DateUtils.parseDate("2014-04-01 00:00:00"),
+				DateUtils.parseDate("2014-05-01 00:00:00"),
+				DateUtils.parseDate("2014-06-01 00:00:00"),
+				DateUtils.parseDate("2014-07-01 00:00:00"),
+				DateUtils.parseDate("2014-08-01 00:00:00"),
+				DateUtils.parseDate("2014-09-01 00:00:00"),
+				DateUtils.parseDate("2014-10-01 00:00:00"),
+				DateUtils.parseDate("2014-11-01 00:00:00"),
+				DateUtils.parseDate("2014-12-01 00:00:00")
 		};
 		Date[] ends = new Date[]{
-				DateUtils.parseDate("02-01-2014 00:00:00"),
-				DateUtils.parseDate("03-01-2014 00:00:00"),
-				DateUtils.parseDate("04-01-2014 00:00:00"),
-				DateUtils.parseDate("05-01-2014 00:00:00"),
-				DateUtils.parseDate("06-01-2014 00:00:00"),
-				DateUtils.parseDate("07-01-2014 00:00:00"),
-				DateUtils.parseDate("08-01-2014 00:00:00"),
-				DateUtils.parseDate("09-01-2014 00:00:00"),
-				DateUtils.parseDate("10-01-2014 00:00:00"),
-				DateUtils.parseDate("11-01-2014 00:00:00"),
-				DateUtils.parseDate("12-01-2014 00:00:00"),
-				DateUtils.parseDate("01-01-2015 00:00:00")
+				DateUtils.parseDate("2014-02-01 00:00:00"),
+				DateUtils.parseDate("2014-03-01 00:00:00"),
+				DateUtils.parseDate("2014-04-01 00:00:00"),
+				DateUtils.parseDate("2014-05-01 00:00:00"),
+				DateUtils.parseDate("2014-06-01 00:00:00"),
+				DateUtils.parseDate("2014-07-01 00:00:00"),
+				DateUtils.parseDate("2014-08-01 00:00:00"),
+				DateUtils.parseDate("2014-09-01 00:00:00"),
+				DateUtils.parseDate("2014-10-01 00:00:00"),
+				DateUtils.parseDate("2014-11-01 00:00:00"),
+				DateUtils.parseDate("2014-12-01 00:00:00"),
+				DateUtils.parseDate("2015-01-01 00:00:00")
 		};
+		
+		Credentials[] creds = new Credentials[accounts];
+		for(int i=0; i<accounts;i++){
+			creds[i] = FXUtils.createDemoAccount();
+		}
+		
+		
 				
-//		List<Thread> threads = new LinkedList<Thread>();
-//		for(int i=0; i<accounts; i++){
-//			Credentials creds = FXUtils.createDemoAccount();
-//			Thread t = new Thread(new DataCollector(creds, pair, "t1", starts[i], ends[i], sessionLimit, folder + i + ".csv"));
+		List<Thread> threads = new LinkedList<Thread>();
+		for(int i=0; i<accounts; i++){
+			//Credentials creds = new Credentials("D172741206001", "1008", Credentials.DEMO, null);
+			//Thread t = new Thread(new DataCollector(creds[i%accounts], pair, "t1", starts[i], ends[i], sessionLimit, folder + i + ".csv"));
+			
+			new DataCollector(creds[i%accounts], pair, "t1", starts[i], ends[i], sessionLimit, folder + i + ".csv").run();
 //			threads.add(t);
 //			t.start();
-//		}
-//		
+			//Logger.info(DateUtils.dateToString(starts[i]) + " to " + DateUtils.dateToString(ends[i]));
+		}
+		
 //		for(Thread th: threads){
 //			th.join();
 //		}
 		
-		LinkedHashMap<Calendar, double[]> values = RateHistory.getSnapshotMap(new SessionManager(FXUtils.createDemoAccount(), null), "EUR/CAD", "t1",
-				"2014-01-08 16:48:40", "2014-01-08 16:49:24");
-		for (Entry<Calendar, double[]> entry: values.entrySet()){
-			System.out.println(DateUtils.dateToString(entry.getKey().getTime()) + "," + entry.getValue()[0] + "," + entry.getValue()[1]);
-		}
+//		Calendar start = DateUtils.getCalendar("2014-05-31 15:58:45", DateUtils.DATE_FORMAT_STD);
+//		Calendar end = DateUtils.getCalendar("2014-05-30 15:55:46", DateUtils.DATE_FORMAT_STD);
+//		//Credentials creds2 = FXUtils.createDemoAccount();
+//		Credentials creds2 = new Credentials("D172741206001", "1008", Credentials.DEMO, null);
+//		LinkedHashMap<Calendar, double[]> values = RateHistory.getTickData(new SessionManager(creds2, null), "EUR/USD",
+//				start, end);
+//		BufferedWriter bw = new BufferedWriter(new FileWriter(new File("C:\\fx-data\\testing.csv")));
+//		for (Entry<Calendar, double[]> entry: values.entrySet()){
+//			Logger.info(DateUtils.dateToString(entry.getKey().getTime()) + "," + entry.getValue()[0] + "," + entry.getValue()[1]);
+//			//bw.write(DateUtils.dateToString(entry.getKey().getTime()) + "," + entry.getValue()[0] + "," + entry.getValue()[1] + "\n");
+//		}
+//		bw.close();
+//		
 		
 	}
 

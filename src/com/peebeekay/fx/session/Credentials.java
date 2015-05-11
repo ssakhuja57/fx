@@ -5,6 +5,8 @@ public class Credentials {
 	private String login;
 	private String password;
 	private String demoOrReal;
+		public static final String DEMO = "Demo";
+		public static final String REAL = "Real";
 	private String[] accountNumbers;
 	
 	public Credentials(String login, String password, String demoOrReal, String[] accountNumbers){

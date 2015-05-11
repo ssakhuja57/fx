@@ -15,10 +15,11 @@ public class DateUtils {
 	 * @throws ParseException 
 	 */
 	
-	private static DateFormat df = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss", Locale.ENGLISH);
+	public static final DateFormat DATE_FORMAT_STD = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
+	public static final DateFormat DATE_FORMAT_MILLI = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.ENGLISH);
 	
-	public static Calendar getCalendar(String dateString) throws ParseException{
-		return getCalendar(parseDate(dateString));
+	public static Calendar getCalendar(String dateString, DateFormat df) throws ParseException{
+		return getCalendar(parseDate(dateString, df));
 	}
 	
 	public static Calendar getCalendar(Date date){
@@ -27,8 +28,12 @@ public class DateUtils {
 		return res;
 	}
 	
-	public static Date parseDate(String dateString) throws ParseException{
+	public static Date parseDate(String dateString, DateFormat df) throws ParseException{
 		return df.parse(dateString);
+	}
+	
+	public static Date parseDate(String dateString) throws ParseException{
+		return parseDate(dateString, DATE_FORMAT_STD);
 	}
 	
 	public static Calendar getUTCTime(){
@@ -36,6 +41,10 @@ public class DateUtils {
 	}
 	
 	public static String dateToString(Date date){
+		return DATE_FORMAT_STD.format(date);
+	}
+	
+	public static String dateToString(Date date, DateFormat df){
 		return df.format(date);
 	}
 	

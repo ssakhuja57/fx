@@ -137,19 +137,6 @@ public class RateCollector implements SessionDependent{
 					
 				} catch (IllegalArgumentException e) {
 					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					rates = new ArrayList<ArrayList<Double>>();
-					rates.add(new ArrayList<Double>()); rates.add(new ArrayList<Double>());
-					double buyRate = sm.offersTable.getBuyRate(pair);
-					double sellRate = sm.offersTable.getSellRate(pair);
-					if(buyRates.size() != 0){
-						buyRate = (double) buyRates.toArray()[buyRates.size() - 1];
-					} 
-					if(sellRates.size() != 0){
-						sellRate = (double) sellRates.toArray()[sellRates.size() - 1];
-					} 
-					rates.get(0).addAll(Collections.nCopies(MAX_REQUEST_LENGTH, buyRate));
-					rates.get(1).addAll(Collections.nCopies(MAX_REQUEST_LENGTH, sellRate));
 				}
 				finally{
 					buyRates.addAll(rates.get(0));
@@ -173,8 +160,6 @@ public class RateCollector implements SessionDependent{
 				}
 			} catch (IllegalArgumentException e) {
 				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				
 			}
 		}
 

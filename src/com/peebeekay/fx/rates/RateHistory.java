@@ -19,11 +19,15 @@ import com.fxcore2.O2GTimeframe;
 import com.fxcore2.O2GTimeframeCollection;
 import com.peebeekay.fx.listeners.RequestFailedException;
 import com.peebeekay.fx.session.SessionManager;
+import com.peebeekay.fx.utils.DateUtils;
+import com.peebeekay.fx.utils.Logger;
 
 public class RateHistory {
 	
 	private static final int DEF_WAIT_FOR = 3;
 	private static final int LONG_WAIT_FOR = 10;
+	//private static final String ANCIENT_DATE = "2000-01-01 00:00:00";
+	private static final int DEF_REQUEST_LENGTH = 1000;
 	
 	
 	public static Collection<Double> getTickData(SessionManager sm, String pair, int lastN, String type) 
@@ -56,15 +60,35 @@ public class RateHistory {
 
 	}
 	
-//	public static LinkedHashMap<Calendar, double[]> getTickData(SessionManager sm, String pair, 
-//			Calendar startTime, Calendar endTime){
-//		LinkedHas
-//	}
+	public static LinkedHashMap<Calendar, double[]> getTickData(SessionManager sm, String pair, 
+			Calendar startTime, Calendar endTime){
+		LinkedHashMap<Calendar, double[]> values = new LinkedHashMap<Calendar, double[]>();
+		Calendar endChunk = null;
+		LinkedHashMap<Calendar, double[]> chunk;
+		try {
+			chunk = getMap(getData(sm, pair, "t1", startTime, endTime, DEF_REQUEST_LENGTH, 10), false);
+		} catch (RequestFailedException e) {
+			return values;
+		}
+		values.putAll(chunk);
+		
+		endChunk = chunk.entrySet().iterator().next().getKey();
+		while(endChunk.after(startTime)){
+			try {
+				chunk = getMap(getData(sm, pair, "t1", startTime, endChunk, DEF_REQUEST_LENGTH, 10), true); // throws exc
+				values.putAll(chunk);
+				endChunk = chunk.entrySet().iterator().next().getKey();
+			} catch (RequestFailedException e) {
+				return values;
+			}
+		}
+		return values;
+	}
 	
 	
 	public static ArrayList<ArrayList<Double>> getSnapshot(SessionManager sm, String pair, String interval,
-			Calendar startTime, Calendar endTime) throws IllegalArgumentException, IllegalAccessException, RequestFailedException{
-		O2GMarketDataSnapshotResponseReader snapshotReader = getData(sm, pair, interval, startTime, endTime, 1000, DEF_WAIT_FOR);
+			Calendar startTime, Calendar endTime) throws RequestFailedException{
+		O2GMarketDataSnapshotResponseReader snapshotReader = getData(sm, pair, interval, startTime, endTime, DEF_REQUEST_LENGTH, DEF_WAIT_FOR);
 		ArrayList<Double> buys = new ArrayList<Double>();
 		ArrayList<Double> sells = new ArrayList<Double>();
 		for (int i = snapshotReader.size()-1; i >= 0; i--) { //add in reverse so oldest rate is at beginning of list
@@ -94,27 +118,19 @@ public class RateHistory {
 	public static LinkedHashMap<Calendar, double[]> getSnapshotMap(SessionManager sm, String pair, String interval, 
 			Calendar startTime, Calendar endTime) throws IllegalArgumentException, IllegalAccessException, RequestFailedException{
 
-		O2GMarketDataSnapshotResponseReader snapshotReader = getData(sm, pair, interval, startTime, endTime, 1000, DEF_WAIT_FOR);
-		LinkedHashMap<Calendar, double[]> res = new LinkedHashMap<Calendar, double[]>();
-		for (int i = snapshotReader.size()-1; i >= 0; i--) { //add in reverse so oldest rate is at beginning of list
-				res.put(snapshotReader.getDate(i), new double[]{snapshotReader.getAsk(i), snapshotReader.getBid(i)});
-			}
-		return res;
+		O2GMarketDataSnapshotResponseReader snapshotReader = getData(sm, pair, interval, startTime, endTime, DEF_REQUEST_LENGTH, DEF_WAIT_FOR);
+		return getMap(snapshotReader, false);
 		
 	}
 	
 	public static LinkedHashMap<Calendar, double[]> getSnapshotMapGreedy(SessionManager sm, String pair, String interval,
 			Calendar startTime, Calendar endTime) throws IllegalArgumentException, IllegalAccessException, RequestFailedException{
-		O2GMarketDataSnapshotResponseReader snapshotReader = getData(sm, pair, interval, startTime, endTime, 1000, LONG_WAIT_FOR);
-		LinkedHashMap<Calendar, double[]> res = new LinkedHashMap<Calendar, double[]>();
-		for (int i = snapshotReader.size()-1; i >= 0; i--) { //add in reverse so oldest rate is at beginning of list
-				res.put(snapshotReader.getDate(i), new double[]{snapshotReader.getAsk(i), snapshotReader.getBid(i)});
-			}
-		return res;
+		O2GMarketDataSnapshotResponseReader snapshotReader = getData(sm, pair, interval, startTime, endTime, DEF_REQUEST_LENGTH, LONG_WAIT_FOR);
+		return getMap(snapshotReader, false);
 	}
 	
 	private static O2GMarketDataSnapshotResponseReader getData(SessionManager sm, String pair, String interval,
-			Calendar startTime, Calendar endTime, int lastN, int waitForSeconds) throws IllegalArgumentException, IllegalAccessException, RequestFailedException{
+			Calendar startTime, Calendar endTime, int lastN, int waitForSeconds) throws RequestFailedException{
 		if(endTime != null && !endTime.after(startTime)){
 			throw new IllegalArgumentException("end time must be after start time");
 		}
@@ -130,9 +146,38 @@ public class RateHistory {
 		O2GResponseReaderFactory readerFactory = session.getResponseReaderFactory();
 		O2GResponse response = sm.responseListener.getResponse(requestID, waitForSeconds, "data request for " + pair ); //+ " --- " + startTime.getTime().toString() + " --- " + endTime.getTime().toString());
 		if (response == null){
-			throw new IllegalAccessException("there is no data available for this time period");
+			throw new RequestFailedException("there is no " + interval + " data available for " 
+					+ DateUtils.dateToString(startTime.getTime()) + " to " + DateUtils.dateToString(endTime.getTime()));
 		}
 		return readerFactory.createMarketDataSnapshotReader(response);
+	}
+	
+	
+	/**
+	 * 
+	 * @param reader
+	 * @return reversed list, so it is sorted from earliest to latest
+	 */
+	private static LinkedHashMap<Calendar, double[]> getMap(O2GMarketDataSnapshotResponseReader reader, boolean reverse){
+		LinkedHashMap<Calendar, double[]> res = new LinkedHashMap<Calendar, double[]>();
+		if(reverse){
+			for (int i = reader.size()-1; i >= 0; i--) {
+				res.put(reader.getDate(i), AskBid.extract(reader, i));
+			}
+		}
+		else{
+			for (int i=0; i < reader.size(); i++) {
+				res.put(reader.getDate(i), AskBid.extract(reader, i));
+			}
+		}
+		return res;
+	}
+
+	
+	static class AskBid{
+		static double[] extract(O2GMarketDataSnapshotResponseReader reader, int rowNum) {
+			return new double[]{reader.getAsk(rowNum), reader.getBid(rowNum)};
+		}
 	}
 	
 	
