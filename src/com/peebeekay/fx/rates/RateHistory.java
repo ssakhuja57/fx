@@ -1,5 +1,6 @@
 package com.peebeekay.fx.rates;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Locale;
+import java.util.Map.Entry;
 
 import com.fxcore2.O2GMarketDataSnapshotResponseReader;
 import com.fxcore2.O2GRequest;
@@ -19,8 +21,8 @@ import com.fxcore2.O2GTimeframe;
 import com.fxcore2.O2GTimeframeCollection;
 import com.peebeekay.fx.listeners.RequestFailedException;
 import com.peebeekay.fx.session.SessionManager;
+import com.peebeekay.fx.utils.ArrayUtils;
 import com.peebeekay.fx.utils.DateUtils;
-import com.peebeekay.fx.utils.Logger;
 
 public class RateHistory {
 	
@@ -28,6 +30,7 @@ public class RateHistory {
 	private static final int LONG_WAIT_FOR = 10;
 	//private static final String ANCIENT_DATE = "2000-01-01 00:00:00";
 	private static final int DEF_REQUEST_LENGTH = 1000;
+	private static final DateFormat LOG_DF = DateUtils.DATE_FORMAT_STD;
 	
 	
 	public static Collection<Double> getTickData(SessionManager sm, String pair, int lastN, String type) 
@@ -66,18 +69,18 @@ public class RateHistory {
 		Calendar endChunk = null;
 		LinkedHashMap<Calendar, double[]> chunk;
 		try {
-			chunk = getMap(getData(sm, pair, "t1", startTime, endTime, DEF_REQUEST_LENGTH, 10), false);
+			chunk = getMap(getData(sm, pair, "t1", startTime, endTime, DEF_REQUEST_LENGTH, 10), true);
 		} catch (RequestFailedException e) {
 			return values;
 		}
 		values.putAll(chunk);
 		
-		endChunk = chunk.entrySet().iterator().next().getKey();
+		endChunk = ArrayUtils.getLastEntry(chunk).getKey();
 		while(endChunk.after(startTime)){
 			try {
 				chunk = getMap(getData(sm, pair, "t1", startTime, endChunk, DEF_REQUEST_LENGTH, 10), true); // throws exc
 				values.putAll(chunk);
-				endChunk = chunk.entrySet().iterator().next().getKey();
+				endChunk = ArrayUtils.getLastEntry(chunk).getKey();
 			} catch (RequestFailedException e) {
 				return values;
 			}
@@ -144,7 +147,8 @@ public class RateHistory {
 		factory.fillMarketDataSnapshotRequestTime(marketDataRequest, startTime, endTime, true);
 		session.sendRequest(marketDataRequest);
 		O2GResponseReaderFactory readerFactory = session.getResponseReaderFactory();
-		O2GResponse response = sm.responseListener.getResponse(requestID, waitForSeconds, "data request for " + pair ); //+ " --- " + startTime.getTime().toString() + " --- " + endTime.getTime().toString());
+		O2GResponse response = sm.responseListener.getResponse(requestID, waitForSeconds, "data request for " + pair 
+				+ ": " + DateUtils.calToString(startTime,LOG_DF) + " to " + DateUtils.calToString(endTime, LOG_DF));
 		if (response == null){
 			throw new RequestFailedException("there is no " + interval + " data available for " 
 					+ DateUtils.dateToString(startTime.getTime()) + " to " + DateUtils.dateToString(endTime.getTime()));

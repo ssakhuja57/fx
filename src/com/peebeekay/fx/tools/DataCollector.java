@@ -208,33 +208,32 @@ public class DataCollector implements Runnable{
 		
 		
 				
-		List<Thread> threads = new LinkedList<Thread>();
-		for(int i=0; i<accounts; i++){
-			//Credentials creds = new Credentials("D172741206001", "1008", Credentials.DEMO, null);
-			//Thread t = new Thread(new DataCollector(creds[i%accounts], pair, "t1", starts[i], ends[i], sessionLimit, folder + i + ".csv"));
+//		List<Thread> threads = new LinkedList<Thread>();
+		for(int i=0; i<starts.length; i++){
+//			Credentials creds = new Credentials("D172741206001", "1008", Credentials.DEMO, null);
+//			Thread t = new Thread(new DataCollector(creds[i%accounts], pair, "t1", starts[i], ends[i], sessionLimit, folder + i + ".csv"));
 			
 			new DataCollector(creds[i%accounts], pair, "t1", starts[i], ends[i], sessionLimit, folder + i + ".csv").run();
 //			threads.add(t);
 //			t.start();
-			//Logger.info(DateUtils.dateToString(starts[i]) + " to " + DateUtils.dateToString(ends[i]));
 		}
 		
 //		for(Thread th: threads){
 //			th.join();
 //		}
 		
-//		Calendar start = DateUtils.getCalendar("2014-05-31 15:58:45", DateUtils.DATE_FORMAT_STD);
-//		Calendar end = DateUtils.getCalendar("2014-05-30 15:55:46", DateUtils.DATE_FORMAT_STD);
+//		Calendar start = DateUtils.getCalendar("2014-05-30 15:50:45", DateUtils.DATE_FORMAT_STD);
+//		Calendar end = DateUtils.getCalendar("2014-05-31 15:55:46", DateUtils.DATE_FORMAT_STD);
 //		//Credentials creds2 = FXUtils.createDemoAccount();
 //		Credentials creds2 = new Credentials("D172741206001", "1008", Credentials.DEMO, null);
 //		LinkedHashMap<Calendar, double[]> values = RateHistory.getTickData(new SessionManager(creds2, null), "EUR/USD",
 //				start, end);
-//		BufferedWriter bw = new BufferedWriter(new FileWriter(new File("C:\\fx-data\\testing.csv")));
+//		//BufferedWriter bw = new BufferedWriter(new FileWriter(new File("C:\\fx-data\\testing.csv")));
 //		for (Entry<Calendar, double[]> entry: values.entrySet()){
 //			Logger.info(DateUtils.dateToString(entry.getKey().getTime()) + "," + entry.getValue()[0] + "," + entry.getValue()[1]);
 //			//bw.write(DateUtils.dateToString(entry.getKey().getTime()) + "," + entry.getValue()[0] + "," + entry.getValue()[1] + "\n");
 //		}
-//		bw.close();
+//		//bw.close();
 //		
 		
 	}

@@ -48,6 +48,10 @@ public class DateUtils {
 		return df.format(date);
 	}
 	
+	public static String calToString(Calendar cal, DateFormat df){
+		return dateToString(cal.getTime(), df);
+	}
+	
 	public static int secondsDiff(Calendar c1, Calendar c2){
 		return (int) ((c2.getTimeInMillis()-c1.getTimeInMillis())/1000);
 	}

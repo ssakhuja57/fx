@@ -1,7 +1,10 @@
 package com.peebeekay.fx.utils;
 
 import java.util.Arrays;
-import java.util.Comparator;
+import java.util.Calendar;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import com.google.common.collect.MinMaxPriorityQueue;
 
@@ -137,6 +140,14 @@ public class ArrayUtils {
 //		}
 //		
 //	}
+	
+	public static <K, V> Entry<K, V> getLastEntry(Map<K,V> map){
+		final Set<Entry<K,V>> mapEntries = map.entrySet();
+	    final int mapLength = mapEntries.size();
+	    final Entry<K,V>[] mapArr = new Entry[mapLength];
+	    mapEntries.toArray(mapArr);
+	    return mapArr[mapLength-1];
+	}
 	
 	public static void main(String[] args){
 		Double[] arr = new Double[28000];

@@ -7,6 +7,7 @@ import com.peebeekay.fx.utils.Logger;
 public class SessionStatusListener implements IO2GSessionStatus{
 	
 	String sessionStatus;
+	private final int LOGIN_WAIT_TIME = 10;
 	
 	@Override
 	public void onLoginFailed(String arg0) {
@@ -21,9 +22,9 @@ public class SessionStatusListener implements IO2GSessionStatus{
 	}
 	
 	public boolean waitForLogin(){
-		for (int i=0;i<5;i++){
+		for (int i=0;i<LOGIN_WAIT_TIME*10;i++){
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(100);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

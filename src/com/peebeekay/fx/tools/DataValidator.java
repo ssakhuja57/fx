@@ -13,7 +13,7 @@ import com.peebeekay.fx.utils.Logger;
 public class DataValidator {
 	
 	public enum ValidationType{
-		ASCENDING(0);
+		ASCENDING(0), DESCENDING(1);
 		private int value;
 		private ValidationType(int value){
 			this.value = value;
@@ -39,7 +39,7 @@ public class DataValidator {
 		this.ignoreBlanks = ignoreBlanks;
 	}
 	
-	private int validateAscending(File file, String delimiter, int timeFieldIndex) throws ParseException, IOException{
+	private int validateSequential(boolean ascending, File file, String delimiter, int timeFieldIndex) throws ParseException, IOException{
 		BufferedReader br = null;
 	    boolean success = true;
 	    int lineNum = 0;
@@ -62,7 +62,7 @@ public class DataValidator {
 		    	else{
 		    	   t0 = t1;
 		    	   t1 = t;
-		    	   if(!t1.after(t0)){
+		    	   if( (ascending && !t1.after(t0)) || (!ascending && !t1.before(t0))){
 		    		   success = false;
 		    		   break;
 		    	   }
@@ -80,6 +80,7 @@ public class DataValidator {
 	public boolean validate(ValidationType type) throws ParseException, IOException{
 		
 		boolean success = true;
+		int result;
 		File[] files = dir.listFiles();
 		int filesScanned = 0;
 		for(File file: files){
@@ -89,7 +90,14 @@ public class DataValidator {
 				Logger.info("validating file " + filesScanned + ": " + shortName);
 				switch(type){
 				case ASCENDING:
-					int result = validateAscending(file, delimiter, timeFieldIndex);
+					result = validateSequential(true, file, delimiter, timeFieldIndex);
+					if(result != 0){
+						Logger.error("error on line " + result + " for file " + shortName);
+						success = false;
+					}
+					break;
+				case DESCENDING:
+					result = validateSequential(false, file, delimiter, timeFieldIndex);
 					if(result != 0){
 						Logger.error("error on line " + result + " for file " + shortName);
 						success = false;
@@ -107,7 +115,7 @@ public class DataValidator {
 	}
 	
 	public static void main(String[] args) throws ParseException, IOException{
-		new DataValidator("C:\\fx-data\\EUR-USD", ".*", false, "t1", ",", 0, true).validate(ValidationType.ASCENDING);
+		new DataValidator("C:\\fx-data\\EUR-USD - run8", ".*", false, "t1", ",", 0, true).validate(ValidationType.DESCENDING);
 	}
 	
 	
