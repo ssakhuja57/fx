@@ -8,9 +8,11 @@ import com.peebeekay.fx.simulation.monitors.open.AOpenTradeMonitor;
 
 public class Trade {
 	
+	private int id;
 	private Status status;
 	private boolean isLong;
 	private int lots;
+	private Date createdTime;
 	
 	private double openPrice;
 	private Date openTime;
@@ -20,8 +22,10 @@ public class Trade {
 	private Date closeTime;
 	private ACloseTradeMonitor closeReason;
 	
-	public Trade(boolean isLong, int lots){
+	public Trade(int id, Date createdTime, boolean isLong, int lots){
+		this.id = id;
 		status = Status.WAITING;
+		this.createdTime = createdTime;
 		this.isLong = isLong;
 		this.lots = lots;
 	}
@@ -75,6 +79,14 @@ public class Trade {
 		return false;
 	}
 	
+	public int getId(){
+		return id;
+	}
+	
+	public Date getCreatedTime(){
+		return createdTime;
+	}
+	
 	public Status getStatus(){
 		return status;
 	}
@@ -109,6 +121,11 @@ public class Trade {
 
 	public ACloseTradeMonitor getCloseReason() {
 		return closeReason;
+	}
+	
+	@Override
+	public int hashCode(){
+		return id;
 	}
 
 	
