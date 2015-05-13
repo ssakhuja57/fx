@@ -34,7 +34,7 @@ public class RSI implements IIndicator {
 		double averageUp =0;
 		double averageDown=0;
 		for(int i =1; i<period; i++){
-			double change = (useBid)? prices.get(i).bid - prices.get(i-1).bid: prices.get(i).ask- prices.get(i-1).ask;
+			double change = (useBid)? prices.get(i).getBid() - prices.get(i-1).getBid(): prices.get(i).getAsk() - prices.get(i-1).getAsk();
 			if(change > 0)
 				averageUp += change; //simple average
 			else
