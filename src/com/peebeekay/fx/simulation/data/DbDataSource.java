@@ -30,7 +30,7 @@ public class DbDataSource  extends ADataSource implements Runnable{
 	}
 	
 	private void publish(){
-		Boolean allReady = false;
+		Boolean allReady = true;
 		for(IDataSubscriber subscriber: subscribers){
 			allReady &= subscriber.isReady();		
 		}
