@@ -10,12 +10,16 @@ public class RSI implements IIndicator {
 	private ArrayList<Price>prices;
 	Boolean simple; //if true use simple moving average 
 	private Boolean useBid; //
-	public RSI(int period, Boolean simple, Boolean useBid){
+	public RSI(int period, Boolean simple, Boolean useBid, ArrayList<Price> prices){
 		 this.period = period;
 		 this.simple = simple;
 		 this.useBid = useBid;
+		 int i=0;
+		 for(Price p: prices){
+			 this.prices.add(i, p);
+			 i++;
+		 }
 	}
-
 	@Override
 	public void addDataPoint(Price p) {
 		prices.add(p);

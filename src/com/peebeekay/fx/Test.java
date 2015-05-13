@@ -24,12 +24,12 @@ public class Test {
 //				double[] rates = ticks.get(time);
 //				System.out.println(time.getTime().toString() + ": " + rates[0] + "/" + rates[1]);
 //			}
-			Collection<Double> ticks2 = RateHistory.getSnapshot(sm, "EUR/AUD", "t1", DateUtils.getCalendar("2015-04-04 21:56:00"),
-					DateUtils.getCalendar("2015-04-04 21:58:00")).get(0);
+			//Collection<Double> ticks2 = RateHistory.getSnapshot(sm, "EUR/AUD", "t1", DateUtils.getCalendar("2015-04-04 21:56:00"),
+				//	DateUtils.getCalendar("2015-04-04 21:58:00")).get(0);
 //			Collection<Double> ticks2 = RateHistory.getTickData(sm, "EUR/USD", 999999, "buy");
-			for (Double d: ticks2){
-				System.out.println(d);
-			}
+			//for (Double d: ticks2){
+			//System.out.println(d);
+			//}
 
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
