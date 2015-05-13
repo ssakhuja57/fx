@@ -35,7 +35,8 @@ public class Trade {
 	}
 	
 	public void open(Price price, AOpenTradeMonitor reason){
-		checkTrans(status, Status.OPEN);
+		if(!checkTrans(status, Status.OPEN)) 
+			return;
 		status = Status.OPEN;
 		if(isLong)
 			openPrice = price.getAsk();
@@ -46,7 +47,8 @@ public class Trade {
 	}
 	
 	public void close(Price price, ACloseTradeMonitor reason){
-		checkTrans(status, Status.CLOSED);
+		if(!checkTrans(status, Status.CLOSED))
+			return;
 		status = Status.CLOSED;
 		if(isLong)
 			openPrice = price.getBid();
@@ -57,19 +59,20 @@ public class Trade {
 	}
 	
 	public void cancel(){
-		checkTrans(status, Status.CANCELLED);
+		if(!checkTrans(status, Status.CANCELLED))
+			return;
 		status = Status.CANCELLED;
 	}
 	
 	
-	private void checkTrans(Status s1, Status s2){
+	private boolean checkTrans(Status s1, Status s2){
 		if(s1 == Status.WAITING && s2 == Status.OPEN)
-			return;
+			return true;
 		if(s1 == Status.OPEN && s2 == Status.CLOSED)
-			return;
+			return true;
 		if(s1 == Status.WAITING && s2 == Status.CANCELLED)
-			return;
-		throw new RuntimeException();
+			return true;
+		return false;
 	}
 	
 	public Status getStatus(){
