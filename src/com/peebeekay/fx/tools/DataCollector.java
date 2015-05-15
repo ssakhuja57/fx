@@ -16,17 +16,19 @@ import java.util.Map.Entry;
 
 import com.peebeekay.fx.listeners.RequestFailedException;
 import com.peebeekay.fx.rates.RateHistory;
+import com.peebeekay.fx.rates.RateHistory.Intervals;
 import com.peebeekay.fx.session.Credentials;
 import com.peebeekay.fx.session.SessionManager;
 import com.peebeekay.fx.utils.DateUtils;
 import com.peebeekay.fx.utils.FXUtils;
 import com.peebeekay.fx.utils.Logger;
+import com.peebeekay.fx.utils.StringUtils;
 
 public class DataCollector implements Runnable{
 
 	private Credentials creds;
 	private String pair;
-	private String interval;
+	private Intervals interval;
 	private Date startDate;
 	private Date endDate;
 	private int sessionLimit;
@@ -36,7 +38,7 @@ public class DataCollector implements Runnable{
 	private HashMap<Integer,Thread> collectorThreads = new HashMap<Integer,Thread>();
 	private final int MAX_REQUEST_LIMIT = 300;
 	
-	public DataCollector(Credentials creds, String pair, String interval,
+	public DataCollector(Credentials creds, String pair, Intervals interval,
 			Date startDate, Date endDate, int sessionLimit, String outputFilePath){
 		this.creds = creds;
 		this.pair = pair;
@@ -130,10 +132,10 @@ public class DataCollector implements Runnable{
 			if(this.sm == null)
 				return;
 			LinkedHashMap<Calendar, double[]> data;
-			data = RateHistory.getTickData(sm, pair, startTime, endTime);
+			data = RateHistory.getOHLCData(sm, pair, interval, startTime, endTime);
 			for(Calendar time: data.keySet()){
-				double[] values = data.get(time);
-				fw.write(DateUtils.dateToString(time.getTime(), DateUtils.DATE_FORMAT_MILLI) + "," + values[0] + "," + values[1] + "\n\r");
+				String values = StringUtils.arrayToString(data.get(time), ",");
+				fw.write(DateUtils.dateToString(time.getTime(), DateUtils.DATE_FORMAT_MILLI) + values + "\n");
 				fw.flush();
 			}
 		}
@@ -169,8 +171,8 @@ public class DataCollector implements Runnable{
 		String parentFolder = "C:\\fx-data\\";
 		String folder = parentFolder + "\\EUR-USD\\";
 		new File(folder).mkdirs();
-		int accounts = 6;
-		int sessionLimit = 10;
+		int accounts = 1;
+		int sessionLimit = 1;
 		
 		Date[] starts = new Date[]{
 				DateUtils.parseDate("2014-01-01 00:00:00"),
@@ -213,7 +215,7 @@ public class DataCollector implements Runnable{
 //			Credentials creds = new Credentials("D172741206001", "1008", Credentials.DEMO, null);
 //			Thread t = new Thread(new DataCollector(creds[i%accounts], pair, "t1", starts[i], ends[i], sessionLimit, folder + i + ".csv"));
 			
-			new DataCollector(creds[i%accounts], pair, "t1", starts[i], ends[i], sessionLimit, folder + i + ".csv").run();
+			new DataCollector(creds[i%accounts], pair, Intervals.M30, starts[i], ends[i], sessionLimit, folder + i + ".csv").run();
 //			threads.add(t);
 //			t.start();
 		}

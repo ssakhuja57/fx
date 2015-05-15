@@ -48,6 +48,10 @@ public class DateUtils {
 		return df.format(date);
 	}
 	
+	public static String calToString(Calendar cal){
+		return dateToString(cal.getTime());
+	}
+	
 	public static String calToString(Calendar cal, DateFormat df){
 		return dateToString(cal.getTime(), df);
 	}

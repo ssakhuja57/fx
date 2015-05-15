@@ -6,7 +6,7 @@ import java.util.Date;
 
 public class Logger {
 	
-	public static LogModes logModeSet = LogModes.INFO;
+	public static LogModes logModeSet = LogModes.DEBUG;
 	private final static DateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
 	
 	public static void info(String msg){
