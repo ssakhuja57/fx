@@ -131,7 +131,7 @@ public class DataCollector implements Runnable{
 		void writeData(Calendar startTime, Calendar endTime) throws IllegalArgumentException, IllegalAccessException, IOException{
 			if(this.sm == null)
 				return;
-			LinkedHashMap<Calendar, double[]> data;
+			Map<Calendar, double[]> data;
 			data = RateHistory.getOHLCData(sm, pair, interval, startTime, endTime);
 			for(Calendar time: data.keySet()){
 				String values = StringUtils.arrayToString(data.get(time), ",");
@@ -169,7 +169,7 @@ public class DataCollector implements Runnable{
 		// modify these
 		String pair = "EUR/USD";
 		String parentFolder = "C:\\fx-data\\";
-		String folder = parentFolder + "\\EUR-USD\\";
+		String folder = parentFolder + "\\EUR-USD3\\";
 		new File(folder).mkdirs();
 		int accounts = 1;
 		int sessionLimit = 1;

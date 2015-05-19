@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 
 import com.fxcore2.O2GMarketDataSnapshotResponseReader;
 import com.fxcore2.O2GRequest;
@@ -25,12 +27,14 @@ import com.peebeekay.fx.utils.Logger;
 public class RateHistory {
 	
 	public enum Intervals{
-		T(0,"t1"), M1(1,"m1"), M5(2,"m5"), M15(3,"m15"), M30(4,"m30");
+		T(0,"t1",0), M1(1,"m1",1), M5(2,"m5",5), M15(3,"m15",15), M30(4,"m30",30);
 		int index;
-		String value;
-		private Intervals(int index, String value){
+		public String value;
+		public int minutes;
+		private Intervals(int index, String value, int minutes){
 			this.index = index;
 			this.value = value;
+			this.minutes = minutes;
 		}
 	}
 	
@@ -40,12 +44,12 @@ public class RateHistory {
 	private static final int DEF_REQUEST_LENGTH = 1000;
 	private static final DateFormat LOG_DF = DateUtils.DATE_FORMAT_STD;
 	
-	public static LinkedHashMap<Calendar, double[]> getTickData(SessionManager sm, String pair,
+	public static Map<Calendar, double[]> getTickData(SessionManager sm, String pair,
 			Calendar startTime, Calendar endTime){
 		return getAggregatedData(sm, pair, Intervals.T, new AskBid(), startTime, endTime);
 	}
 	
-	public static LinkedHashMap<Calendar, double[]> getOHLCData(SessionManager sm, String pair, Intervals interval,
+	public static Map<Calendar, double[]> getOHLCData(SessionManager sm, String pair, Intervals interval,
 			Calendar startTime, Calendar endTime){
 		return getAggregatedData(sm, pair, interval, new AskBidOHLC(), startTime, endTime);
 	}
@@ -86,13 +90,13 @@ public class RateHistory {
 		return getMap(snapshotReader, new AskBidOHLC(), false);
 	}
 	
-	private static LinkedHashMap<Calendar, double[]> getAggregatedData(SessionManager sm, String pair, Intervals interval,
+	private static TreeMap<Calendar, double[]> getAggregatedData(SessionManager sm, String pair, Intervals interval,
 			Extractor extractor, Calendar startTime, Calendar endTime){
-		LinkedHashMap<Calendar, double[]> values = new LinkedHashMap<Calendar, double[]>();
+		TreeMap<Calendar, double[]> values = new TreeMap<Calendar, double[]>();
 		Calendar endChunk = null;
-		LinkedHashMap<Calendar, double[]> chunk;
+		TreeMap<Calendar, double[]> chunk;
 		try {
-			chunk = getMap(getData(sm, pair, interval, startTime, endTime, DEF_REQUEST_LENGTH, 10), extractor, true);
+			chunk = getSortedMap(getData(sm, pair, interval, startTime, endTime, DEF_REQUEST_LENGTH, 10), extractor, true);
 		} catch (RequestFailedException e) {
 			return values;
 		}
@@ -101,10 +105,13 @@ public class RateHistory {
 		endChunk = ArrayUtils.getLastEntry(chunk).getKey();
 		while(endChunk.after(startTime)){
 			try {
-				chunk = getMap(getData(sm, pair, interval, startTime, endChunk, DEF_REQUEST_LENGTH, 10),
-						extractor, true); // throws exc
+				chunk = getSortedMap(getData(sm, pair, interval, startTime, endChunk, DEF_REQUEST_LENGTH, 10),
+						extractor, true);
 				values.putAll(chunk);
-				endChunk = ArrayUtils.getLastEntry(chunk).getKey();
+				if(chunk.size() == 1)
+					break;
+				endChunk = chunk.firstKey();
+				//Logger.debug(DateUtils.calToString(endChunk) + " size: " + chunk.size());
 			} catch (RequestFailedException e) {
 				return values;
 			}
@@ -160,6 +167,15 @@ public class RateHistory {
 		return res;
 	}
 	
+	private static TreeMap<Calendar, double[]> getSortedMap(O2GMarketDataSnapshotResponseReader reader,
+												Extractor ext, boolean reverse){
+		TreeMap<Calendar, double[]> res  = new TreeMap<Calendar, double[]>();
+		for(int i=0; i<reader.size(); i++)
+		{
+			res.put(reader.getDate(i), ext.extract(reader, i));
+		}
+		return res;
+	}
 	private interface Extractor{
 		double[] extract(O2GMarketDataSnapshotResponseReader reader, int rowNum);
 	}

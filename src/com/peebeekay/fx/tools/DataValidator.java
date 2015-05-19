@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Calendar;
 
+import com.peebeekay.fx.rates.RateHistory.Intervals;
 import com.peebeekay.fx.utils.DateUtils;
 import com.peebeekay.fx.utils.Logger;
 
@@ -23,32 +24,32 @@ public class DataValidator {
 	File dir;
 	String filePattern;
 	boolean fixedStep;
-	String interval;
+	Intervals interval;
 	int timeFieldIndex;
 	String delimiter;
 	boolean ignoreBlanks;
 	
-	public DataValidator(String fileDir, String filePattern, boolean fixedStep, String interval, 
-			String delimiter, int timeFieldIndex, boolean ignoreBlanks){
+	public DataValidator(String fileDir, String filePattern, String delimiter, Intervals interval, int timeFieldIndex, boolean ignoreBlanks){
 		this.dir = new File(fileDir);
 		this.filePattern = filePattern;
-		this.fixedStep = fixedStep;
-		this.interval = interval;
 		this.timeFieldIndex = timeFieldIndex;
 		this.delimiter = delimiter;
 		this.ignoreBlanks = ignoreBlanks;
+		this.interval = interval;
 	}
 	
-	private int validateSequential(boolean ascending, File file, String delimiter, int timeFieldIndex) throws ParseException, IOException{
+	private int validateSequential(boolean ascending, File file, int timeFieldIndex) throws ParseException, IOException{
 		BufferedReader br = null;
 	    boolean success = true;
+	    boolean fixedStep = interval.minutes != 0;
+	    int step = 60*(ascending ? interval.minutes : -interval.minutes);
 	    int lineNum = 0;
 		try {
 			br = new BufferedReader(new FileReader(file));
 			String line;
 		    Calendar t0 = null;
 		    Calendar t1 = null;
-		    boolean gap = false;
+		    boolean gapWarning = false;
 		    while ((line = br.readLine()) != null) {
 		    	lineNum++;
 		    	//Logger.info(line);
@@ -62,9 +63,21 @@ public class DataValidator {
 		    	else{
 		    	   t0 = t1;
 		    	   t1 = t;
-		    	   if( (ascending && !t1.after(t0)) || (!ascending && !t1.before(t0))){
+		    	   if( (ascending && !t1.after(t0)) || (!ascending && !t1.before(t0)) ){
 		    		   success = false;
 		    		   break;
+		    	   }
+		    	   if(fixedStep){
+			    	   if(DateUtils.secondsDiff(t0, t1) != step){
+			    		   if(gapWarning){
+			    			   success = false;
+			    			   break;
+			    		   }
+			    		   gapWarning = true;
+			    	   }
+			    	   else{
+			    		   gapWarning = false;
+			    	   }
 		    	   }
 		       }
 		    }
@@ -90,14 +103,14 @@ public class DataValidator {
 				Logger.info("validating file " + filesScanned + ": " + shortName);
 				switch(type){
 				case ASCENDING:
-					result = validateSequential(true, file, delimiter, timeFieldIndex);
+					result = validateSequential(true, file, timeFieldIndex);
 					if(result != 0){
 						Logger.error("error on line " + result + " for file " + shortName);
 						success = false;
 					}
 					break;
 				case DESCENDING:
-					result = validateSequential(false, file, delimiter, timeFieldIndex);
+					result = validateSequential(false, file, timeFieldIndex);
 					if(result != 0){
 						Logger.error("error on line " + result + " for file " + shortName);
 						success = false;
@@ -115,7 +128,7 @@ public class DataValidator {
 	}
 	
 	public static void main(String[] args) throws ParseException, IOException{
-		new DataValidator("C:\\fx-data\\EUR-USD - run8", ".*", false, "t1", ",", 0, true).validate(ValidationType.DESCENDING);
+		new DataValidator("C:\\fx-data\\EUR-USD", ".*", ",", Intervals.M30, 0, true).validate(ValidationType.ASCENDING);
 	}
 	
 	
