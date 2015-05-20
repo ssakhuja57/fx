@@ -4,19 +4,14 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import com.peebeekay.fx.listeners.RequestFailedException;
+import com.peebeekay.fx.info.Interval;
+import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.rates.RateHistory;
-import com.peebeekay.fx.rates.RateHistory.Intervals;
 import com.peebeekay.fx.session.Credentials;
 import com.peebeekay.fx.session.SessionManager;
 import com.peebeekay.fx.utils.DateUtils;
@@ -27,8 +22,8 @@ import com.peebeekay.fx.utils.StringUtils;
 public class DataCollector implements Runnable{
 
 	private Credentials creds;
-	private String pair;
-	private Intervals interval;
+	private Pair pair;
+	private Interval interval;
 	private Date startDate;
 	private Date endDate;
 	private int sessionLimit;
@@ -38,7 +33,7 @@ public class DataCollector implements Runnable{
 	private HashMap<Integer,Thread> collectorThreads = new HashMap<Integer,Thread>();
 	private final int MAX_REQUEST_LIMIT = 300;
 	
-	public DataCollector(Credentials creds, String pair, Intervals interval,
+	public DataCollector(Credentials creds, Pair pair, Interval interval,
 			Date startDate, Date endDate, int sessionLimit, String outputFilePath){
 		this.creds = creds;
 		this.pair = pair;
@@ -135,7 +130,7 @@ public class DataCollector implements Runnable{
 			data = RateHistory.getOHLCData(sm, pair, interval, startTime, endTime);
 			for(Calendar time: data.keySet()){
 				String values = StringUtils.arrayToString(data.get(time), ",");
-				fw.write(DateUtils.dateToString(time.getTime(), DateUtils.DATE_FORMAT_MILLI) + values + "\n");
+				fw.write(DateUtils.dateToString(time.getTime(), DateUtils.DATE_FORMAT_MILLI) + "," + values + "\n");
 				fw.flush();
 			}
 		}
@@ -167,9 +162,9 @@ public class DataCollector implements Runnable{
 	{
 		
 		// modify these
-		String pair = "EUR/USD";
-		String parentFolder = "C:\\fx-data\\";
-		String folder = parentFolder + "\\EUR-USD3\\";
+		Pair pair = Pair.EURUSD;
+		String parentFolder = "C:\\fx-data\\final";
+		String folder = parentFolder + "\\EUR-USD-m30\\";
 		new File(folder).mkdirs();
 		int accounts = 1;
 		int sessionLimit = 1;
@@ -215,7 +210,7 @@ public class DataCollector implements Runnable{
 //			Credentials creds = new Credentials("D172741206001", "1008", Credentials.DEMO, null);
 //			Thread t = new Thread(new DataCollector(creds[i%accounts], pair, "t1", starts[i], ends[i], sessionLimit, folder + i + ".csv"));
 			
-			new DataCollector(creds[i%accounts], pair, Intervals.M30, starts[i], ends[i], sessionLimit, folder + i + ".csv").run();
+			new DataCollector(creds[i%accounts], pair, Interval.M30, starts[i], ends[i], sessionLimit, folder + i + ".csv").run();
 //			threads.add(t);
 //			t.start();
 		}

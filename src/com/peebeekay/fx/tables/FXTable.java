@@ -9,7 +9,7 @@ import com.fxcore2.O2GTableIterator;
 import com.fxcore2.O2GTableManager;
 import com.fxcore2.O2GTableType;
 import com.fxcore2.O2GTradeTableRow;
-import com.peebeekay.fx.info.Pairs;
+import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.utils.Logger;
 
 public abstract class FXTable<TableClass extends O2GTable, TableRowClass extends O2GRow> {
@@ -22,14 +22,14 @@ public abstract class FXTable<TableClass extends O2GTable, TableRowClass extends
 	}
 	
 	@SuppressWarnings("unchecked")
-	public TableRowClass getTradeRow(String pair, String buySell){
+	public TableRowClass getTradeRow(Pair pair, String buySell){
 		O2GTableIterator iterator = new O2GTableIterator();
         String[] columnNames = new String[] { "OfferID", "BuySell" };
-        Object[] columnValues = new Object[] { Pairs.getID(pair), buySell };
+        Object[] columnValues = new Object[] { String.valueOf(pair.id), buySell };
         return (TableRowClass) table.getNextGenericRowByMultiColumnValues(columnNames, columnValues, iterator);
 	}
 	
-	public String getTradeIDs(String pair, String buySell){
+	public String getTradeIDs(Pair pair, String buySell){
 		O2GTradeTableRow trade = (O2GTradeTableRow) getTradeRow(pair, buySell);
         return trade.getAccountID() + ":" + trade.getTradeID();
         

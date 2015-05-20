@@ -10,13 +10,14 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import com.fxcore2.Constants;
-import com.peebeekay.fx.info.Pairs;
+import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.rates.RateCollector;
-import com.peebeekay.fx.rates.RateTools;
 import com.peebeekay.fx.session.SessionHolder;
 import com.peebeekay.fx.session.SessionManager;
 import com.peebeekay.fx.utils.DateUtils;
 import com.peebeekay.fx.utils.Logger;
+import com.peebeekay.fx.utils.PairUtils;
+import com.peebeekay.fx.utils.RateUtils;
 
 public class SpikeTrader implements SessionHolder{
 	
@@ -25,7 +26,7 @@ public class SpikeTrader implements SessionHolder{
 	
 	private SessionManager sm;
 	private boolean isActive;
-	private ArrayList<String> pairs;
+	private ArrayList<Pair> pairs;
 	
 	private int defSpikeBuffer = 10;
 	private int defStopBuffer = 9;
@@ -51,12 +52,12 @@ public class SpikeTrader implements SessionHolder{
 	private Timer recalibrator;
 	private int recalibratorFreq; //frequency in seconds at which to recalibrate orders
 	private int recalibrateUntil; //seconds before eventDate to stop recalibrating orders
-	private HashMap<String, Boolean> recalibrateParams = new HashMap<String, Boolean>();
+	private HashMap<Pair, Boolean> recalibrateParams = new HashMap<Pair, Boolean>();
 	
 	private Timer dataCollector;
-	private HashMap<String, double[]> data = new HashMap<String, double[]>();
-	private HashMap<String, RateCollector> rateCollectors = new HashMap<String, RateCollector>();
-	private HashMap<String, Integer[]> params = new HashMap<String, Integer[]>(); //amount, spike buffer, stop buffer
+	private HashMap<Pair, double[]> data = new HashMap<Pair, double[]>();
+	private HashMap<Pair, RateCollector> rateCollectors = new HashMap<Pair, RateCollector>();
+	private HashMap<Pair, Integer[]> params = new HashMap<Pair, Integer[]>(); //amount, spike buffer, stop buffer
 	
 	
 	public SpikeTrader(SessionManager sm, String[] currencies, String eventDate_string, double accountUtilization,
@@ -88,18 +89,18 @@ public class SpikeTrader implements SessionHolder{
 		this.recalibratorFreq = recalibratorFreq;
 		this.recalibrateUntil = recalibrateUntil;
 		
-		pairs = Pairs.getRelatedPairs(currencies);
+		pairs = PairUtils.getRelatedPairs(currencies);
 		
 		if(dataCollect){
 			dataCollector = new Timer();
-			for (String pair:pairs){
+			for (Pair pair:pairs){
 				rateCollectors.put(pair, new RateCollector(sm, pair, dataCollectLength, 1));
 			}
 			
 			dataCollector.schedule(new DataCollector(), 0, 1*1000);
 		}
 		
-		for (String pair:pairs){
+		for (Pair pair:pairs){
 			recalibrateParams.put(pair, true);
 		}
 		
@@ -139,16 +140,16 @@ public class SpikeTrader implements SessionHolder{
 	private class DataCollector extends TimerTask{
 		@Override
 		public void run() {
-			for (String pair: pairs){
+			for (Pair pair: pairs){
 				RateCollector rc = rateCollectors.get(pair);
 				double buyHigh = rc.getHigh("buy", 0);
 				double buyLow = rc.getLow("buy", 0);
-				double buyDiff = RateTools.convertToPips(buyHigh - buyLow, pair);
+				double buyDiff = RateUtils.convertToPips(buyHigh - buyLow, pair);
 				double sellHigh = rc.getHigh("sell", 0);
 				double sellLow = rc.getLow("sell", 0);
-				double sellDiff = RateTools.convertToPips(sellHigh - sellLow, pair);
-				double slope = RateTools.convertToPips(rc.getSlope("buy", 3), pair);
-				double stdDev = RateTools.convertToPips(rc.getStdDev("buy"), pair);
+				double sellDiff = RateUtils.convertToPips(sellHigh - sellLow, pair);
+				double slope = RateUtils.convertToPips(rc.getSlope("buy", 3), pair);
+				double stdDev = RateUtils.convertToPips(rc.getStdDev("buy"), pair);
 				data.put(pair, new double[]{buyLow, buyHigh, buyDiff, sellLow, sellHigh, sellDiff, slope, stdDev});
 			}
 		}
@@ -164,7 +165,7 @@ public class SpikeTrader implements SessionHolder{
 			}
 			recalibrateAllOrders();
 			if (dataCollect){
-				for (String pair: pairs){
+				for (Pair pair: pairs){
 					if(recalibrateParams.get(pair)){
 						int spikeBuffer = (int)rateCollectors.get(pair).getMaxWindowRange();
 						Logger.debug(pair + ": buffer calculated = " + spikeBuffer);
@@ -198,7 +199,7 @@ public class SpikeTrader implements SessionHolder{
 	
 	
 	private void placeAllOrders(){
-		for (String pair: pairs){
+		for (Pair pair: pairs){
 			Integer[] pairParams = params.get(pair); 
 			sm.createOpposingOCOEntryOrdersWithStops(pair, pairParams[0], pairParams[1], pairParams[2], true);
 		}
@@ -254,18 +255,18 @@ public class SpikeTrader implements SessionHolder{
 	}
 	
 	
-	public ArrayList<String> getPairs(){
-		return (ArrayList<String>)pairs.clone();
+	public ArrayList<Pair> getPairs(){
+		return (ArrayList<Pair>)pairs.clone();
 	}
 	
-	public HashMap<String, Integer[]> getParams(){
-		return (HashMap<String, Integer[]>)params.clone();
+	public HashMap<Pair, Integer[]> getParams(){
+		return (HashMap<Pair, Integer[]>)params.clone();
 	}
 	
 	public void recalculateParams(){
 		sm.updateMarginsReqs();
 		try{
-			Thread.currentThread().sleep(1000);
+			Thread.sleep(1000);
 		} catch (InterruptedException e){
 			e.printStackTrace();
 		}
@@ -273,13 +274,13 @@ public class SpikeTrader implements SessionHolder{
 //		double sum_pc_mmr = 0;
 		double sum_mmr = 0;
 		
-		for(String pair: pairs){
+		for(Pair pair: pairs){
 //			sum_pc_mmr += (sm.offersTable.getPipCost(pair)/sm.getMarginReqs(pair)[0]);
 			sum_mmr += sm.getMarginReqs(pair)[0];
 		}
 		//int pairsCount = pairs.size();
 		
-		for (String pair: pairs){
+		for (Pair pair: pairs){
 			Logger.debug("calculating values for " + pair);
 			//double pipCost = sm.offersTable.getPipCost(pair);
 			//int lots = (int)((accountBalance*accountUtilization*pipCost)/(Math.pow(mmr, 2.0)*sum_pc_mmr));
@@ -320,7 +321,7 @@ public class SpikeTrader implements SessionHolder{
 	}
 	
 	public void subscribeCurrency(){
-		for (String pair: pairs){
+		for (Pair pair: pairs){
 			sm.setPairSubscription(pair, Constants.SubscriptionStatuses.Tradable);
 		}
 	}
@@ -330,7 +331,7 @@ public class SpikeTrader implements SessionHolder{
 	}
 	
 	public void recalibrateAllOrders(){
-		for (String pair: pairs){
+		for (Pair pair: pairs){
 			try{
 				sm.adjustOpposingOCOEntryOrders(pair, params.get(pair)[1]);
 			} catch(NullPointerException e){
@@ -339,12 +340,12 @@ public class SpikeTrader implements SessionHolder{
 		}
 	}
 	
-	private void setParam(String pair, int index, int value){
+	private void setParam(Pair pair, int index, int value){
 		params.get(pair)[index] = value;
 	}
 	
 	
-	public void setParams(String pair, int lots, int spikeBuffer, int stopBuffer){
+	public void setParams(Pair pair, int lots, int spikeBuffer, int stopBuffer){
 		if(isActive){
 			logIsRunning();
 			return;
@@ -354,7 +355,7 @@ public class SpikeTrader implements SessionHolder{
 		params.put(pair, new Integer[]{lots*1000, spikeBuffer, stopBuffer});
 	}
 	
-	public void setRecalibrationOptions(String pair, boolean active){
+	public void setRecalibrationOptions(Pair pair, boolean active){
 		recalibrateParams.put(pair, active);
 	}
 	
@@ -372,7 +373,7 @@ public class SpikeTrader implements SessionHolder{
 	public void stop(){
 		cancelAllOrders();
 		try {
-			Thread.currentThread().sleep(500);
+			Thread.sleep(500);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -386,7 +387,7 @@ public class SpikeTrader implements SessionHolder{
 		autoStartTimer.cancel();
 		cancelAllOrders();
 		try{
-			Thread.currentThread().sleep(500);
+			Thread.sleep(500);
 		} catch(InterruptedException e){
 			e.printStackTrace();
 		}
@@ -395,12 +396,12 @@ public class SpikeTrader implements SessionHolder{
 		expirationTimer.cancel();
 		if(dataCollect){
 			dataCollector.cancel();
-			for (String pair: pairs){
+			for (Pair pair: pairs){
 				rateCollectors.get(pair).end();
 			}
 		}
 		try{
-			Thread.currentThread().sleep(3000); // wait for cleanup to finish
+			Thread.sleep(3000); // wait for cleanup to finish
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

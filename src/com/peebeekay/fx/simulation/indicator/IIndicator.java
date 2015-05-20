@@ -1,9 +1,9 @@
 package com.peebeekay.fx.simulation.indicator;
 
-import com.peebeekay.fx.simulation.data.Price;
+import com.peebeekay.fx.simulation.data.types.Tick;
 
 public interface IIndicator {
 	
-	void addDataPoint(Price p);
+	void addDataPoint(Tick p);
 	double getValue();
 }

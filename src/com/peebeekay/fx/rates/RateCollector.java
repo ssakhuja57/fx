@@ -10,17 +10,19 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
+import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.listeners.RequestFailedException;
 import com.peebeekay.fx.session.SessionDependent;
 import com.peebeekay.fx.session.SessionManager;
 import com.peebeekay.fx.utils.ArrayUtils;
 import com.peebeekay.fx.utils.DateUtils;
 import com.peebeekay.fx.utils.Logger;
+import com.peebeekay.fx.utils.RateUtils;
 
 public class RateCollector implements SessionDependent{
 	
 	private SessionManager sm;
-	private String pair;
+	private Pair pair;
 	private int length;
 	private int frequency;
 	public static final int MAX_REQUEST_LENGTH = 300;
@@ -38,7 +40,7 @@ public class RateCollector implements SessionDependent{
 	//private ConcurrentLinkedQueue<Double> lowRates;
 	
 	
-	public RateCollector(SessionManager sm, String pair, int length, int frequency) throws IllegalArgumentException{
+	public RateCollector(SessionManager sm, Pair pair, int length, int frequency) throws IllegalArgumentException{
 			
 //			if (length > 300){
 //				throw new IllegalArgumentException("max allowed length of RateCollector is 300");
@@ -171,7 +173,7 @@ public class RateCollector implements SessionDependent{
 		@Override
 		public void run() {
 			while(isActive){
-				maxWindowRange = RateTools.convertToPips(getMaxRangeByWindow(300), pair);
+				maxWindowRange = RateUtils.convertToPips(getMaxRangeByWindow(300), pair);
 			}
 		}
 		
@@ -251,7 +253,7 @@ public class RateCollector implements SessionDependent{
 	}
 	
 	
-	public String getPair(){
+	public Pair getPair(){
 		return this.pair;
 	}
 	

@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import com.peebeekay.fx.simulation.data.IDataSubscriber;
-import com.peebeekay.fx.simulation.data.Price;
+import com.peebeekay.fx.simulation.data.types.Tick;
 import com.peebeekay.fx.simulation.monitor.ICloseMonitor;
 import com.peebeekay.fx.simulation.monitor.IOpenMonitor;
 import com.peebeekay.fx.simulation.monitors.ATradeMonitor;

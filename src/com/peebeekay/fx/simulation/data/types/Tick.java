@@ -1,19 +1,27 @@
-package com.peebeekay.fx.simulation.data;
+package com.peebeekay.fx.simulation.data.types;
 
 import java.util.Date;
 
-public class Price {
+import com.peebeekay.fx.info.Pair;
+
+public class Tick {
 	
+	private Pair pair;
 	private double ask;
 	private double bid;
 	private Date time;
-	public Price(double bid, double ask, Date time){
-		this.bid = bid;
+	
+	public Tick(Pair pair, double ask, double bid, Date time){
+		this.pair = pair;
 		this.ask = ask;
+		this.bid = bid;
 		this.time = time;
 	}
 	
 	// getters
+	public Pair getPair(){
+		return pair;
+	}
 	public double getAsk(){
 		return ask;
 	}

@@ -1,11 +1,11 @@
 package com.peebeekay.fx.simulation.data;
 
-import java.util.Calendar;
-import java.util.HashMap;
+import com.peebeekay.fx.simulation.data.types.Tick;
+
 
 public interface IDataSubscriber extends Runnable{
 	
-	void accept(Price prices);
-	Boolean isReady();
+	void accept(Tick price);
+	boolean isReady();
 
 }

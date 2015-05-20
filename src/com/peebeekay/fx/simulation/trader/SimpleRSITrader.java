@@ -3,9 +3,9 @@ package com.peebeekay.fx.simulation.trader;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import com.peebeekay.fx.simulation.data.ADataSource;
-import com.peebeekay.fx.simulation.data.ADataSource.DataType;
-import com.peebeekay.fx.simulation.data.Price;
+import com.peebeekay.fx.simulation.data.distributors.ADataDistributor;
+import com.peebeekay.fx.simulation.data.distributors.ADataDistributor.DataType;
+import com.peebeekay.fx.simulation.data.types.Tick;
 import com.peebeekay.fx.simulation.indicator.IIndicator;
 import com.peebeekay.fx.simulation.indicator.RSI;
 
@@ -24,12 +24,12 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 		HOLD,BUY,SELL
 	}
 	
-	public SimpleRSITrader(ADataSource ds){
+	public SimpleRSITrader(ADataDistributor ds){
 		super(ds);
 		Calendar timeNow = Calendar.getInstance();
 		Calendar nowMinus14 = Calendar.getInstance();
 		nowMinus14.add(Calendar.MINUTE, -14);
-		ArrayList<Price> historicalPrices = ds.getHistorical(nowMinus14, timeNow, DataType.M30);
+		ArrayList<Tick> historicalPrices = ds.getHistorical(nowMinus14, timeNow, DataType.M30);
 		rsi = new RSI(period, true, true, historicalPrices);
 		prevRsi = rsi.getValue();
 		pointsReceived = 0;
@@ -46,7 +46,7 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 	}
 	
 	@Override
-	public synchronized void accept(Price price) {
+	public synchronized void accept(Tick price) {
 		rsi.addDataPoint(price);
 		pointsReceived++;
 		notifyAll();

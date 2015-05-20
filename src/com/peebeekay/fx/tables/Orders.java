@@ -7,7 +7,7 @@ import com.fxcore2.O2GOrdersTable;
 import com.fxcore2.O2GTableIterator;
 import com.fxcore2.O2GTableManager;
 import com.fxcore2.O2GTableType;
-import com.peebeekay.fx.info.Pairs;
+import com.peebeekay.fx.info.Pair;
 
 public class Orders extends FXTable<O2GOrdersTable, O2GOrderTableRow>{
 	
@@ -26,10 +26,10 @@ public class Orders extends FXTable<O2GOrdersTable, O2GOrderTableRow>{
 		return res;
 	}
 	
-	public String[] getOCOOrderIDs(String pair, String buySell){
+	public String[] getOCOOrderIDs(Pair pair, String buySell){
 		O2GTableIterator iterator = new O2GTableIterator();
         String[] columnNames = new String[] { "OfferID", "BuySell", "ContingencyType" }; //OCO orders only
-        Object[] columnValues = new Object[] { Pairs.getID(pair), buySell, 1 };
+        Object[] columnValues = new Object[] { String.valueOf(pair.id), buySell, 1 };
         O2GOrderTableRow row =(O2GOrderTableRow) table.getNextRowByMultiColumnValues(columnNames, columnValues, iterator);
         return new String[]{row.getAccountID(), row.getOrderID()};
 	}

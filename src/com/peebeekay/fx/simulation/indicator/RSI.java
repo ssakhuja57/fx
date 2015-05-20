@@ -2,28 +2,28 @@ package com.peebeekay.fx.simulation.indicator;
 
 import java.util.ArrayList;
 
-import com.peebeekay.fx.simulation.data.Price;
+import com.peebeekay.fx.simulation.data.types.Tick;
 
 public class RSI implements IIndicator {
 	
 	private int period;
-	private ArrayList<Price>prices;
+	private ArrayList<Tick>prices;
 	Boolean simple; //if true use simple moving average 
 	private Boolean useBid; //
-	public RSI(int period, Boolean simple, Boolean useBid, ArrayList<Price> prices){
+	public RSI(int period, Boolean simple, Boolean useBid, ArrayList<Tick> prices){
 		 this.period = period;
 		 this.simple = simple;
 		 this.useBid = useBid;
-		 this.prices = new ArrayList<Price>();
+		 this.prices = new ArrayList<Tick>();
 		 
 		 int i=0;
-		 for(Price p: prices){
+		 for(Tick p: prices){
 			 this.prices.add(i, p);
 			 i++;
 		 }
 	}
 	@Override
-	public void addDataPoint(Price p) {
+	public void addDataPoint(Tick p) {
 		prices.add(p);
 		prices.remove(0);
 	}

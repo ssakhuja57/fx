@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Calendar;
 
-import com.peebeekay.fx.rates.RateHistory.Intervals;
+import com.peebeekay.fx.info.Interval;
 import com.peebeekay.fx.utils.DateUtils;
 import com.peebeekay.fx.utils.Logger;
 
@@ -24,12 +24,12 @@ public class DataValidator {
 	File dir;
 	String filePattern;
 	boolean fixedStep;
-	Intervals interval;
+	Interval interval;
 	int timeFieldIndex;
 	String delimiter;
 	boolean ignoreBlanks;
 	
-	public DataValidator(String fileDir, String filePattern, String delimiter, Intervals interval, int timeFieldIndex, boolean ignoreBlanks){
+	public DataValidator(String fileDir, String filePattern, String delimiter, Interval interval, int timeFieldIndex, boolean ignoreBlanks){
 		this.dir = new File(fileDir);
 		this.filePattern = filePattern;
 		this.timeFieldIndex = timeFieldIndex;
@@ -128,7 +128,7 @@ public class DataValidator {
 	}
 	
 	public static void main(String[] args) throws ParseException, IOException{
-		new DataValidator("C:\\fx-data\\EUR-USD", ".*", ",", Intervals.M30, 0, true).validate(ValidationType.ASCENDING);
+		new DataValidator("C:\\fx-data\\EUR-USD", ".*", ",", Interval.M30, 0, true).validate(ValidationType.ASCENDING);
 	}
 	
 	

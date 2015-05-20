@@ -1,5 +1,7 @@
-package com.peebeekay.fx.simulation.data;
+package com.peebeekay.fx.simulation;
 
+import com.peebeekay.fx.simulation.data.distributors.ADataDistributor;
+import com.peebeekay.fx.simulation.data.distributors.TickDataDistributor;
 import com.peebeekay.fx.simulation.trader.ATrader;
 import com.peebeekay.fx.simulation.trader.SimpleRSITrader;
 
@@ -10,7 +12,7 @@ public class SimulationRunner {
 	
 	public static void main(String[] argv){
 		
-		ADataSource ds = new DbDataSource();
+		ADataDistributor ds = new TickDataDistributor();
 		ATrader td = new SimpleRSITrader(ds);
 		SimulationClock simClock = new SimulationClock();
 		

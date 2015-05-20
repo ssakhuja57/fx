@@ -14,16 +14,17 @@ import com.fxcore2.O2GResponseReaderFactory;
 import com.fxcore2.O2GTableType;
 import com.fxcore2.O2GTradingSettingsProvider;
 import com.fxcore2.O2GValueMap;
-import com.peebeekay.fx.info.Pairs;
+import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.listeners.ResponseListener;
 import com.peebeekay.fx.session.SessionManager;
 import com.peebeekay.fx.utils.Logger;
+import com.peebeekay.fx.utils.PairUtils;
 
 
 public class OrderActions {
 	
 	
-	   public static String createMarketOrder(SessionManager sessionMgr, String accountID, String pair, String buySell, 
+	   public static String createMarketOrder(SessionManager sessionMgr, String accountID, Pair pair, String buySell, 
 			   					int amount, ResponseListener responseListener) { 
 	       
 	        O2GValueMap valuemap = getDefaultValMap(sessionMgr, accountID, pair, buySell, amount);
@@ -37,7 +38,7 @@ public class OrderActions {
 	   
 
 			
-	   public static String createEntryOrderWithStop(SessionManager sessionMgr, String accountID, String pair, String buySell, 
+	   public static String createEntryOrderWithStop(SessionManager sessionMgr, String accountID, Pair pair, String buySell, 
 			   					int amount, double rate, int stopOffset, boolean trailStop, ResponseListener responseListener){ 
 		   
 		   stopOffset = buySell.equals(Constants.Buy) ? -stopOffset : stopOffset; // make offset negative if buy 
@@ -57,7 +58,7 @@ public class OrderActions {
 	        return createOrder(sessionMgr, valuemap, responseListener);
 	    }
 	   
-	   public static String createOpposingOCOEntryOrdersWithStops(SessionManager sessionMgr, String accountID, String pair,
+	   public static String createOpposingOCOEntryOrdersWithStops(SessionManager sessionMgr, String accountID, Pair pair,
 			   int amount, double longRate, double shortRate, int stopOffset, boolean trailStop, ResponseListener responseListener){
 		   O2GValueMap parentValueMap = getEmptyValMap(sessionMgr);
 		   parentValueMap.setString(O2GRequestParamsEnum.COMMAND, Constants.Commands.CreateOCO);
@@ -116,7 +117,7 @@ public class OrderActions {
 	   }
 	   
 	   // this is an alternative to using TrueMarketClose
-	   public static String closeTrade(SessionManager sessionMgr, String accountID, String tradeID, String pair, String buySell, 
+	   public static String closeTrade(SessionManager sessionMgr, String accountID, String tradeID, Pair pair, String buySell, 
 			   int amount, ResponseListener responseListener){ 
 		
 		   String oppositeBuySell = buySell.equals(Constants.Buy) ? Constants.Sell : Constants.Buy; 
@@ -160,7 +161,7 @@ public class OrderActions {
 		   }
 	   }
 	   
-	   public static String setPairSubscription(SessionManager sessionMgr, String pair, String status, ResponseListener responseListener){
+	   public static String setPairSubscription(SessionManager sessionMgr, Pair pair, String status, ResponseListener responseListener){
 		   
 		   if (status.equals(Constants.SubscriptionStatuses.Tradable)){
 			   int subscribed = sessionMgr.offersTable.getSubscriptionCount();
@@ -177,14 +178,14 @@ public class OrderActions {
 		   O2GValueMap valuemap = getEmptyValMap(sessionMgr);
 	        valuemap.setString(O2GRequestParamsEnum.COMMAND, Constants.Commands.SetSubscriptionStatus);
 	        valuemap.setString(O2GRequestParamsEnum.SUBSCRIPTION_STATUS, status);
-	        valuemap.setString(O2GRequestParamsEnum.OFFER_ID, Pairs.getID(pair));
+	        valuemap.setString(O2GRequestParamsEnum.OFFER_ID, String.valueOf(pair.id));
 	        
 	        return createOrder(sessionMgr, valuemap, responseListener);
 	   }
 	   
 	   public static void removeAllPairSubscriptions(SessionManager sessionMgr, ResponseListener responseListener){
 		   Logger.info("unsubscribing from all pairs...");
-		   for (String pair: Pairs.getAllPairs()){
+		   for (Pair pair: PairUtils.getAllPairs()){
 			   setPairSubscription(sessionMgr, pair, Constants.SubscriptionStatuses.Disable, responseListener);
 		   }
 	   }
@@ -193,8 +194,8 @@ public class OrderActions {
 		   
 		   Logger.info("Setting all pairs related to " 
 				   + currencies.toString() + " to tradable");
-		   Collection<String> pairs = Pairs.getRelatedPairs(currencies);
-		   for (String pair: pairs){
+		   Collection<Pair> pairs = PairUtils.getRelatedPairs(currencies);
+		   for (Pair pair: pairs){
 			   setPairSubscription(sessionMgr, pair, Constants.SubscriptionStatuses.Tradable, responseListener);
 		   }
 	   }
@@ -208,7 +209,7 @@ public class OrderActions {
 		    }
 		 }
 		 
-		public static double[] getMarginRequirements(SessionManager sessionMgr, String pair) {
+		public static double[] getMarginRequirements(SessionManager sessionMgr, Pair pair) {
 		        O2GLoginRules loginRules = sessionMgr.session.getLoginRules();
 		        O2GTradingSettingsProvider tradingSetting = loginRules.getTradingSettingsProvider();
 		        O2GResponse accountsResponse = loginRules.getTableRefreshResponse(O2GTableType.ACCOUNTS);
@@ -218,14 +219,14 @@ public class OrderActions {
 		        }
 		        O2GAccountsTableResponseReader accounts = responseReaderFactory.createAccountsTableReader(accountsResponse);
 		        O2GAccountRow accountRow = accounts.getRow(0);
-		        O2GMargin margin = tradingSetting.getMargins(pair, accountRow);
+		        O2GMargin margin = tradingSetting.getMargins(PairUtils.insertSlash(pair), accountRow);
 		        return new double[]{margin.getMMR(), margin.getEMR(), margin.getLMR()};
 		 }
 	   
 
 
 	   
-		private static O2GValueMap getDefaultValMap(SessionManager sessionMgr, String accountID, String pair, String buySell, int amount){
+		private static O2GValueMap getDefaultValMap(SessionManager sessionMgr, String accountID, Pair pair, String buySell, int amount){
 	        
 			O2GRequestFactory reqFactory = sessionMgr.session.getRequestFactory();
 		       if (reqFactory == null) {
@@ -234,7 +235,7 @@ public class OrderActions {
 			O2GValueMap valuemap = reqFactory.createValueMap();
 			valuemap.setString(O2GRequestParamsEnum.COMMAND, Constants.Commands.CreateOrder);
 	        valuemap.setString(O2GRequestParamsEnum.ACCOUNT_ID, accountID);
-	        valuemap.setString(O2GRequestParamsEnum.OFFER_ID, Pairs.getID(pair).toString());
+	        valuemap.setString(O2GRequestParamsEnum.OFFER_ID, String.valueOf(pair.id));
 	        valuemap.setString(O2GRequestParamsEnum.BUY_SELL, buySell);
 	        valuemap.setInt(O2GRequestParamsEnum.AMOUNT, amount);
 	        return valuemap;

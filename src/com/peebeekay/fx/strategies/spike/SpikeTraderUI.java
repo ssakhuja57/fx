@@ -32,9 +32,10 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.TableModel;
 
-import com.peebeekay.fx.info.Pairs;
+import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.session.SessionLoginUI;
 import com.peebeekay.fx.utils.Logger;
+import com.peebeekay.fx.utils.PairUtils;
 
 public class SpikeTraderUI extends JFrame{
 	
@@ -79,8 +80,8 @@ public class SpikeTraderUI extends JFrame{
 	JTable pairsData;
 	
 	JPanel inputs = new JPanel(new GridLayout(0,5));
-	HashMap<String,JTextField[]> orderInputs = new HashMap<String,JTextField[]>();
-	HashMap<String, JCheckBox> recalibrateParamOptions = new HashMap<String, JCheckBox>();
+	HashMap<Pair,JTextField[]> orderInputs = new HashMap<Pair,JTextField[]>();
+	HashMap<Pair, JCheckBox> recalibrateParamOptions = new HashMap<Pair, JCheckBox>();
 	JTextField defAmount;
 	JTextField defSpikeBuffer;
 	JTextField defStopBuffer;
@@ -98,7 +99,7 @@ public class SpikeTraderUI extends JFrame{
 		super("Spike Trader");
 		this.setSize(500, 750);
 		this.setResizable(false);
-		currencySelector = new JList<String>(Pairs.currencies.toArray(new String[Pairs.currencies.size()]));
+		currencySelector = new JList<String>(PairUtils.getAllCurrencies().toArray(new String[PairUtils.getAllCurrencies().size()]));
 			currencySelector.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 			currencySelector.setSelectedIndex(0);
 			JScrollPane currencyScroll = new JScrollPane(currencySelector);
@@ -256,7 +257,7 @@ public class SpikeTraderUI extends JFrame{
 		inputs.add(new JLabel("Stop Buffer"));
 		inputs.add(new JLabel("Recal Params"));
 
-		for (String pair: spikeTrader.getPairs()){
+		for (Pair pair: spikeTrader.getPairs()){
 			inputs.add(new JLabel(pair + ":"));
 			//Integer[] calculated = spikeTrader.getParams().get(pair);
 			JTextField amount = new JTextField();
@@ -337,7 +338,7 @@ public class SpikeTraderUI extends JFrame{
 			}
 			else{	
 				boolean valueErrors = false;
-				for (String pair: spikeTrader.getPairs()){
+				for (Pair pair: spikeTrader.getPairs()){
 					
 					int lots = 0;
 					int spikeBuffer = 0;
@@ -393,7 +394,7 @@ public class SpikeTraderUI extends JFrame{
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			spikeTrader.recalculateParams();
-			for (String pair: spikeTrader.getPairs()){
+			for (Pair pair: spikeTrader.getPairs()){
 				Integer[] calculated = spikeTrader.getParams().get(pair);
 				Integer lots = calculated[0]/1000;
 				Integer spikeBuffer = calculated[1];

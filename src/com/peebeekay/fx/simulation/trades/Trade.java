@@ -2,7 +2,7 @@ package com.peebeekay.fx.simulation.trades;
 
 import java.util.Date;
 
-import com.peebeekay.fx.simulation.data.Price;
+import com.peebeekay.fx.simulation.data.types.Tick;
 import com.peebeekay.fx.simulation.monitors.close.ACloseTradeMonitor;
 import com.peebeekay.fx.simulation.monitors.open.AOpenTradeMonitor;
 
@@ -38,7 +38,7 @@ public class Trade {
 		}
 	}
 	
-	public void open(Price price, AOpenTradeMonitor reason){
+	public void open(Tick price, AOpenTradeMonitor reason){
 		if(!checkTrans(status, Status.OPEN)) 
 			return;
 		status = Status.OPEN;
@@ -50,7 +50,7 @@ public class Trade {
 		openReason = reason;
 	}
 	
-	public void close(Price price, ACloseTradeMonitor reason){
+	public void close(Tick price, ACloseTradeMonitor reason){
 		if(!checkTrans(status, Status.CLOSED))
 			return;
 		status = Status.CLOSED;

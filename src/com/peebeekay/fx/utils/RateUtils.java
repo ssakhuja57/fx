@@ -1,8 +1,8 @@
-package com.peebeekay.fx.rates;
+package com.peebeekay.fx.utils;
 
-import com.peebeekay.fx.info.Pairs;
+import com.peebeekay.fx.info.Pair;
 
-public class RateTools {
+public class RateUtils {
 	
 	public static double addPips(double rate, int pips){
 		if (rate > 30){ //check if JPY
@@ -11,8 +11,8 @@ public class RateTools {
 		return rate + pips/10000.0;
 	}
 	
-	public static double convertToPips(double amount, String pair){
-		String[] currencies = Pairs.splitPair(pair);
+	public static double convertToPips(double amount, Pair pair){
+		String[] currencies = PairUtils.splitPair(pair);
 		if (currencies[0].equals("JPY") || currencies[1].equals("JPY")){
 			return Math.round(100*amount*10)/10;
 		}

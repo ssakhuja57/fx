@@ -5,7 +5,7 @@ import com.fxcore2.O2GOffersTable;
 import com.fxcore2.O2GTableIterator;
 import com.fxcore2.O2GTableManager;
 import com.fxcore2.O2GTableType;
-import com.peebeekay.fx.info.Pairs;
+import com.peebeekay.fx.info.Pair;
 
 public class Offers extends FXTable<O2GOffersTable, O2GOfferTableRow>{
 	
@@ -24,28 +24,28 @@ public class Offers extends FXTable<O2GOffersTable, O2GOfferTableRow>{
 		return count;
 	}
 	
-	public double getBuyRate(String pair){
+	public double getBuyRate(Pair pair){
 		return getRateRow(pair).getAsk();
 	}
 	
-	public double getSellRate(String pair){
+	public double getSellRate(Pair pair){
 		return getRateRow(pair).getBid();
 	}
 	
-	public double getLow(String pair){
+	public double getLow(Pair pair){
 		return getRateRow(pair).getLow();
 	}
 	
-	public double getHigh(String pair){
+	public double getHigh(Pair pair){
 		return getRateRow(pair).getHigh();
 	}
 	
-	public double getPipCost(String pair){
+	public double getPipCost(Pair pair){
 		return getRateRow(pair).getPipCost();
 	}
 	
-	private O2GOfferTableRow getRateRow(String pair){
-		return table.getNextRowByColumnValue("OfferID", Pairs.getID(pair), new O2GTableIterator());
+	private O2GOfferTableRow getRateRow(Pair pair){
+		return table.getNextRowByColumnValue("OfferID", String.valueOf(pair.id), new O2GTableIterator());
 	}
 	
 	
