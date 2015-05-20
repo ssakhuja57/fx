@@ -14,6 +14,8 @@ public class RSI implements IIndicator {
 		 this.period = period;
 		 this.simple = simple;
 		 this.useBid = useBid;
+		 this.prices = new ArrayList<Price>();
+		 
 		 int i=0;
 		 for(Price p: prices){
 			 this.prices.add(i, p);

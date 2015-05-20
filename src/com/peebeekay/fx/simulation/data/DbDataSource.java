@@ -2,6 +2,7 @@ package com.peebeekay.fx.simulation.data;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -13,11 +14,14 @@ public class DbDataSource  extends ADataSource implements Runnable{
 	
 	private Queue<Price> cache; //for now we can let the cache grow indefinitely since we aren't restricted on memory
 	private Boolean stopSignal;
+	private volatile boolean tick;
+	
 	public DbDataSource()
 	{
 		super();
 		cache = new LinkedList<Price>();
 		stopSignal = false;
+		tick = false;
 	}
 	
 	private void getDataFromDb()
@@ -25,7 +29,7 @@ public class DbDataSource  extends ADataSource implements Runnable{
 		Random rng = new Random();
 		double bid = rng.nextDouble()*3;
 		double ask = rng.nextDouble()*3;
-		Calendar nowTime = Calendar.getInstance();
+		Date nowTime = Calendar.getInstance().getTime();
 		cache.add(new Price(bid, ask, nowTime));
 	}
 	
@@ -41,40 +45,58 @@ public class DbDataSource  extends ADataSource implements Runnable{
 			}
 		}
 	}
-
+	private synchronized void waitForTick(){
+		try{
+			wait();
+		}catch(InterruptedException e){
+			
+		}
+	}
+	public synchronized void stop(){
+		stopSignal = true;
+		notifyAll();
+	}
 	@Override
 	public void run() {
-		long lastSendTime = 0;
-		
-		while(!stopSignal)
-		{
-			long sleepTime = (long) (publishingRate*1000);
-			long loopStart = System.nanoTime();
-			//get data from database
-			getDataFromDb();
-			//determine if it's time to send the data
-			double elapsedTime = (double)(System.nanoTime() - lastSendTime)/1000000000.00;
-			if(elapsedTime > publishingRate)
-			{
+		getDataFromDb();
+		while(!stopSignal){
+			waitForTick();
+			if(tick){
 				publish();
-				lastSendTime = System.nanoTime();
-			}
-			long workTime = (System.nanoTime() - loopStart)/1000000; //amount of time spend actually doing work
-			if(sleepTime > workTime)
-			{ //if we can sleep
-				try {
-					Thread.sleep(sleepTime- workTime);
-				} catch (InterruptedException e) {
-					Logger.debug("Could not sleep");
-				}
+				tick = false;
 			}
 		}
 	}
+		
+	
 
 	@Override
-	ArrayList<Price> getHistorical(Calendar start, Calendar end, DataType type) {
+	public ArrayList<Price> getHistorical(Calendar start, Calendar end, DataType type) {
 		//query the db for the prices
-		return null;
+		ArrayList<Price> prices = new ArrayList<Price>();
+		Random rng = new Random();
+		for(int i =0; i<14; i++){
+			prices.add(new Price(rng.nextDouble()*3,rng.nextDouble()*3, Calendar.getInstance().getTime()));
+		}
+		return prices;
+	}
+
+	@Override
+	public synchronized void onTick() {
+		tick = true;
+		notifyAll();
+	}
+
+	@Override
+	public void onThirty() {
+		//Nothing??
+		
+	}
+
+	@Override
+	public boolean stillHasData() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }
