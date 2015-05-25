@@ -1,11 +1,14 @@
 package com.peebeekay.fx.simulation.data.types;
 
+import java.util.Date;
+
 import com.peebeekay.fx.info.Interval;
 import com.peebeekay.fx.info.Pair;
 
 public class OhlcPrice {
 	
 	private Pair pair;
+	private Date time;
 	private Interval interval;
 	
 	private double askOpen;
@@ -18,9 +21,10 @@ public class OhlcPrice {
 	private double bidLow;
 	private double bidClose;
 	
-	public OhlcPrice(Pair pair, Interval interval, double askOpen, double askHigh, double askLow, double askClose,
+	public OhlcPrice(Pair pair, Date time, Interval interval, double askOpen, double askHigh, double askLow, double askClose,
 			double bidOpen, double bidHigh, double bidLow, double bidClose){
 		this.pair = pair;
+		this.time = time;
 		this.interval = interval;
 		
 		this.askOpen = askOpen;
@@ -36,6 +40,9 @@ public class OhlcPrice {
 	
 	public Pair getPair(){
 		return pair;
+	}
+	public Date getTime(){
+		return time;
 	}
 	public Interval getInterval(){
 		return interval;

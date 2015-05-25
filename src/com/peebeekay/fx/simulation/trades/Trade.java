@@ -1,38 +1,45 @@
 package com.peebeekay.fx.simulation.trades;
 
+import java.lang.reflect.Field;
 import java.util.Date;
 
+import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.simulation.data.types.Tick;
 import com.peebeekay.fx.simulation.monitors.close.ACloseTradeMonitor;
 import com.peebeekay.fx.simulation.monitors.open.AOpenTradeMonitor;
+import com.peebeekay.fx.utils.DateUtils;
 
 public class Trade {
 	
 	private int id;
+	private Pair pair;
 	private Status status;
 	private boolean isLong;
 	private int lots;
 	private Date createdTime;
 	
 	private double openPrice;
+	private Tick openTick;
 	private Date openTime;
 	private AOpenTradeMonitor openReason;
 	
 	private double closePrice;
+	private Tick closeTick;
 	private Date closeTime;
 	private ACloseTradeMonitor closeReason;
 	
-	public Trade(int id, Date createdTime, boolean isLong, int lots){
+	public Trade(int id, Pair pair, boolean isLong, int lots){
 		this.id = id;
+		this.pair = pair;
 		status = Status.WAITING;
-		this.createdTime = createdTime;
 		this.isLong = isLong;
 		this.lots = lots;
+		createdTime = new Date();
 	}
 	
 	public enum Status{
-		WAITING(0), OPEN(1), CLOSED(2), CANCELLED(-1);
-		int value;
+		WAITING(0), CANCELLED(1), OPEN(1), CLOSED(2);
+		public int value;
 		private Status(int value){
 			this.value = value;
 		}
@@ -42,6 +49,7 @@ public class Trade {
 		if(!checkTrans(status, Status.OPEN)) 
 			return;
 		status = Status.OPEN;
+		this.openTick = price;
 		if(isLong)
 			openPrice = price.getAsk();
 		else
@@ -54,6 +62,7 @@ public class Trade {
 		if(!checkTrans(status, Status.CLOSED))
 			return;
 		status = Status.CLOSED;
+		this.closeTick = price;
 		if(isLong)
 			openPrice = price.getBid();
 		else
@@ -83,6 +92,10 @@ public class Trade {
 		return id;
 	}
 	
+	public Pair getPair(){
+		return pair;
+	}
+	
 	public Date getCreatedTime(){
 		return createdTime;
 	}
@@ -102,6 +115,10 @@ public class Trade {
 	public double getOpenPrice() {
 		return openPrice;
 	}
+	
+	public Tick getOpenTick(){
+		return openTick;
+	}
 
 	public Date getOpenTime() {
 		return openTime;
@@ -114,6 +131,10 @@ public class Trade {
 	public double getClosePrice() {
 		return closePrice;
 	}
+	
+	public Tick getCloseTick(){
+		return closeTick;
+	}
 
 	public Date getCloseTime() {
 		return closeTime;
@@ -122,6 +143,23 @@ public class Trade {
 	public ACloseTradeMonitor getCloseReason() {
 		return closeReason;
 	}
+	
+	public String getSummary(){
+		String res = "";
+		for (Field field : this.getClass().getDeclaredFields()) {
+		    field.setAccessible(true);
+		    String name = field.getName();
+		    Object value = null;
+			try {
+				value = field.get(this);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				e.printStackTrace();
+			}
+		    res += name + "=" + value + "; ";
+		}
+		return res;
+	}
+
 	
 	@Override
 	public int hashCode(){

@@ -9,7 +9,7 @@ public abstract class AOpenTradeMonitor extends ATradeMonitor{
 	
 	public AOpenTradeMonitor(Trade trade) {
 		super(trade);
-		super.validStatuses.add(Status.WAITING);
+		super.validStatus = Status.WAITING;
 	}
 
 	@Override

@@ -18,6 +18,11 @@ public class Tick {
 		this.time = time;
 	}
 	
+	public Tick(double ask, double bid){
+		this.ask = ask;
+		this.bid = bid;
+	}
+	
 	// getters
 	public Pair getPair(){
 		return pair;
@@ -30,5 +35,17 @@ public class Tick {
 	}
 	public Date getTime(){
 		return time;
+	}
+	
+	public double getEnterPrice(boolean isLong){
+		if(isLong)
+			return ask;
+		return bid;
+	}
+	
+	public double getExitPrice(boolean isLong){
+		if(isLong)
+			return bid;
+		return ask;
 	}
 }

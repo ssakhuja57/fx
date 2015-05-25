@@ -17,14 +17,19 @@ public abstract class ATradeMonitor implements IDataSubscriber, Runnable{
 	protected boolean isActive;
 	private ArrayList<ADataDistributor> dataSources = new ArrayList<ADataDistributor>();;
 	protected Queue<Tick> priceQueue = new LinkedList<Tick>();
-	protected List<Status> validStatuses = new LinkedList<Status>();
+	protected Status validStatus;
 	
 	public ATradeMonitor(Trade trade){
 		this.trade = trade;
 	}
 	
-	public void acceptData(Tick price){
+	@Override
+	public void accept(Tick price){
 		priceQueue.add(price);
+	}
+	
+	public boolean checkIsActive(){
+		return isActive;
 	}
 	
 	public void subscribeToDataDist(ADataDistributor dataSource){
@@ -33,14 +38,17 @@ public abstract class ATradeMonitor implements IDataSubscriber, Runnable{
 	}
 	
 	public boolean checkValidStatus(){
-		return validStatuses.contains(trade.getStatus());
+		if(!isActive){
+			return false;
+		}
+		if(trade.getStatus().value > validStatus.value){
+			this.cancel();
+			return false;
+		}
+		return true;
 	}
 	
 	public abstract void execute(Tick price);
-	
-	public void activate(){
-		isActive = true;
-	}
 	
 	public void cancel(){
 		for(ADataDistributor d: dataSources){

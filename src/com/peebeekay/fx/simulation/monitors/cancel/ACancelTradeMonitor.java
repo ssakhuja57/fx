@@ -10,7 +10,7 @@ public abstract class ACancelTradeMonitor extends ATradeMonitor{
 
 	public ACancelTradeMonitor(Trade trade) {
 		super(trade);
-		super.validStatuses.add(Status.WAITING);
+		super.validStatus = Status.WAITING;
 	}
 
 	@Override

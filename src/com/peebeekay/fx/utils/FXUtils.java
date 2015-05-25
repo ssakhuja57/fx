@@ -5,9 +5,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Date;
-import java.util.Random;
 
 import com.peebeekay.fx.session.Credentials;
+import com.peebeekay.fx.simulation.data.types.Tick;
 
 public class FXUtils {
 
@@ -68,7 +68,7 @@ public class FXUtils {
                 password = fieldSplit[1].replace("\"", "");
         }
         
-        Thread.currentThread().sleep(1000);
+        Thread.sleep(1000);
         
         return new Credentials(username, password, Credentials.DEMO, null);
 }

@@ -1,0 +1,91 @@
+package com.peebeekay.fx.simulation;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.EnumSet;
+
+import com.peebeekay.fx.info.Interval;
+import com.peebeekay.fx.info.Pair;
+import com.peebeekay.fx.simulation.data.sources.DBDataSource;
+import com.peebeekay.fx.simulation.data.types.Tick;
+import com.peebeekay.fx.simulation.trader.ATrader;
+import com.peebeekay.fx.utils.DateUtils;
+import com.peebeekay.fx.utils.Logger;
+
+
+public class SimulationController implements Runnable{
+
+	private int tickRow = 0;
+	private Calendar tickClock;
+	private Calendar OhlcClock;
+	private boolean moreData = true;
+	
+	private Pair pair;
+	private Calendar end;
+	private DBDataSource dbSource;
+	private ArrayList<ATrader> traders = new ArrayList<ATrader>();
+	
+	public SimulationController(Pair pair, Calendar start, Calendar end, DBDataSource dbSource){
+		this.pair = pair;
+		this.end = end;
+		this.dbSource = dbSource;
+		tickClock = start;
+		OhlcClock = start;
+	}
+	
+	public void addTrader(ATrader trader){
+		traders.add(trader);
+	}
+	
+	private void advanceTick(){
+		Tick tick = null;
+		try{
+			tick = dbSource.getTickRow(tickRow);
+		} catch(IndexOutOfBoundsException e){
+			Logger.info("no more data in source, finished!");
+			moreData = false;
+			return;
+		}
+		tickClock.setTime(tick.getTime());
+		Calendar tickTime = DateUtils.getCalendar(tick.getTime());
+		Calendar tickTimeMinute = DateUtils.roundDownToMinute(tickTime); 
+		if(tickTimeMinute.after(OhlcClock)){
+			OhlcClock = tickTimeMinute;
+			sendOhlc();
+		}
+		sendTick(tick);
+		tickRow++;
+	}
+	
+	private void sendTick(Tick tick){
+		for(ATrader t: traders){
+			t.accept(tick);
+		}
+	}
+	
+	private void sendOhlc(){
+		for(Interval interval: EnumSet.allOf(Interval.class)){
+			if(DateUtils.isMultipleOf(OhlcClock.getTime(), interval.minutes)){
+				for(ATrader t: traders)
+					t.accept(dbSource.getOhlcPrices(pair, interval, OhlcClock, OhlcClock).get(0));
+			}
+		}
+	}
+
+	@Override
+	public void run() {
+		while(true){
+			if(tickClock.after(end) || !moreData)
+				break;
+			advanceTick();
+		}
+		for(ATrader t: traders)
+			try {
+				t.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+	}
+	
+}

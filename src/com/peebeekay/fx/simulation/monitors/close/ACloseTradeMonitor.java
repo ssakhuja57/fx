@@ -9,7 +9,7 @@ public abstract class ACloseTradeMonitor extends ATradeMonitor{
 	
 	public ACloseTradeMonitor(Trade trade) {
 		super(trade);
-		super.validStatuses.add(Status.OPEN);
+		super.validStatus = Status.OPEN;
 	}
 
 	@Override
