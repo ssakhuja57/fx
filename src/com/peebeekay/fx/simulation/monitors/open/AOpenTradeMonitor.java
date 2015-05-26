@@ -15,5 +15,6 @@ public abstract class AOpenTradeMonitor extends ATradeMonitor{
 	@Override
 	public void execute(Tick price){
 		super.trade.open(price, this);
+		this.cancel();
 	}
 }

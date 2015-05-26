@@ -40,5 +40,11 @@ public class RandomPriceData implements IDataSource{
 		double ask = rand.nextDouble()*3;
 		return new Tick(pair, ask, bid, time);
 	}
+
+	@Override
+	public Tick getTickRow(int rowNum) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }

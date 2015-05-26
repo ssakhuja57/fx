@@ -6,7 +6,7 @@ import com.peebeekay.fx.simulation.trades.Trade;
 import com.peebeekay.fx.simulation.trades.Trade.Status;
 import com.peebeekay.fx.utils.RateUtils;
 
-public class StopMonitor extends ACloseTradeMonitor{
+public class StopClose extends ACloseTradeMonitor{
 
 	int maxOffset;
 	int currentOffset;
@@ -15,7 +15,7 @@ public class StopMonitor extends ACloseTradeMonitor{
 	boolean isLong;
 	
 	
-	public StopMonitor(Trade trade, int offset, boolean trail) {
+	public StopClose(Trade trade, int offset, boolean trail) {
 		super(trade);
 		this.maxOffset = offset;
 		this.currentOffset = offset;
@@ -25,10 +25,7 @@ public class StopMonitor extends ACloseTradeMonitor{
 
 	@Override
 	public void accept(Tick price) {
-		if(!super.checkValidStatus()){
-			return;
-		}
-		if(super.trade.getStatus() != Status.OPEN){
+		if(!super.checkValid()){
 			return;
 		}
 		Tick lastPrice = super.priceQueue.peek();

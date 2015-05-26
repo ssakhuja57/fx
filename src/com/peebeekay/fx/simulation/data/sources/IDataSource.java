@@ -10,6 +10,8 @@ import com.peebeekay.fx.simulation.data.types.Tick;
 
 public interface IDataSource {
 	
+	public Tick getTickRow(int rowNum);
+	
 	public ArrayList<Tick> getTicks(Pair pair, Calendar start, Calendar end);
 	
 	public ArrayList<OhlcPrice> getOhlcPrices(Pair pair, Interval interval, Calendar start, Calendar end);

@@ -7,7 +7,7 @@ import java.util.EnumSet;
 
 import com.peebeekay.fx.info.Interval;
 import com.peebeekay.fx.info.Pair;
-import com.peebeekay.fx.simulation.data.sources.DBDataSource;
+import com.peebeekay.fx.simulation.data.sources.IDataSource;
 import com.peebeekay.fx.simulation.data.types.OhlcPrice;
 import com.peebeekay.fx.simulation.data.types.Tick;
 import com.peebeekay.fx.simulation.trader.ATrader;
@@ -24,13 +24,13 @@ public class SimulationController implements Runnable{
 	
 	private Pair pair;
 	private Calendar end;
-	private DBDataSource dbSource;
+	private IDataSource dataSource;
 	private ArrayList<ATrader> traders = new ArrayList<ATrader>();
 	
-	public SimulationController(Pair pair, Calendar start, Calendar end, DBDataSource dbSource){
+	public SimulationController(Pair pair, Calendar start, Calendar end, IDataSource dataSource){
 		this.pair = pair;
 		this.end = end;
-		this.dbSource = dbSource;
+		this.dataSource = dataSource;
 		tickClock = Calendar.getInstance(); tickClock.setTime(start.getTime());
 		OhlcClock = Calendar.getInstance(); OhlcClock.setTime(start.getTime());
 	}
@@ -42,7 +42,7 @@ public class SimulationController implements Runnable{
 	private void advanceTick(){
 		Tick tick = null;
 		try{
-			tick = dbSource.getTickRow(tickRow);
+			tick = dataSource.getTickRow(tickRow);
 		} catch(IndexOutOfBoundsException e){
 			Logger.info("no more data in source, finished!");
 			moreData = false;
@@ -75,7 +75,7 @@ public class SimulationController implements Runnable{
 				continue;
 			if(DateUtils.isMultipleOf(OhlcClock.getTime(), interval.minutes)){
 				for(ATrader t: traders){
-					ArrayList<OhlcPrice> prices = dbSource.getOhlcPrices(pair, interval, OhlcClock, OhlcClock);
+					ArrayList<OhlcPrice> prices = dataSource.getOhlcPrices(pair, interval, OhlcClock, OhlcClock);
 					if(prices.size() > 0)
 						t.accept(prices.get(0));
 				}

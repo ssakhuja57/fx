@@ -8,15 +8,15 @@ import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.simulation.data.sources.IDataSource;
 import com.peebeekay.fx.simulation.data.types.OhlcPrice;
 import com.peebeekay.fx.simulation.data.types.Tick;
+import com.peebeekay.fx.simulation.indicator.IIndicator;
 import com.peebeekay.fx.simulation.indicator.RSI;
-import com.peebeekay.fx.simulation.monitors.close.StopMonitor;
+import com.peebeekay.fx.simulation.monitors.close.StopClose;
 import com.peebeekay.fx.simulation.monitors.open.MarketOpen;
 import com.peebeekay.fx.simulation.trades.Trade;
-import com.peebeekay.fx.utils.Logger;
 
 public class SimpleRSITrader extends ATrader implements Runnable{
 	
-	private RSI rsi;
+	private IIndicator rsi;
 	private Calendar startTime;
 	private Pair pair;
 	private int stopOffset;
@@ -73,7 +73,7 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 			tradeLong = false;
 		Trade trade = super.tradeMgr.createTrade(pair, tradeLong, 1000);
 		super.tradeMgr.updateTrade(trade, new MarketOpen(trade));
-		super.tradeMgr.updateTrade(trade, new StopMonitor(trade, stopOffset, true));
+		super.tradeMgr.updateTrade(trade, new StopClose(trade, stopOffset, true));
 		signal = Signal.HOLD;
 	}
 	

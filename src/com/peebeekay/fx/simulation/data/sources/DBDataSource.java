@@ -94,6 +94,7 @@ public class DBDataSource implements IDataSource{
 		return new OhlcPrice(pair, date, interval, askOpen, askHigh, askLow, askClose, bidOpen, bidHigh, bidLow, bidClose);
 	}
 	
+	@Override
 	public Tick getTickRow(int rowNum){
 		return arrayToTick(tickCache.get(rowNum));
 	}

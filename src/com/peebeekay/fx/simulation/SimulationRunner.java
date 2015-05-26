@@ -55,11 +55,11 @@ public class SimulationRunner {
 		};
 		for(int month=0; month<starts.length; month++){
 			DBConfig dbConfig = new VerticaConfig("192.168.0.102", 5433, "fx", "dbadmin", "dbadmin");
-			DBDataSource dbSource = new DBDataSource(dbConfig, pair, starts[month], ends[month], true);
-			SimulationController controller = new SimulationController(pair, starts[month], ends[month], dbSource);
+			IDataSource dataSource = new DBDataSource(dbConfig, pair, starts[month], ends[month], true);
+			SimulationController controller = new SimulationController(pair, starts[month], ends[month], dataSource);
 			
 			for(int i=12; i<=25; i++){
-				SimpleRSITrader t = new SimpleRSITrader("2014-" + (month+1) + "-m30RSI-stop" + i + ".csv", "C:\\fx-data\\results", pair, dbSource, starts[month], i);
+				ATrader t = new SimpleRSITrader("2014-" + (month+1) + "-m30RSI-stop" + i + ".csv", "C:\\fx-data\\results", pair, dataSource, starts[month], i);
 				controller.addTrader(t);
 			}
 			

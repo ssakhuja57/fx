@@ -15,5 +15,6 @@ public abstract class ACloseTradeMonitor extends ATradeMonitor{
 	@Override
 	public void execute(Tick price){
 		super.trade.close(price, this);
+		this.cancel();
 	}
 }

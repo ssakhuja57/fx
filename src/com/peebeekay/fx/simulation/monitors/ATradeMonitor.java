@@ -7,6 +7,7 @@ import java.util.Queue;
 
 import com.peebeekay.fx.simulation.data.IDataSubscriber;
 import com.peebeekay.fx.simulation.data.distributors.ADataDistributor;
+import com.peebeekay.fx.simulation.data.types.OhlcPrice;
 import com.peebeekay.fx.simulation.data.types.Tick;
 import com.peebeekay.fx.simulation.trades.Trade;
 import com.peebeekay.fx.simulation.trades.Trade.Status;
@@ -25,20 +26,18 @@ public abstract class ATradeMonitor implements IDataSubscriber, Runnable{
 	}
 	
 	@Override
-	public void accept(Tick price){
-		priceQueue.add(price);
-	}
+	public abstract void accept(Tick price);
 	
-	public boolean checkIsActive(){
-		return isActive;
-	}
+	@Override
+	public abstract void accept(OhlcPrice price);
+	
 	
 	public void subscribeToDataDist(ADataDistributor dataSource){
 		dataSource.subscribeTo(this);
 		dataSources.add(dataSource);
 	}
 	
-	public boolean checkValidStatus(){
+	public boolean checkValid(){
 		if(!isActive){
 			return false;
 		}
@@ -46,7 +45,10 @@ public abstract class ATradeMonitor implements IDataSubscriber, Runnable{
 			this.cancel();
 			return false;
 		}
-		return true;
+		if(trade.getStatus() == validStatus)
+			return true;
+		
+		return false;
 	}
 	
 	public abstract void execute(Tick price);

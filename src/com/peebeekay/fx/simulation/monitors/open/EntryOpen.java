@@ -3,18 +3,15 @@ package com.peebeekay.fx.simulation.monitors.open;
 import com.peebeekay.fx.simulation.data.types.OhlcPrice;
 import com.peebeekay.fx.simulation.data.types.Tick;
 import com.peebeekay.fx.simulation.trades.Trade;
+import com.peebeekay.fx.utils.RateUtils;
 
-public class MarketOpen extends AOpenTradeMonitor{
+public class EntryOpen extends AOpenTradeMonitor{
 
-	public MarketOpen(Trade trade) {
+	private Tick entryPrice;
+	
+	public EntryOpen(Trade trade, Tick entryPrice) {
 		super(trade);
-	}
-
-	@Override
-	public void accept(Tick price) {
-		if(!super.checkValid())
-			return;
-		super.execute(price);
+		this.entryPrice = entryPrice;
 	}
 
 	@Override
@@ -24,7 +21,17 @@ public class MarketOpen extends AOpenTradeMonitor{
 
 	@Override
 	public void run() {
+		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public void accept(Tick price) {
+		if(!super.checkValid())
+			return;
+		if(RateUtils.isBetter(price, entryPrice, super.trade.getIsLong())){
+			super.execute(price);
+		}
 	}
 
 	@Override
@@ -32,6 +39,7 @@ public class MarketOpen extends AOpenTradeMonitor{
 		// TODO Auto-generated method stub
 		
 	}
-
 	
+	
+
 }

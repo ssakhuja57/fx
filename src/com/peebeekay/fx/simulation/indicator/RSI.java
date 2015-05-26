@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.peebeekay.fx.info.Interval;
 import com.peebeekay.fx.simulation.data.types.OhlcPrice;
+import com.peebeekay.fx.simulation.data.types.Tick;
 
 public class RSI implements IIndicator {
 	
@@ -12,6 +13,8 @@ public class RSI implements IIndicator {
 	private ArrayList<OhlcPrice> prices;
 	Boolean simple; //if true use simple moving average 
 	private Boolean useBid; //
+	
+	
 	public RSI(Interval interval, int period, Boolean simple, Boolean useBid, ArrayList<OhlcPrice> historicalPrices){
 		this.interval = interval;
 		 this.period = period;
@@ -31,16 +34,18 @@ public class RSI implements IIndicator {
 		 }
 	}
 	
-	public Interval getInterval(){
-		return interval;
-	}
-
+	@Override
 	public void addDataPoint(OhlcPrice p) {
 		if(p.getInterval() != interval){
 			throw new RuntimeException(interval + "data expected, got " + p.getInterval());
 		}
 		prices.add(p);
 		prices.remove(0);
+	}
+	
+	@Override
+	public void addDataPoint(Tick price) {
+		
 	}
 	
 
@@ -66,5 +71,6 @@ public class RSI implements IIndicator {
 		double rsi = 100 - (100/(1+(averageUp/averageDown)));
 		return rsi;
 	}
+
 
 }
