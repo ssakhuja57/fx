@@ -68,7 +68,7 @@ public class DBDataSource implements IDataSource{
 	}
 	
 	private OhlcPrice arrayToOhlc(String[] row, Interval interval){
-		final int expected = 11;
+		final int expected = 10;
 		if(row.length != expected){
 			throw new RuntimeException("expected " + expected + " values for OHLC, got " + row.length);
 		}

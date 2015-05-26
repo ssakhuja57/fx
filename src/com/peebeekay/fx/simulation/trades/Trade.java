@@ -7,7 +7,7 @@ import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.simulation.data.types.Tick;
 import com.peebeekay.fx.simulation.monitors.close.ACloseTradeMonitor;
 import com.peebeekay.fx.simulation.monitors.open.AOpenTradeMonitor;
-import com.peebeekay.fx.utils.DateUtils;
+import com.peebeekay.fx.utils.Logger;
 
 public class Trade {
 	
@@ -48,6 +48,7 @@ public class Trade {
 	public void open(Tick price, AOpenTradeMonitor reason){
 		if(!checkTrans(status, Status.OPEN)) 
 			return;
+		Logger.info("opening trade");
 		status = Status.OPEN;
 		this.openTick = price;
 		if(isLong)

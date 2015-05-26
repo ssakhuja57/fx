@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Queue;
 
 import com.peebeekay.fx.info.Pair;
+import com.peebeekay.fx.simulation.data.IDataSubscriber;
+import com.peebeekay.fx.simulation.data.types.OhlcPrice;
 import com.peebeekay.fx.simulation.data.types.Tick;
 import com.peebeekay.fx.simulation.monitors.ATradeMonitor;
 import com.peebeekay.fx.simulation.monitors.cancel.ACancelTradeMonitor;
@@ -17,7 +19,7 @@ import com.peebeekay.fx.simulation.monitors.open.AOpenTradeMonitor;
 import com.peebeekay.fx.simulation.trades.Trade;
 import com.peebeekay.fx.utils.Logger;
 
-public class TradeManager {
+public class TradeManager implements IDataSubscriber{
 	
 	private String resultFolder;
 	private String traderName;
@@ -47,7 +49,8 @@ public class TradeManager {
 		fw.close();
 	}
 	
-	public void acceptTick(Tick price){
+	@Override
+	public void accept(Tick price){
 		for(Trade t: monitors.keySet()){
 			MonitorSet set = monitors.get(t);
 			for(ATradeMonitor m1: set.openMonitors)
@@ -85,6 +88,26 @@ public class TradeManager {
 			cancelTradeMonitors = new LinkedList<ACancelTradeMonitor>();
 			
 		}
+	}
+
+
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void accept(OhlcPrice price) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Boolean isReady() {
+		// TODO Auto-generated method stub
+		return null;
 	}	
 
 

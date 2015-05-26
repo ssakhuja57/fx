@@ -3,6 +3,7 @@ package com.peebeekay.fx.simulation.data.types;
 import java.util.Date;
 
 import com.peebeekay.fx.info.Pair;
+import com.peebeekay.fx.utils.DateUtils;
 
 public class Tick {
 	
@@ -47,5 +48,11 @@ public class Tick {
 		if(isLong)
 			return bid;
 		return ask;
+	}
+	
+	@Override
+	public String toString(){
+		return DateUtils.dateToString(time, DateUtils.DATE_FORMAT_MILLI)
+				+ "," + pair + "," + ask + "," + bid;
 	}
 }

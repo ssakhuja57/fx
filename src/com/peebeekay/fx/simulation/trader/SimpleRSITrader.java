@@ -37,6 +37,7 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 	public SimpleRSITrader(String name, String outputFolder, Pair pair, IDataSource ds, Calendar startTime){
 		super(ds, name, outputFolder);
 		this.startTime = startTime;
+		this.pair = pair;
 		
 		Calendar nowMinusPeriod = Calendar.getInstance();
 		nowMinusPeriod.setTime(startTime.getTime());
@@ -61,6 +62,7 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 	@Override
 	public void accept(Tick price) {
 		//Logger.debug("received tick " + price.getTime());
+		super.tradeMgr.accept(price);
 		if(signal == Signal.HOLD)
 			return;
 		
@@ -70,16 +72,19 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 		Trade trade = super.tradeMgr.createTrade(pair, tradeLong, 1000);
 		super.tradeMgr.updateTrade(trade, new MarketOpen(trade));
 		super.tradeMgr.updateTrade(trade, new StopMonitor(trade, STOP_OFFSET, true));
+		signal = Signal.HOLD;
 	}
 	
 	@Override
 	public void accept(OhlcPrice price) {
+		//Logger.debug("received " + price.getInterval() + " at " + price.getTime());
 		if(price.getInterval() == INTERVAL){
 			rsi.addDataPoint(price);
 			pointsReceived++;			
 			signal = chooseAction();
 			prevRsi = rsi.getValue();
 		}
+//		Logger.debug(prevRsi+"");
 	}
 	
 

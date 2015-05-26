@@ -26,6 +26,9 @@ public class RSI implements IIndicator {
 			 this.prices.add(i, p);
 			 i++;
 		 }
+		 while(prices.size() > period){
+			 prices.remove(0);
+		 }
 	}
 	
 	public Interval getInterval(){
@@ -46,7 +49,7 @@ public class RSI implements IIndicator {
 		if(prices.size() == period)
 			return calcRSI();
 		else
-			return -1;
+			throw new RuntimeException(period + " values needed in RSI, only have " + prices.size());
 	}
 	
 	private double calcRSI(){

@@ -3,6 +3,7 @@ package com.peebeekay.fx.simulation.monitors.open;
 import com.peebeekay.fx.simulation.data.types.OhlcPrice;
 import com.peebeekay.fx.simulation.data.types.Tick;
 import com.peebeekay.fx.simulation.trades.Trade;
+import com.peebeekay.fx.utils.Logger;
 
 public class MarketOpen extends AOpenTradeMonitor{
 

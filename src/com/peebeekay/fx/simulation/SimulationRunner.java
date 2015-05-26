@@ -12,6 +12,7 @@ import com.peebeekay.fx.simulation.data.sources.RandomPriceData;
 import com.peebeekay.fx.simulation.trader.ATrader;
 import com.peebeekay.fx.simulation.trader.SimpleRSITrader;
 import com.peebeekay.fx.utils.DateUtils;
+import com.peebeekay.fx.utils.Logger;
 import com.peebeekay.fx.utils.config.DBConfig;
 import com.peebeekay.fx.utils.config.VerticaConfig;
 
@@ -24,7 +25,7 @@ public class SimulationRunner {
 		
 		Pair pair = Pair.EURUSD;
 		Calendar start = DateUtils.getCalendar("2014-01-05 00:00:00", DateUtils.DATE_FORMAT_STD);
-		Calendar end = DateUtils.getCalendar("2014-03-01 00:00:00", DateUtils.DATE_FORMAT_STD);
+		Calendar end = DateUtils.getCalendar("2014-02-10 00:00:00", DateUtils.DATE_FORMAT_STD);
 //		Calendar end = DateUtils.getCalendar("2015-01-01 00:00:00", DateUtils.DATE_FORMAT_STD);
 		
 		DBConfig dbConfig = new VerticaConfig("192.168.0.102", 5433, "fx", "dbadmin", "dbadmin");
@@ -36,6 +37,7 @@ public class SimulationRunner {
 		controller.addTrader(t1);
 		
 		new Thread(controller).start();
+		
 	}
 
 }

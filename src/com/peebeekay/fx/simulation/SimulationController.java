@@ -8,6 +8,7 @@ import java.util.EnumSet;
 import com.peebeekay.fx.info.Interval;
 import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.simulation.data.sources.DBDataSource;
+import com.peebeekay.fx.simulation.data.types.OhlcPrice;
 import com.peebeekay.fx.simulation.data.types.Tick;
 import com.peebeekay.fx.simulation.trader.ATrader;
 import com.peebeekay.fx.utils.DateUtils;
@@ -30,8 +31,8 @@ public class SimulationController implements Runnable{
 		this.pair = pair;
 		this.end = end;
 		this.dbSource = dbSource;
-		tickClock = start;
-		OhlcClock = start;
+		tickClock = Calendar.getInstance(); tickClock.setTime(start.getTime());
+		OhlcClock = Calendar.getInstance(); OhlcClock.setTime(start.getTime());
 	}
 	
 	public void addTrader(ATrader trader){
@@ -50,7 +51,9 @@ public class SimulationController implements Runnable{
 		tickClock.setTime(tick.getTime());
 		Calendar tickTime = DateUtils.getCalendar(tick.getTime());
 		Calendar tickTimeMinute = DateUtils.roundDownToMinute(tickTime); 
+		//Logger.debug(OhlcClock.getTime().toString());
 		if(tickTimeMinute.after(OhlcClock)){
+			//Logger.debug(tickTimeMinute.getTime().toString() + " > " + OhlcClock.getTime().toString());
 			OhlcClock = tickTimeMinute;
 			sendOhlc();
 		}
@@ -66,9 +69,16 @@ public class SimulationController implements Runnable{
 	
 	private void sendOhlc(){
 		for(Interval interval: EnumSet.allOf(Interval.class)){
+			if(interval == Interval.T)
+				continue;
+			if(interval != Interval.M30)
+				continue;
 			if(DateUtils.isMultipleOf(OhlcClock.getTime(), interval.minutes)){
-				for(ATrader t: traders)
-					t.accept(dbSource.getOhlcPrices(pair, interval, OhlcClock, OhlcClock).get(0));
+				for(ATrader t: traders){
+					ArrayList<OhlcPrice> prices = dbSource.getOhlcPrices(pair, interval, OhlcClock, OhlcClock);
+					if(prices.size() > 0)
+						t.accept(prices.get(0));
+				}
 			}
 		}
 	}
