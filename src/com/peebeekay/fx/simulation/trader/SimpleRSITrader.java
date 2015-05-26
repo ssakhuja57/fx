@@ -19,7 +19,7 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 	private RSI rsi;
 	private Calendar startTime;
 	private Pair pair;
-	public final int STOP_OFFSET = 20;
+	private int stopOffset;
 	public final Interval INTERVAL = Interval.M30;
 	public final int period = 14;
 	public final int HIGH_MARK = 70;
@@ -34,14 +34,16 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 		HOLD,BUY,SELL
 	}
 	
-	public SimpleRSITrader(String name, String outputFolder, Pair pair, IDataSource ds, Calendar startTime){
+	public SimpleRSITrader(String name, String outputFolder, Pair pair, IDataSource ds, Calendar startTime, int stopOffset){
 		super(ds, name, outputFolder);
 		this.startTime = startTime;
 		this.pair = pair;
+		this.stopOffset = stopOffset;
 		
 		Calendar nowMinusPeriod = Calendar.getInstance();
 		nowMinusPeriod.setTime(startTime.getTime());
-		nowMinusPeriod.add(Calendar.MINUTE, -period*INTERVAL.minutes);
+		//nowMinusPeriod.add(Calendar.MINUTE, -period*INTERVAL.minutes);
+		nowMinusPeriod.add(Calendar.HOUR, -120); // add extra in case run over weekend data
 		
 		ArrayList<OhlcPrice> historicalPrices = ds.getOhlcPrices(pair, INTERVAL, nowMinusPeriod, startTime);
 		rsi = new RSI(INTERVAL, period, true, true, historicalPrices);
@@ -71,7 +73,7 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 			tradeLong = false;
 		Trade trade = super.tradeMgr.createTrade(pair, tradeLong, 1000);
 		super.tradeMgr.updateTrade(trade, new MarketOpen(trade));
-		super.tradeMgr.updateTrade(trade, new StopMonitor(trade, STOP_OFFSET, true));
+		super.tradeMgr.updateTrade(trade, new StopMonitor(trade, stopOffset, true));
 		signal = Signal.HOLD;
 	}
 	

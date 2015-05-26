@@ -41,6 +41,7 @@ public class DBDataSource implements IDataSource{
 					+ " ORDER BY ts"
 					+ ";";
 			try {
+				Logger.debug("initializing db data cache");
 				tickCache.addAll(DBUtils.readQuery(config, sql));
 				Logger.debug("db data cache initialized with " + tickCache.size() + " tick rows");
 			} catch (SQLException e) {

@@ -48,7 +48,7 @@ public class Trade {
 	public void open(Tick price, AOpenTradeMonitor reason){
 		if(!checkTrans(status, Status.OPEN)) 
 			return;
-		Logger.info("opening trade");
+		Logger.info("opening trade " + id);
 		status = Status.OPEN;
 		this.openTick = price;
 		if(isLong)
@@ -62,12 +62,13 @@ public class Trade {
 	public void close(Tick price, ACloseTradeMonitor reason){
 		if(!checkTrans(status, Status.CLOSED))
 			return;
+		Logger.info("closing trade " + id);
 		status = Status.CLOSED;
 		this.closeTick = price;
 		if(isLong)
-			openPrice = price.getBid();
+			closePrice = price.getBid();
 		else
-			openPrice = price.getAsk();
+			closePrice = price.getAsk();
 		closeTime = price.getTime();
 		closeReason = reason;
 	}
@@ -156,7 +157,7 @@ public class Trade {
 			} catch (IllegalArgumentException | IllegalAccessException e) {
 				e.printStackTrace();
 			}
-		    res += name + "=" + value + "; ";
+		    res += name + "=" + (value != null ? value.toString() : "N/A") + "; ";
 		}
 		return res;
 	}
