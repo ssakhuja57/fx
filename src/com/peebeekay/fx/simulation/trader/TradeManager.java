@@ -42,6 +42,8 @@ public class TradeManager implements IDataSubscriber{
 	public void logResults() throws IOException{
 		File f = new File(resultFolder + "\\tradelog-" + traderName);
 		FileWriter fw = new FileWriter(f);
+		fw.write(Trade.getHeaderRow() + "\n");
+		fw.flush();
 		for(Trade t: monitors.keySet()){
 			fw.write(t.getSummary() + "\n");
 			fw.flush();

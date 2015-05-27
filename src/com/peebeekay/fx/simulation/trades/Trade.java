@@ -1,13 +1,14 @@
 package com.peebeekay.fx.simulation.trades;
 
-import java.lang.reflect.Field;
 import java.util.Date;
 
 import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.simulation.data.types.Tick;
+import com.peebeekay.fx.simulation.monitors.cancel.ACancelTradeMonitor;
 import com.peebeekay.fx.simulation.monitors.close.ACloseTradeMonitor;
 import com.peebeekay.fx.simulation.monitors.open.AOpenTradeMonitor;
 import com.peebeekay.fx.utils.Logger;
+import com.peebeekay.fx.utils.StringUtils;
 
 public class Trade {
 	
@@ -21,12 +22,15 @@ public class Trade {
 	private double openPrice;
 	private Tick openTick;
 	private Date openTime;
-	private AOpenTradeMonitor openReason;
+	private AOpenTradeMonitor openMethod;
 	
 	private double closePrice;
 	private Tick closeTick;
 	private Date closeTime;
-	private ACloseTradeMonitor closeReason;
+	private ACloseTradeMonitor closeMethod;
+	
+	private Date cancelTime;
+	private ACancelTradeMonitor cancelMethod;
 	
 	public Trade(int id, Pair pair, boolean isLong, int lots){
 		this.id = id;
@@ -45,7 +49,7 @@ public class Trade {
 		}
 	}
 	
-	public void open(Tick price, AOpenTradeMonitor reason){
+	public void open(Tick price, AOpenTradeMonitor method){
 		if(!checkTrans(status, Status.OPEN)) 
 			return;
 		Logger.info("opening trade " + id);
@@ -56,10 +60,10 @@ public class Trade {
 		else
 			openPrice = price.getBid();
 		openTime = price.getTime();
-		openReason = reason;
+		openMethod = method;
 	}
 	
-	public void close(Tick price, ACloseTradeMonitor reason){
+	public void close(Tick price, ACloseTradeMonitor method){
 		if(!checkTrans(status, Status.CLOSED))
 			return;
 		Logger.info("closing trade " + id);
@@ -70,13 +74,14 @@ public class Trade {
 		else
 			closePrice = price.getAsk();
 		closeTime = price.getTime();
-		closeReason = reason;
+		closeMethod = method;
 	}
 	
-	public void cancel(){
+	public void cancel(ACancelTradeMonitor method){
 		if(!checkTrans(status, Status.CANCELLED))
 			return;
 		status = Status.CANCELLED;
+		cancelMethod = method;
 	}
 	
 	
@@ -126,8 +131,8 @@ public class Trade {
 		return openTime;
 	}
 
-	public AOpenTradeMonitor getOpenReason() {
-		return openReason;
+	public AOpenTradeMonitor getOpenMethod() {
+		return openMethod;
 	}
 
 	public double getClosePrice() {
@@ -142,32 +147,33 @@ public class Trade {
 		return closeTime;
 	}
 
-	public ACloseTradeMonitor getCloseReason() {
-		return closeReason;
+	public ACloseTradeMonitor getCloseMethod() {
+		return closeMethod;
 	}
 	
-	public String getSummary(){
-		String res = "";
-		for (Field field : this.getClass().getDeclaredFields()) {
-		    field.setAccessible(true);
-		    String name = field.getName();
-		    Object value = null;
-			try {
-				value = field.get(this);
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				e.printStackTrace();
-			}
-		    res += name + "=" + (value != null ? value.toString() : "N/A") + "; ";
-		}
-		return res;
+	public ACancelTradeMonitor getCancelMethod(){
+		return cancelMethod;
 	}
-
+	
+	public Date getCancelTime(){
+		return cancelTime;
+	}
 	
 	@Override
 	public int hashCode(){
 		return id;
 	}
-
 	
+	public static String getHeaderRow(){
+		return "id,pair,lots,status,createdTime,isLong," +
+				"openTime,openPrice,openMethod,closeTime,closePrice,closeMethod,cancelTime,cancelMethod";
+	}
+	
+	public String getSummary(){
+		Object[] fields = new Object[] {String.valueOf(id),pair,lots,status,
+				createdTime,isLong,openTime,openPrice,openMethod,
+				closeTime,closePrice,closeMethod,cancelTime,cancelMethod};
+		return StringUtils.arrayToString(fields, ",");
+	}
 
 }

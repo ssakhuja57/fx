@@ -25,41 +25,43 @@ public class SimulationRunner {
 	public static void main(String[] args) throws ParseException{
 		
 		Pair pair = Pair.EURUSD;
-		Calendar[] starts = new Calendar[]{
-				DateUtils.getCalendar("2014-01-05 00:00:00", DateUtils.DATE_FORMAT_STD),
-				DateUtils.getCalendar("2014-02-01 00:00:00", DateUtils.DATE_FORMAT_STD),
-				DateUtils.getCalendar("2014-03-01 00:00:00", DateUtils.DATE_FORMAT_STD),
-				DateUtils.getCalendar("2014-04-01 00:00:00", DateUtils.DATE_FORMAT_STD),
-				DateUtils.getCalendar("2014-05-01 00:00:00", DateUtils.DATE_FORMAT_STD),
-				DateUtils.getCalendar("2014-06-01 00:00:00", DateUtils.DATE_FORMAT_STD),
-				DateUtils.getCalendar("2014-07-01 00:00:00", DateUtils.DATE_FORMAT_STD),
-				DateUtils.getCalendar("2014-08-01 00:00:00", DateUtils.DATE_FORMAT_STD),
-				DateUtils.getCalendar("2014-09-01 00:00:00", DateUtils.DATE_FORMAT_STD),
-				DateUtils.getCalendar("2014-10-01 00:00:00", DateUtils.DATE_FORMAT_STD),
-				DateUtils.getCalendar("2014-11-01 00:00:00", DateUtils.DATE_FORMAT_STD),
-				DateUtils.getCalendar("2014-12-01 00:00:00", DateUtils.DATE_FORMAT_STD)
-		};
-		Calendar[] ends = new Calendar[]{
-				DateUtils.getCalendar("2014-02-01 00:00:00", DateUtils.DATE_FORMAT_STD),
-				DateUtils.getCalendar("2014-03-01 00:00:00", DateUtils.DATE_FORMAT_STD),
-				DateUtils.getCalendar("2014-04-01 00:00:00", DateUtils.DATE_FORMAT_STD),
-				DateUtils.getCalendar("2014-05-01 00:00:00", DateUtils.DATE_FORMAT_STD),
-				DateUtils.getCalendar("2014-06-01 00:00:00", DateUtils.DATE_FORMAT_STD),
-				DateUtils.getCalendar("2014-07-01 00:00:00", DateUtils.DATE_FORMAT_STD),
-				DateUtils.getCalendar("2014-08-01 00:00:00", DateUtils.DATE_FORMAT_STD),
-				DateUtils.getCalendar("2014-09-01 00:00:00", DateUtils.DATE_FORMAT_STD),
-				DateUtils.getCalendar("2014-10-01 00:00:00", DateUtils.DATE_FORMAT_STD),
-				DateUtils.getCalendar("2014-11-01 00:00:00", DateUtils.DATE_FORMAT_STD),
-				DateUtils.getCalendar("2014-12-01 00:00:00", DateUtils.DATE_FORMAT_STD),
-				DateUtils.getCalendar("2015-01-01 00:00:00", DateUtils.DATE_FORMAT_STD)
-		};
-		for(int month=0; month<starts.length; month++){
-			DBConfig dbConfig = new VerticaConfig("192.168.0.102", 5433, "fx", "dbadmin", "dbadmin");
-			IDataSource dataSource = new DBDataSource(dbConfig, pair, starts[month], ends[month], true);
-			SimulationController controller = new SimulationController(pair, starts[month], ends[month], dataSource);
+//		Calendar[] starts = new Calendar[]{
+//				DateUtils.getCalendar("2014-01-05 00:00:00", DateUtils.DATE_FORMAT_STD),
+//				DateUtils.getCalendar("2014-02-01 00:00:00", DateUtils.DATE_FORMAT_STD),
+//				DateUtils.getCalendar("2014-03-01 00:00:00", DateUtils.DATE_FORMAT_STD),
+//				DateUtils.getCalendar("2014-04-01 00:00:00", DateUtils.DATE_FORMAT_STD),
+//				DateUtils.getCalendar("2014-05-01 00:00:00", DateUtils.DATE_FORMAT_STD),
+//				DateUtils.getCalendar("2014-06-01 00:00:00", DateUtils.DATE_FORMAT_STD),
+//				DateUtils.getCalendar("2014-07-01 00:00:00", DateUtils.DATE_FORMAT_STD),
+//				DateUtils.getCalendar("2014-08-01 00:00:00", DateUtils.DATE_FORMAT_STD),
+//				DateUtils.getCalendar("2014-09-01 00:00:00", DateUtils.DATE_FORMAT_STD),
+//				DateUtils.getCalendar("2014-10-01 00:00:00", DateUtils.DATE_FORMAT_STD),
+//				DateUtils.getCalendar("2014-11-01 00:00:00", DateUtils.DATE_FORMAT_STD),
+//				DateUtils.getCalendar("2014-12-01 00:00:00", DateUtils.DATE_FORMAT_STD)
+//		};
+//		Calendar[] ends = new Calendar[]{
+//				DateUtils.getCalendar("2014-02-01 00:00:00", DateUtils.DATE_FORMAT_STD),
+//				DateUtils.getCalendar("2014-03-01 00:00:00", DateUtils.DATE_FORMAT_STD),
+//				DateUtils.getCalendar("2014-04-01 00:00:00", DateUtils.DATE_FORMAT_STD),
+//				DateUtils.getCalendar("2014-05-01 00:00:00", DateUtils.DATE_FORMAT_STD),
+//				DateUtils.getCalendar("2014-06-01 00:00:00", DateUtils.DATE_FORMAT_STD),
+//				DateUtils.getCalendar("2014-07-01 00:00:00", DateUtils.DATE_FORMAT_STD),
+//				DateUtils.getCalendar("2014-08-01 00:00:00", DateUtils.DATE_FORMAT_STD),
+//				DateUtils.getCalendar("2014-09-01 00:00:00", DateUtils.DATE_FORMAT_STD),
+//				DateUtils.getCalendar("2014-10-01 00:00:00", DateUtils.DATE_FORMAT_STD),
+//				DateUtils.getCalendar("2014-11-01 00:00:00", DateUtils.DATE_FORMAT_STD),
+//				DateUtils.getCalendar("2014-12-01 00:00:00", DateUtils.DATE_FORMAT_STD),
+//				DateUtils.getCalendar("2015-01-01 00:00:00", DateUtils.DATE_FORMAT_STD)
+//		};
+		Calendar[] starts = new Calendar[]{DateUtils.getCalendar("2014-01-05 00:00:00", DateUtils.DATE_FORMAT_STD)};
+		Calendar[] ends = new Calendar[]{DateUtils.getCalendar("2014-06-01 00:00:00", DateUtils.DATE_FORMAT_STD)};
+		for(int x=0; x<starts.length; x++){
+			DBConfig dbConfig = new VerticaConfig("192.168.91.128", 5433, "fx", "dbadmin", "dbadmin");
+			IDataSource dataSource = new DBDataSource(dbConfig, pair, starts[x], ends[x], true);
+			SimulationController controller = new SimulationController(pair, starts[x], ends[x], dataSource);
 			
-			for(int i=12; i<=25; i++){
-				ATrader t = new SimpleRSITrader("2014-" + (month+1) + "-m30RSI-stop" + i + ".csv", "C:\\fx-data\\results", pair, dataSource, starts[month], i);
+			for(int i=15; i<=20; i++){
+				ATrader t = new SimpleRSITrader("2014-" + (x+1) + "-m30RSI-stop" + i + ".csv", "C:\\fx-data\\results", pair, dataSource, starts[x], i);
 				controller.addTrader(t);
 			}
 			
