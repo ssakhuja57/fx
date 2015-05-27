@@ -1,6 +1,7 @@
 package com.peebeekay.fx.utils;
 
 import com.peebeekay.fx.info.Pair;
+import com.peebeekay.fx.simulation.data.types.ReferenceLine;
 import com.peebeekay.fx.simulation.data.types.Tick;
 
 public class RateUtils {
@@ -31,19 +32,34 @@ public class RateUtils {
 		return Math.abs(pips);
 	}
 	
-	public static boolean isBetter(Tick price, Tick reference, boolean isLong){
-		if(isLong){
-			if( (price.getAsk() > reference.getAsk()) && (price.getBid() > reference.getBid()) )
+	public static boolean isEqualOrBetter(Tick price, Tick reference, boolean isLong, boolean isEnter){
+		if( (isLong && isEnter) || (!isLong && !isEnter) ){
+			if( price.getAsk() <= reference.getAsk() )
 				return true;
 			return false;
 		}
-		if( (price.getAsk() < reference.getAsk()) && (price.getBid() < reference.getBid()) )
-			return true;
-		return false;
+		else{
+			if( price.getBid() >= reference.getBid() )
+				return true;
+			return false;
+		}
 	}
 	
-	public static boolean crosses(Tick price0, Tick price1, Tick reference, boolean isLong){
-		if(isBetter(price0, reference, isLong) && !isBetter(price1, reference, isLong)){
+	public static boolean isEqualOrBetter(Tick price, ReferenceLine reference, boolean isLong, boolean isEnter){
+		if( (isLong && isEnter) || (!isLong && !isEnter) ){
+			if(price.getAsk() <= reference.getValue())
+				return true;
+			return false;
+		}
+		else{
+			if(price.getBid() >= reference.getValue())
+				return true;
+			return false;
+		}
+	}
+	
+	public static boolean crosses(Tick price0, Tick price1, ReferenceLine reference, boolean isLong, boolean isEnter){
+		if(isEqualOrBetter(price0, reference, isLong, isEnter) && !isEqualOrBetter(price1, reference, isLong, isEnter)){
 			return true;
 		}
 		return false;

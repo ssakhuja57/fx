@@ -1,58 +1,88 @@
 package com.peebeekay.fx.simulation.monitors.close;
 
 import com.peebeekay.fx.simulation.data.types.OhlcPrice;
+import com.peebeekay.fx.simulation.data.types.ReferenceLine;
 import com.peebeekay.fx.simulation.data.types.Tick;
 import com.peebeekay.fx.simulation.trades.Trade;
-import com.peebeekay.fx.simulation.trades.Trade.Status;
 import com.peebeekay.fx.utils.RateUtils;
 
 public class StopClose extends ACloseTradeMonitor{
 
 	int maxOffset;
-	int currentOffset;
 	boolean trail;
-	Tick stopLine;
+	ReferenceLine stopLine;
 	boolean isLong;
+	private Tick lastPrice;
 	
 	
 	public StopClose(Trade trade, int offset, boolean trail) {
 		super(trade);
 		this.maxOffset = offset;
-		this.currentOffset = offset;
 		this.trail = trail;
 		isLong = super.trade.getIsLong();
 	}
 
+//	@Override
+//	public void accept(Tick price) {
+//		if(!super.checkValid()){
+//			return;
+//		}
+//		Tick lastPrice = super.priceQueue.peek();
+//		super.priceQueue.add(price);
+//		if(lastPrice == null){ // this means this monitor has just been initialized, set the initial stopLine
+//			int sign = isLong ? -1 : 1;
+//			double refPrice = isLong ? trade.getOpenTick().getBid() : trade.getOpenTick().getAsk();
+//			double stopPrice = RateUtils.addPips(refPrice, sign*maxOffset);
+//			stopLine = new Tick(stopPrice, stopPrice);
+//			return;
+//		}
+//
+//		if(RateUtils.crosses(lastPrice, price, stopLine, isLong)){
+//			super.execute(price);
+//		}
+//		
+//		if(trail){
+//			if(RateUtils.isBetter(price, lastPrice, isLong)){
+//				currentOffset = RateUtils.getAbsPipDistance(price.getExitPrice(isLong), stopLine.getExitPrice(isLong));
+//				if(currentOffset >= maxOffset){
+//					int sign = isLong ? -1 : 1;
+//					double newStopPrice = RateUtils.addPips(price.getExitPrice(isLong), sign*maxOffset);
+//					stopLine = new Tick(newStopPrice, newStopPrice);
+//				}
+//			}
+//		}	
+//	}
+	
 	@Override
 	public void accept(Tick price) {
 		if(!super.checkValid()){
 			return;
 		}
-		Tick lastPrice = super.priceQueue.peek();
-		super.priceQueue.add(price);
 		if(lastPrice == null){ // this means this monitor has just been initialized, set the initial stopLine
 			int sign = isLong ? -1 : 1;
-			double refPrice = isLong ? trade.getOpenTick().getBid() : trade.getOpenTick().getAsk();
+			double refPrice = price.getExitPrice(isLong);
 			double stopPrice = RateUtils.addPips(refPrice, sign*maxOffset);
-			stopLine = new Tick(stopPrice, stopPrice);
+			stopLine = new ReferenceLine(stopPrice);
+			lastPrice = price;
 			return;
 		}
 
-		if(RateUtils.crosses(lastPrice, price, stopLine, isLong)){
+		if(!RateUtils.isEqualOrBetter(price, stopLine, isLong, false)){
 			super.execute(price);
+			return;
 		}
 		
 		if(trail){
-			if(RateUtils.isBetter(price, lastPrice, isLong)){
-				currentOffset = RateUtils.getAbsPipDistance(price.getExitPrice(isLong), stopLine.getExitPrice(isLong));
-				if(currentOffset >= maxOffset){
+			if(RateUtils.isEqualOrBetter(price, lastPrice, isLong, false)){
+				int currentOffset = RateUtils.getAbsPipDistance(price.getExitPrice(isLong), stopLine.getValue());
+				if(currentOffset > maxOffset){
 					int sign = isLong ? -1 : 1;
 					double newStopPrice = RateUtils.addPips(price.getExitPrice(isLong), sign*maxOffset);
-					stopLine = new Tick(newStopPrice, newStopPrice);
+					stopLine.adjustValue(newStopPrice);
 				}
 			}
 		}
-		
+		lastPrice = price;
 	}
 
 	@Override

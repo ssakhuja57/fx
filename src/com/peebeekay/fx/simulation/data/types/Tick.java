@@ -19,11 +19,6 @@ public class Tick {
 		this.time = time;
 	}
 	
-	public Tick(double ask, double bid){
-		this.ask = ask;
-		this.bid = bid;
-	}
-	
 	// getters
 	public Pair getPair(){
 		return pair;
