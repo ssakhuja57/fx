@@ -25,8 +25,6 @@ public class DBDataSource implements IDataSource{
 	private boolean cacheAll;
 	private ArrayList<String[]> tickCache = new ArrayList<String[]>();
 	
-	private static final String TICK_FIELDS = "pair,ts,ask,bid";
-	private static final String OHLC_FIELDS = "pair,ts,askOpen,askHigh,askLow,askClose,bidOpen,bidHigh,bidLow,bidClose";
 	
 	public DBDataSource(DBConfig config, Pair pair, Calendar start, Calendar end, boolean cacheAll){
 		this.config = config;
@@ -35,7 +33,7 @@ public class DBDataSource implements IDataSource{
 		this.end = end;
 		this.cacheAll = cacheAll;
 		if(cacheAll){
-			String sql = "select " + TICK_FIELDS + " from data.tick where ts >= '" + DateUtils.calToString(start) + "'"
+			String sql = "select " + StringUtils.arrayToString(Tick.FIELDS, ",") + " from data.tick where ts >= '" + DateUtils.calToString(start) + "'"
 					+ " AND ts <= '" + DateUtils.calToString(end) + "'"
 					+ " AND pair = '" + pair + "'"
 					+ " ORDER BY ts"
@@ -50,53 +48,10 @@ public class DBDataSource implements IDataSource{
 		}
 	}
 	
-	private Tick arrayToTick(String[] row){
-		final int expected = 4;
-		if(row.length != expected){
-			throw new RuntimeException("expected " + expected + " values for tick, got " + row.length);
-		}
-		Pair pair = StringUtils.getEnumFromString(Pair.class, row[0]);
-		Date date = null;
-		try {
-			date = DateUtils.parseDate(row[1], DateUtils.DATE_FORMAT_MILLI);
-		} catch (ParseException e) {
-			e.printStackTrace();
-			throw new RuntimeException("date parse error: " + row[1]);
-		}
-		double ask = Double.parseDouble(row[2]);
-		double bid = Double.parseDouble(row[3]);
-		return new Tick(pair, ask, bid, date);
-	}
-	
-	private OhlcPrice arrayToOhlc(String[] row, Interval interval){
-		final int expected = 10;
-		if(row.length != expected){
-			throw new RuntimeException("expected " + expected + " values for OHLC, got " + row.length);
-		}
-		Pair pair = StringUtils.getEnumFromString(Pair.class, row[0]);
-		Date date = null;
-		try {
-			date = DateUtils.parseDate(row[1], DateUtils.DATE_FORMAT_STD);
-		} catch (ParseException e) {
-			e.printStackTrace();
-			throw new RuntimeException("date parse error: " + row[1]);
-		}
-		double askOpen = Double.parseDouble(row[2]);
-		double askHigh = Double.parseDouble(row[3]);
-		double askLow = Double.parseDouble(row[4]);
-		double askClose = Double.parseDouble(row[5]);
-		
-		double bidOpen = Double.parseDouble(row[6]);
-		double bidHigh = Double.parseDouble(row[7]);
-		double bidLow = Double.parseDouble(row[8]);
-		double bidClose = Double.parseDouble(row[9]);
-		
-		return new OhlcPrice(pair, date, interval, askOpen, askHigh, askLow, askClose, bidOpen, bidHigh, bidLow, bidClose);
-	}
 	
 	@Override
 	public Tick getTickRow(int rowNum){
-		return arrayToTick(tickCache.get(rowNum));
+		return Tick.arrayToTick(tickCache.get(rowNum));
 	}
 
 	@Override
@@ -107,7 +62,7 @@ public class DBDataSource implements IDataSource{
 	@Override
 	public ArrayList<OhlcPrice> getOhlcPrices(Pair pair, Interval interval,
 			Calendar start, Calendar end) {
-		String sql = "select " + OHLC_FIELDS + " from data." + interval.value 
+		String sql = "select " + StringUtils.arrayToString(OhlcPrice.FIELDS,",") + " from data." + interval.value 
 				+ " WHERE ts >= '" + DateUtils.calToString(start) + "'"
 				+ " AND ts <= '" + DateUtils.calToString(end) + "'"
 				+ " AND pair = '" + pair + "'"
@@ -122,7 +77,7 @@ public class DBDataSource implements IDataSource{
 		
 		ArrayList<OhlcPrice> res = new ArrayList<OhlcPrice>();
 		for(String[] row: rows){
-			res.add(arrayToOhlc(row, interval));
+			res.add(OhlcPrice.arrayToOhlc(row, interval));
 		}
 		
 		return res;

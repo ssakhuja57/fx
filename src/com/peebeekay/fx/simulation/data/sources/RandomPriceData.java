@@ -38,7 +38,7 @@ public class RandomPriceData implements IDataSource{
 	private Tick getTick(Pair pair, Date time){
 		double bid = rand.nextDouble()*3;
 		double ask = rand.nextDouble()*3;
-		return new Tick(pair, ask, bid, time);
+		return new Tick(pair, time, ask, bid);
 	}
 
 	@Override
