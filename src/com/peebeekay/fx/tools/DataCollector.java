@@ -127,10 +127,18 @@ public class DataCollector implements Runnable{
 			if(this.sm == null)
 				return;
 			Map<Calendar, double[]> data;
-			data = RateHistory.getOHLCData(sm, pair, interval, startTime, endTime);
+			if(interval == Interval.T)
+				data = RateHistory.getTickData(sm, pair, startTime, endTime);
+			else
+				data = RateHistory.getOHLCData(sm, pair, interval, startTime, endTime);
 			for(Calendar time: data.keySet()){
+				String meta;
+				if(interval == Interval.T)
+					meta = pair + "," + DateUtils.dateToString(time.getTime(), DateUtils.DATE_FORMAT_MILLI) + ",";
+				else
+					meta = pair + "," + interval.name() + "," + DateUtils.dateToString(time.getTime(), DateUtils.DATE_FORMAT_MILLI) + ",";
 				String values = StringUtils.arrayToString(data.get(time), ",");
-				fw.write(DateUtils.dateToString(time.getTime(), DateUtils.DATE_FORMAT_MILLI) + "," + values + "\n");
+				fw.write(meta + values + "\n");
 				fw.flush();
 			}
 		}
@@ -163,39 +171,44 @@ public class DataCollector implements Runnable{
 		
 		// modify these
 		Pair pair = Pair.EURUSD;
-		String parentFolder = "C:\\fx-data\\final";
-		String folder = parentFolder + "\\EUR-USD-m30\\";
+		Interval interval = Interval.T;
+		String parentFolder = "C:\\fx-data\\final\\recent";
+		String folder = parentFolder + "\\EUR-USD\\";
 		new File(folder).mkdirs();
 		int accounts = 1;
 		int sessionLimit = 1;
 		
 		Date[] starts = new Date[]{
-				DateUtils.parseDate("2014-01-01 00:00:00"),
-				DateUtils.parseDate("2014-02-01 00:00:00"),
-				DateUtils.parseDate("2014-03-01 00:00:00"),
-				DateUtils.parseDate("2014-04-01 00:00:00"),
-				DateUtils.parseDate("2014-05-01 00:00:00"),
-				DateUtils.parseDate("2014-06-01 00:00:00"),
-				DateUtils.parseDate("2014-07-01 00:00:00"),
-				DateUtils.parseDate("2014-08-01 00:00:00"),
-				DateUtils.parseDate("2014-09-01 00:00:00"),
-				DateUtils.parseDate("2014-10-01 00:00:00"),
-				DateUtils.parseDate("2014-11-01 00:00:00"),
-				DateUtils.parseDate("2014-12-01 00:00:00")
+//				DateUtils.parseDate("2014-01-01 00:00:00"),
+//				DateUtils.parseDate("2014-02-01 00:00:00"),
+//				DateUtils.parseDate("2014-03-01 00:00:00"),
+//				DateUtils.parseDate("2014-04-01 00:00:00"),
+//				DateUtils.parseDate("2014-05-01 00:00:00"),
+//				DateUtils.parseDate("2014-06-01 00:00:00"),
+//				DateUtils.parseDate("2014-07-01 00:00:00"),
+//				DateUtils.parseDate("2014-08-01 00:00:00"),
+//				DateUtils.parseDate("2014-09-01 00:00:00"),
+//				DateUtils.parseDate("2014-10-01 00:00:00"),
+//				DateUtils.parseDate("2014-11-01 00:00:00"),
+//				DateUtils.parseDate("2014-12-01 00:00:00")
+				
+				DateUtils.parseDate("2015-06-01 00:00:00")
 		};
 		Date[] ends = new Date[]{
-				DateUtils.parseDate("2014-02-01 00:00:00"),
-				DateUtils.parseDate("2014-03-01 00:00:00"),
-				DateUtils.parseDate("2014-04-01 00:00:00"),
-				DateUtils.parseDate("2014-05-01 00:00:00"),
-				DateUtils.parseDate("2014-06-01 00:00:00"),
-				DateUtils.parseDate("2014-07-01 00:00:00"),
-				DateUtils.parseDate("2014-08-01 00:00:00"),
-				DateUtils.parseDate("2014-09-01 00:00:00"),
-				DateUtils.parseDate("2014-10-01 00:00:00"),
-				DateUtils.parseDate("2014-11-01 00:00:00"),
-				DateUtils.parseDate("2014-12-01 00:00:00"),
-				DateUtils.parseDate("2015-01-01 00:00:00")
+//				DateUtils.parseDate("2014-02-01 00:00:00"),
+//				DateUtils.parseDate("2014-03-01 00:00:00"),
+//				DateUtils.parseDate("2014-04-01 00:00:00"),
+//				DateUtils.parseDate("2014-05-01 00:00:00"),
+//				DateUtils.parseDate("2014-06-01 00:00:00"),
+//				DateUtils.parseDate("2014-07-01 00:00:00"),
+//				DateUtils.parseDate("2014-08-01 00:00:00"),
+//				DateUtils.parseDate("2014-09-01 00:00:00"),
+//				DateUtils.parseDate("2014-10-01 00:00:00"),
+//				DateUtils.parseDate("2014-11-01 00:00:00"),
+//				DateUtils.parseDate("2014-12-01 00:00:00"),
+//				DateUtils.parseDate("2015-01-01 00:00:00")
+				
+				DateUtils.parseDate("2015-06-04 00:00:00")
 		};
 		
 		Credentials[] creds = new Credentials[accounts];
@@ -208,11 +221,12 @@ public class DataCollector implements Runnable{
 //		List<Thread> threads = new LinkedList<Thread>();
 		for(int i=0; i<starts.length; i++){
 //			Credentials creds = new Credentials("D172741206001", "1008", Credentials.DEMO, null);
-//			Thread t = new Thread(new DataCollector(creds[i%accounts], pair, "t1", starts[i], ends[i], sessionLimit, folder + i + ".csv"));
+			Thread t = new Thread(new DataCollector(creds[i%accounts], pair, interval, starts[i], ends[i], sessionLimit, folder 
+					+ pair + "-" + interval + "-" + i + ".csv"));
 			
-			new DataCollector(creds[i%accounts], pair, Interval.M30, starts[i], ends[i], sessionLimit, folder + i + ".csv").run();
+//			new DataCollector(creds[i%accounts], pair, Interval.M30, starts[i], ends[i], sessionLimit, folder + i + ".csv").run();
 //			threads.add(t);
-//			t.start();
+			t.start();
 		}
 		
 //		for(Thread th: threads){

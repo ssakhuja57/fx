@@ -34,7 +34,7 @@ public class RateHistory {
 	private static final int LONG_WAIT_FOR = 10;
 	//private static final String ANCIENT_DATE = "2000-01-01 00:00:00";
 	private static final int DEF_REQUEST_LENGTH = 1000;
-	private static final DateFormat LOG_DF = DateUtils.DATE_FORMAT_STD;
+	private static final String LOG_DF = DateUtils.DATE_FORMAT_STD;
 	
 	public static Map<Calendar, double[]> getTickData(SessionManager sm, Pair pair,
 			Calendar startTime, Calendar endTime){

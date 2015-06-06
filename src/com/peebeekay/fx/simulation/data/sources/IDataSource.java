@@ -14,5 +14,7 @@ public interface IDataSource {
 	
 	public ArrayList<Tick> getTicks(Pair pair, Calendar start, Calendar end);
 	
+	public OhlcPrice getOhlcPrice(Pair pair, Interval interval, Calendar time);
+	
 	public ArrayList<OhlcPrice> getOhlcPrices(Pair pair, Interval interval, Calendar start, Calendar end);
 }

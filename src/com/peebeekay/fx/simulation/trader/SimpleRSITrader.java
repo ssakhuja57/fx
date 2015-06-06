@@ -13,6 +13,7 @@ import com.peebeekay.fx.simulation.indicator.RSI;
 import com.peebeekay.fx.simulation.monitors.close.StopClose;
 import com.peebeekay.fx.simulation.monitors.open.MarketOpen;
 import com.peebeekay.fx.simulation.trades.Trade;
+import com.peebeekay.fx.utils.Logger;
 
 public class SimpleRSITrader extends ATrader implements Runnable{
 	
@@ -25,7 +26,6 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 	public final int HIGH_MARK = 70;
 	public final double LOW_MARK = 30;
 	private double prevRsi;
-	private double pointsReceived;
 	private volatile Boolean isReady;
 	private Boolean stillRunning;
 	private Signal signal = Signal.HOLD;
@@ -48,7 +48,6 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 		ArrayList<OhlcPrice> historicalPrices = ds.getOhlcPrices(pair, INTERVAL, nowMinusPeriod, startTime);
 		rsi = new RSI(INTERVAL, period, true, true, historicalPrices);
 		prevRsi = rsi.getValue();
-		pointsReceived = 0;
 		isReady = true;
 		stillRunning = true;
 	}
@@ -79,10 +78,9 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 	
 	@Override
 	public void accept(OhlcPrice price) {
-		//Logger.debug("received " + price.getInterval() + " at " + price.getTime());
+//		Logger.debug("received " + price.getInterval() + " at " + price.getTime());
 		if(price.getInterval() == INTERVAL){
-			rsi.addDataPoint(price);
-			pointsReceived++;			
+			rsi.addDataPoint(price);			
 			signal = chooseAction();
 			prevRsi = rsi.getValue();
 		}

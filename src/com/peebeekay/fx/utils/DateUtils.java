@@ -15,10 +15,14 @@ public class DateUtils {
 	 * @throws ParseException 
 	 */
 	
-	public static final DateFormat DATE_FORMAT_STD = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
-	public static final DateFormat DATE_FORMAT_MILLI = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.ENGLISH);
+	public static final String DATE_FORMAT_STD = "yyyy-MM-dd HH:mm:ss";
+	public static final String DATE_FORMAT_MILLI = "yyyy-MM-dd HH:mm:ss.SSS";
 	
-	public static Calendar getCalendar(String dateString, DateFormat df) throws ParseException{
+	public static DateFormat getDateFormat(String format){
+		return new SimpleDateFormat(format, Locale.ENGLISH);
+	}
+	
+	public static Calendar getCalendar(String dateString, String df) throws ParseException{
 		return getCalendar(parseDate(dateString, df));
 	}
 	
@@ -28,8 +32,8 @@ public class DateUtils {
 		return res;
 	}
 	
-	public static Date parseDate(String dateString, DateFormat df) throws ParseException{
-		return df.parse(dateString);
+	public static Date parseDate(String dateString, String df) throws ParseException{
+		return getDateFormat(df).parse(dateString);
 	}
 	
 	public static Date parseDate(String dateString) throws ParseException{
@@ -41,18 +45,18 @@ public class DateUtils {
 	}
 	
 	public static String dateToString(Date date){
-		return DATE_FORMAT_STD.format(date);
+		return getDateFormat(DATE_FORMAT_STD).format(date);
 	}
 	
-	public static String dateToString(Date date, DateFormat df){
-		return df.format(date);
+	public static String dateToString(Date date, String df){
+		return getDateFormat(df).format(date);
 	}
 	
 	public static String calToString(Calendar cal){
 		return dateToString(cal.getTime());
 	}
 	
-	public static String calToString(Calendar cal, DateFormat df){
+	public static String calToString(Calendar cal, String df){
 		return dateToString(cal.getTime(), df);
 	}
 	

@@ -46,5 +46,12 @@ public class RandomPriceData implements IDataSource{
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public OhlcPrice getOhlcPrice(Pair pair, Interval interval, Calendar time) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	
 }

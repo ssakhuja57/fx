@@ -1,19 +1,18 @@
 package com.peebeekay.fx.simulation;
 
+import java.io.File;
 import java.text.ParseException;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
+import com.peebeekay.fx.info.Interval;
 import com.peebeekay.fx.info.Pair;
-import com.peebeekay.fx.simulation.data.distributors.ADataDistributor;
-import com.peebeekay.fx.simulation.data.distributors.TickDataDistributor;
-import com.peebeekay.fx.simulation.data.sources.DBDataSource;
+import com.peebeekay.fx.simulation.data.sources.DelimitedFileDataSource;
 import com.peebeekay.fx.simulation.data.sources.IDataSource;
-import com.peebeekay.fx.simulation.data.sources.RandomPriceData;
 import com.peebeekay.fx.simulation.trader.ATrader;
 import com.peebeekay.fx.simulation.trader.SimpleRSITrader;
 import com.peebeekay.fx.utils.DateUtils;
-import com.peebeekay.fx.utils.Logger;
 import com.peebeekay.fx.utils.config.DBConfig;
 import com.peebeekay.fx.utils.config.VerticaConfig;
 
@@ -25,6 +24,10 @@ public class SimulationRunner {
 	public static void main(String[] args) throws ParseException{
 		
 		Pair pair = Pair.EURUSD;
+		String dataFolder = "C:\\fx-data\\final\\recent\\EUR-USD\\";
+		
+		Calendar[] starts = new Calendar[]{DateUtils.getCalendar("2015-06-01 12:00:00", DateUtils.DATE_FORMAT_STD)};
+		Calendar[] ends = new Calendar[]{DateUtils.getCalendar("2015-06-04 00:00:00", DateUtils.DATE_FORMAT_STD)};
 //		Calendar[] starts = new Calendar[]{
 //				DateUtils.getCalendar("2014-01-05 00:00:00", DateUtils.DATE_FORMAT_STD),
 //				DateUtils.getCalendar("2014-02-01 00:00:00", DateUtils.DATE_FORMAT_STD),
@@ -53,15 +56,16 @@ public class SimulationRunner {
 //				DateUtils.getCalendar("2014-12-01 00:00:00", DateUtils.DATE_FORMAT_STD),
 //				DateUtils.getCalendar("2015-01-01 00:00:00", DateUtils.DATE_FORMAT_STD)
 //		};
-		Calendar[] starts = new Calendar[]{DateUtils.getCalendar("2014-01-05 00:00:00", DateUtils.DATE_FORMAT_STD)};
-		Calendar[] ends = new Calendar[]{DateUtils.getCalendar("2014-06-01 00:00:00", DateUtils.DATE_FORMAT_STD)};
+
 		for(int x=0; x<starts.length; x++){
-			DBConfig dbConfig = new VerticaConfig("192.168.91.128", 5433, "fx", "dbadmin", "dbadmin");
-			IDataSource dataSource = new DBDataSource(dbConfig, pair, starts[x], ends[x], true);
+			DBConfig dbConfig = new VerticaConfig("192.168.91.132", 5433, "fx", "dbadmin", "dbadmin");
+//			IDataSource dataSource = new DBDataSource(dbConfig, pair, starts[x], ends[x], true);
+			Map<Interval,File> ohlcFiles = new HashMap<Interval,File>();
+			ohlcFiles.put(Interval.M30, new File(dataFolder + "EURUSD-M30-0.csv_0"));
+			IDataSource dataSource = new DelimitedFileDataSource(dataFolder + "EURUSD-T-0.csv_0", ohlcFiles, ",", pair, starts[x], ends[x], true);
 			SimulationController controller = new SimulationController(pair, starts[x], ends[x], dataSource);
-			
-			for(int i=15; i<=20; i++){
-				ATrader t = new SimpleRSITrader("2014-" + (x+1) + "-m30RSI-stop" + i + ".csv", "C:\\fx-data\\results", pair, dataSource, starts[x], i);
+			for(int i=21; i<=21; i++){
+				ATrader t = new SimpleRSITrader("2015-" + (x+1) + "-m30RSI-stop" + i + ".csv", "C:\\fx-data\\results", pair, dataSource, starts[x], i);
 				controller.addTrader(t);
 			}
 			

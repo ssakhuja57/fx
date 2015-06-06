@@ -19,7 +19,7 @@ public class SimulationController implements Runnable{
 
 	private int tickRow = 0;
 	private Calendar tickClock;
-	private Calendar OhlcClock;
+	private Calendar ohlcClock;
 	private boolean moreData = true;
 	
 	private Pair pair;
@@ -28,11 +28,13 @@ public class SimulationController implements Runnable{
 	private ArrayList<ATrader> traders = new ArrayList<ATrader>();
 	
 	public SimulationController(Pair pair, Calendar start, Calendar end, IDataSource dataSource){
+		Logger.debug("creating simulation controller for " + pair 
+				+ " from " + DateUtils.calToString(start) + " to " + DateUtils.calToString(end));
 		this.pair = pair;
 		this.end = end;
 		this.dataSource = dataSource;
 		tickClock = Calendar.getInstance(); tickClock.setTime(start.getTime());
-		OhlcClock = Calendar.getInstance(); OhlcClock.setTime(start.getTime());
+		ohlcClock = Calendar.getInstance(); ohlcClock.setTime(start.getTime());
 	}
 	
 	public void addTrader(ATrader trader){
@@ -40,6 +42,8 @@ public class SimulationController implements Runnable{
 	}
 	
 	private void advanceTick(){
+//		Logger.debug(tickClock.getTime().toString());
+//		Logger.debug("advancing tick");
 		Tick tick = null;
 		try{
 			tick = dataSource.getTickRow(tickRow);
@@ -52,9 +56,9 @@ public class SimulationController implements Runnable{
 		Calendar tickTime = DateUtils.getCalendar(tick.getTime());
 		Calendar tickTimeMinute = DateUtils.roundDownToMinute(tickTime); 
 		//Logger.debug(OhlcClock.getTime().toString());
-		if(tickTimeMinute.after(OhlcClock)){
-			//Logger.debug(tickTimeMinute.getTime().toString() + " > " + OhlcClock.getTime().toString());
-			OhlcClock = tickTimeMinute;
+		if(tickTimeMinute.after(ohlcClock)){
+//			Logger.debug(tickTimeMinute.getTime().toString() + " > " + ohlcClock.getTime().toString());
+			ohlcClock = tickTimeMinute;
 			sendOhlc();
 		}
 		sendTick(tick);
@@ -71,13 +75,13 @@ public class SimulationController implements Runnable{
 		for(Interval interval: EnumSet.allOf(Interval.class)){
 			if(interval == Interval.T)
 				continue;
-			if(interval != Interval.M30)
+			if(interval != Interval.M30) //tmp
 				continue;
-			if(DateUtils.isMultipleOf(OhlcClock.getTime(), interval.minutes)){
+			if(DateUtils.isMultipleOf(ohlcClock.getTime(), interval.minutes)){
 				for(ATrader t: traders){
-					ArrayList<OhlcPrice> prices = dataSource.getOhlcPrices(pair, interval, OhlcClock, OhlcClock);
-					if(prices.size() > 0)
-						t.accept(prices.get(0));
+					OhlcPrice price = dataSource.getOhlcPrice(pair, interval, ohlcClock);
+					if(price != null)
+						t.accept(price);
 				}
 			}
 		}
@@ -86,8 +90,11 @@ public class SimulationController implements Runnable{
 	@Override
 	public void run() {
 		while(true){
-			if(tickClock.after(end) || !moreData)
+			if(tickClock.after(end) || !moreData){
+				Logger.debug(tickRow+"");
+				Logger.debug(tickClock.getTime().toString() + " " + moreData);
 				break;
+			}
 			advanceTick();
 		}
 		for(ATrader t: traders)

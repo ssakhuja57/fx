@@ -1,8 +1,10 @@
 package com.peebeekay.fx.utils;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -15,27 +17,27 @@ import java.util.jar.JarFile;
 
 public class FileUtils {
 	
-	private static final String PREFERENCES_PATH = "preferences";
-	
-	public static final LinkedHashMap<String, Properties> PROPERTIES_MAP;
-	
-	static{
-		PROPERTIES_MAP = new LinkedHashMap<String, Properties>();
-		PROPERTIES_MAP.put("None", new Properties());
-		try {
-			for (String path: getResourcePaths(PREFERENCES_PATH)){
-				Properties props;
-				try {
-					props = getPropsFromResource(path);
-					PROPERTIES_MAP.put(props.getProperty("name"), props);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		} catch (IOException | URISyntaxException e) {
-			e.printStackTrace();
-		}
-	}
+//	private static final String PREFERENCES_PATH = "preferences";
+//	
+//	public static final LinkedHashMap<String, Properties> PROPERTIES_MAP;
+//	
+//	static{
+//		PROPERTIES_MAP = new LinkedHashMap<String, Properties>();
+//		PROPERTIES_MAP.put("None", new Properties());
+//		try {
+//			for (String path: getResourcePaths(PREFERENCES_PATH)){
+//				Properties props;
+//				try {
+//					props = getPropsFromResource(path);
+//					PROPERTIES_MAP.put(props.getProperty("name"), props);
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		} catch (IOException | URISyntaxException e) {
+//			e.printStackTrace();
+//		}
+//	}
 	
 	public static Properties getPropsFromFile(String path) throws FileNotFoundException, IOException{
 		Properties props = new Properties();
@@ -71,5 +73,9 @@ public class FileUtils {
 	    jar.close();
 	    return res;
 	}
-
+	
+	public static BufferedReader readFile(File file) throws FileNotFoundException{
+		return new BufferedReader(new FileReader(file));
+	}
+	
 }

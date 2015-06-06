@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import com.peebeekay.fx.info.Interval;
 import com.peebeekay.fx.simulation.data.types.OhlcPrice;
 import com.peebeekay.fx.simulation.data.types.Tick;
+import com.peebeekay.fx.utils.DateUtils;
+import com.peebeekay.fx.utils.Logger;
 
 public class RSI implements IIndicator {
 	
@@ -36,6 +38,7 @@ public class RSI implements IIndicator {
 	
 	@Override
 	public void addDataPoint(OhlcPrice p) {
+//		Logger.debug("received " + p.getBidClose() + " at " + DateUtils.dateToString(p.getTime(), DateUtils.DATE_FORMAT_MILLI));
 		if(p.getInterval() != interval){
 			throw new RuntimeException(interval + "data expected, got " + p.getInterval());
 		}
@@ -65,10 +68,15 @@ public class RSI implements IIndicator {
 			if(change > 0)
 				averageUp += change; //simple average
 			else
-				averageDown += (-change);
-			
+				averageDown -= change;
 		}
-		double rsi = 100 - (100/(1+(averageUp/averageDown)));
+		double rsi;
+		if(averageDown == 0)
+			rsi = 100;
+		else
+			rsi = 100 - (100/(1+(averageUp/averageDown)));
+		
+		Logger.debug(rsi + "");
 		return rsi;
 	}
 

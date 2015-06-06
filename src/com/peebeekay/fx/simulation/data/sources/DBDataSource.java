@@ -77,11 +77,31 @@ public class DBDataSource implements IDataSource{
 		
 		ArrayList<OhlcPrice> res = new ArrayList<OhlcPrice>();
 		for(String[] row: rows){
-			res.add(OhlcPrice.arrayToOhlc(row, interval));
+			res.add(OhlcPrice.arrayToOhlc(row));
 		}
 		
-		return res;
-		
+		return res;	
+	}
+	
+
+
+	@Override
+	public OhlcPrice getOhlcPrice(Pair pair, Interval interval,
+			Calendar time) {
+		ArrayList<String[]> rows = new ArrayList<String[]>();
+		String sql = "select " + StringUtils.arrayToString(OhlcPrice.FIELDS,",") + " from data." + interval.value 
+				+ " WHERE ts = '" + DateUtils.calToString(time) + "'"
+				+ " AND pair = '" + pair + "'"
+				+ " ORDER BY ts"
+				+ ";";
+		try {
+			rows = DBUtils.readQuery(config, sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		if(rows.size() != 1)
+			return null;
+		return OhlcPrice.arrayToOhlc(rows.get(0));
 	}
 	
 	

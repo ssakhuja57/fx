@@ -24,7 +24,7 @@ public class OhlcPrice {
 	private double bidLow;
 	private double bidClose;
 	
-	public static final String[] FIELDS = new String[] {"pair","ts","askOpen","askHigh","askLow","askClose","bidOpen","bidHigh","bidLow","bidClose"};
+	public static final String[] FIELDS = new String[] {"pair","interval","ts","askOpen","askHigh","askLow","askClose","bidOpen","bidHigh","bidLow","bidClose"};
 	
 	public OhlcPrice(Pair pair, Date time, Interval interval, double askOpen, double askHigh, double askLow, double askClose,
 			double bidOpen, double bidHigh, double bidLow, double bidClose){
@@ -43,28 +43,29 @@ public class OhlcPrice {
 		this.bidClose = bidClose;
 	}
 	
-	public static OhlcPrice arrayToOhlc(String[] row, Interval interval){
-		final int expected = 10;
+	public static OhlcPrice arrayToOhlc(String[] row){
+		final int expected = FIELDS.length;
 		if(row.length != expected){
 			throw new RuntimeException("expected " + expected + " values for OHLC, got " + row.length);
 		}
 		Pair pair = StringUtils.getEnumFromString(Pair.class, row[0]);
+		Interval interval = Interval.valueOf(row[1]);
 		Date date = null;
 		try {
-			date = DateUtils.parseDate(row[1], DateUtils.DATE_FORMAT_STD);
+			date = DateUtils.parseDate(row[2], DateUtils.DATE_FORMAT_STD);
 		} catch (ParseException e) {
 			e.printStackTrace();
-			throw new RuntimeException("date parse error: " + row[1]);
+			throw new RuntimeException("date parse error: " + row[2]);
 		}
-		double askOpen = Double.parseDouble(row[2]);
-		double askHigh = Double.parseDouble(row[3]);
-		double askLow = Double.parseDouble(row[4]);
-		double askClose = Double.parseDouble(row[5]);
+		double askOpen = Double.parseDouble(row[3]);
+		double askHigh = Double.parseDouble(row[4]);
+		double askLow = Double.parseDouble(row[5]);
+		double askClose = Double.parseDouble(row[6]);
 		
-		double bidOpen = Double.parseDouble(row[6]);
-		double bidHigh = Double.parseDouble(row[7]);
-		double bidLow = Double.parseDouble(row[8]);
-		double bidClose = Double.parseDouble(row[9]);
+		double bidOpen = Double.parseDouble(row[7]);
+		double bidHigh = Double.parseDouble(row[8]);
+		double bidLow = Double.parseDouble(row[9]);
+		double bidClose = Double.parseDouble(row[10]);
 		
 		return new OhlcPrice(pair, date, interval, askOpen, askHigh, askLow, askClose, bidOpen, bidHigh, bidLow, bidClose);
 	}
