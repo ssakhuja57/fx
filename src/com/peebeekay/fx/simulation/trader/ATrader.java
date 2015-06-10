@@ -16,10 +16,10 @@ public abstract class ATrader implements IDataSubscriber {
 	String name;
 	
 	
-	public ATrader(IDataSource ds, String name, String outputFolder) {
+	public ATrader(IDataSource ds, String name, String outputFolder, int maxConcurrentTrades) {
 		this.ds = ds;
 		this.name = name;
-		tradeMgr = new TradeManager(outputFolder, name);
+		tradeMgr = new TradeManager(outputFolder, name, maxConcurrentTrades);
 		this.isReady = true;
 	}
 	

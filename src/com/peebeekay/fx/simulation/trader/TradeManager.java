@@ -17,6 +17,7 @@ import com.peebeekay.fx.simulation.monitors.cancel.ACancelTradeMonitor;
 import com.peebeekay.fx.simulation.monitors.close.ACloseTradeMonitor;
 import com.peebeekay.fx.simulation.monitors.open.AOpenTradeMonitor;
 import com.peebeekay.fx.simulation.trades.Trade;
+import com.peebeekay.fx.simulation.trades.Trade.Status;
 import com.peebeekay.fx.utils.Logger;
 
 public class TradeManager implements IDataSubscriber{
@@ -24,19 +25,34 @@ public class TradeManager implements IDataSubscriber{
 	private String resultFolder;
 	private String traderName;
 	private Map<Trade,MonitorSet> monitors = new HashMap<Trade,MonitorSet>();
+	private int maxConcurrentTrades;
 	private int numTrades = 0;
 	
-	public TradeManager(String resultOutputFolder, String traderName){
+	public TradeManager(String resultOutputFolder, String traderName, int maxConcurrentTrades){
 		this.resultFolder = resultOutputFolder;
 		this.traderName = traderName;
+		this.maxConcurrentTrades = maxConcurrentTrades;
 	}
 	
-	public Trade createTrade(Pair pair, Boolean isLong, int lots){
+	public Trade createTrade(Pair pair, Boolean isLong, int lots) throws TradeCreationException{
 		Logger.info("trader " + traderName + " creating trade for " + pair);
+		if(getOpenTradeCount() >= maxConcurrentTrades && maxConcurrentTrades != 0){
+			Logger.debug("already at max concurrent trades of " + maxConcurrentTrades);
+			throw new TradeCreationException();
+		}
 		Trade newTrade = new Trade(numTrades, pair, isLong, lots);
 		monitors.put(newTrade, new MonitorSet());
 		numTrades++;
 		return newTrade;
+	}
+	
+	public int getOpenTradeCount(){
+		int count = 0;
+		for(Trade t: monitors.keySet()){
+			if(t.getStatus() == Status.OPEN)
+				count++;
+		}
+		return count;
 	}
 	
 	public void logResults() throws IOException{

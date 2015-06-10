@@ -68,13 +68,13 @@ public class RSI implements IIndicator {
 			if(change > 0)
 				averageUp += change; //simple average
 			else
-				averageDown -= change;
+				averageDown += change;
 		}
 		double rsi;
 		if(averageDown == 0)
 			rsi = 100;
 		else
-			rsi = 100 - (100/(1+(averageUp/averageDown)));
+			rsi = 100 - (100/(1-(averageUp/averageDown)));
 		
 		Logger.debug(rsi + "");
 		return rsi;

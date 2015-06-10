@@ -25,6 +25,7 @@ public class SimulationRunner {
 		
 		Pair pair = Pair.EURUSD;
 		String dataFolder = "C:\\fx-data\\final\\recent\\EUR-USD\\";
+		int maxConcurrentTrades = 1;
 		
 		Calendar[] starts = new Calendar[]{DateUtils.getCalendar("2015-06-01 12:00:00", DateUtils.DATE_FORMAT_STD)};
 		Calendar[] ends = new Calendar[]{DateUtils.getCalendar("2015-06-04 00:00:00", DateUtils.DATE_FORMAT_STD)};
@@ -64,8 +65,9 @@ public class SimulationRunner {
 			ohlcFiles.put(Interval.M30, new File(dataFolder + "EURUSD-M30-0.csv_0"));
 			IDataSource dataSource = new DelimitedFileDataSource(dataFolder + "EURUSD-T-0.csv_0", ohlcFiles, ",", pair, starts[x], ends[x], true);
 			SimulationController controller = new SimulationController(pair, starts[x], ends[x], dataSource);
-			for(int i=21; i<=21; i++){
-				ATrader t = new SimpleRSITrader("2015-" + (x+1) + "-m30RSI-stop" + i + ".csv", "C:\\fx-data\\results", pair, dataSource, starts[x], i);
+			for(int i=20; i<=20; i+=10){
+				ATrader t = new SimpleRSITrader("2015-" + (x+1) + "-m30RSI-stop" + i + ".csv", "C:\\fx-data\\results", 
+						pair, dataSource, starts[x], i, maxConcurrentTrades);
 				controller.addTrader(t);
 			}
 			

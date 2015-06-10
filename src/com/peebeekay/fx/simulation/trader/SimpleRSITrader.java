@@ -34,8 +34,9 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 		HOLD,BUY,SELL
 	}
 	
-	public SimpleRSITrader(String name, String outputFolder, Pair pair, IDataSource ds, Calendar startTime, int stopOffset){
-		super(ds, name, outputFolder);
+	public SimpleRSITrader(String name, String outputFolder, Pair pair, IDataSource ds, 
+			Calendar startTime, int stopOffset, int maxConcurrentTrades){
+		super(ds, name, outputFolder, maxConcurrentTrades);
 		this.startTime = startTime;
 		this.pair = pair;
 		this.stopOffset = stopOffset;
@@ -62,7 +63,7 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 	
 	@Override
 	public void accept(Tick price) {
-		//Logger.debug("received tick " + price.getTime());
+//		Logger.debug("received tick " + price.getTime());
 		super.tradeMgr.accept(price);
 		if(signal == Signal.HOLD)
 			return;
@@ -70,15 +71,20 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 		boolean tradeLong = true;
 		if(signal == Signal.SELL)
 			tradeLong = false;
-		Trade trade = super.tradeMgr.createTrade(pair, tradeLong, 1000);
-		super.tradeMgr.updateTrade(trade, new MarketOpen(trade));
-		super.tradeMgr.updateTrade(trade, new StopClose(trade, stopOffset, true));
-		signal = Signal.HOLD;
+		Trade trade = null;
+		try {
+			trade = super.tradeMgr.createTrade(pair, tradeLong, 1000);
+			super.tradeMgr.updateTrade(trade, new MarketOpen(trade));
+			super.tradeMgr.updateTrade(trade, new StopClose(trade, stopOffset, true));
+		} catch (TradeCreationException e) {
+		} finally{
+			signal = Signal.HOLD;
+		}
 	}
 	
 	@Override
 	public void accept(OhlcPrice price) {
-//		Logger.debug("received " + price.getInterval() + " at " + price.getTime());
+		Logger.debug("received " + price.getInterval() + " at " + price.getTime());
 		if(price.getInterval() == INTERVAL){
 			rsi.addDataPoint(price);			
 			signal = chooseAction();
