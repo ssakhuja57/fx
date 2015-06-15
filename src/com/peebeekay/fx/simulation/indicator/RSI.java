@@ -5,21 +5,25 @@ import java.util.ArrayList;
 import com.peebeekay.fx.info.Interval;
 import com.peebeekay.fx.simulation.data.types.OhlcPrice;
 import com.peebeekay.fx.simulation.data.types.Tick;
-import com.peebeekay.fx.utils.DateUtils;
 import com.peebeekay.fx.utils.Logger;
 
 public class RSI implements IIndicator {
 	
 	private Interval interval;
-	private int period;
+	private int periods;
+	private int arraySize;
 	private ArrayList<OhlcPrice> prices;
 	Boolean simple; //if true use simple moving average 
 	private Boolean useBid; //
 	
+	private double averageGain = 0;
+	private double averageLoss = 0;
 	
-	public RSI(Interval interval, int period, Boolean simple, Boolean useBid, ArrayList<OhlcPrice> historicalPrices){
+	
+	public RSI(Interval interval, int periods, Boolean simple, Boolean useBid, ArrayList<OhlcPrice> historicalPrices){
 		this.interval = interval;
-		 this.period = period;
+		 this.periods = periods;
+		 arraySize = periods + 1;
 		 this.simple = simple;
 		 this.useBid = useBid;
 		 this.prices = new ArrayList<OhlcPrice>();
@@ -31,7 +35,7 @@ public class RSI implements IIndicator {
 			 this.prices.add(i, p);
 			 i++;
 		 }
-		 while(prices.size() > period){
+		 while(prices.size() > arraySize){
 			 prices.remove(0);
 		 }
 	}
@@ -54,29 +58,37 @@ public class RSI implements IIndicator {
 
 	@Override
 	public double getValue() {
-		if(prices.size() == period)
+		if(prices.size() == arraySize)
 			return calcRSI();
 		else
-			throw new RuntimeException(period + " values needed in RSI, only have " + prices.size());
+			throw new RuntimeException(arraySize + " values needed in RSI, only have " + prices.size());
 	}
 	
 	private double calcRSI(){
-		double averageUp =0;
-		double averageDown=0;
-		for(int i=1; i<period; i++){
+		double averageGainCurr =0;
+		double averageLossCurr=0;
+		for(int i=1; i<arraySize; i++){
 			double change = (useBid)? prices.get(i).getBidClose() - prices.get(i-1).getBidClose(): prices.get(i).getAskClose() - prices.get(i-1).getAskClose();
+//			Logger.debug(i + ": calculation for period " + prices.get(i-1).getTime().toString() + " to " + prices.get(i).getTime().toString() + ": " + change);
 			if(change > 0)
-				averageUp += change; //simple average
+				averageGainCurr += change;
 			else
-				averageDown += change;
+				averageLossCurr -= change;
 		}
 		double rsi;
-		if(averageDown == 0)
-			rsi = 100;
-		else
-			rsi = 100 - (100/(1-(averageUp/averageDown)));
 		
-		Logger.debug(rsi + "");
+		if(averageGain == 0 && averageLoss == 0){
+			averageGain = averageGainCurr;
+			averageLoss = averageLossCurr;
+		}
+		else{
+			averageGain = (averageGain*(periods - 1) + averageGainCurr)/periods;
+			averageLoss = (averageLoss*(periods - 1) + averageLossCurr)/periods;
+		}
+
+		rsi = 100 - (100/(1+(averageGain/averageLoss)));
+		
+//		Logger.debug(rsi + "");
 		return rsi;
 	}
 

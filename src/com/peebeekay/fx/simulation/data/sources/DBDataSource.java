@@ -33,7 +33,9 @@ public class DBDataSource implements IDataSource{
 		this.end = end;
 		this.cacheAll = cacheAll;
 		if(cacheAll){
-			String sql = "select " + StringUtils.arrayToString(Tick.FIELDS, ",") + " from data.tick where ts >= '" + DateUtils.calToString(start) + "'"
+			String sql = "SELECT " + StringUtils.arrayToString(Tick.FIELDS, ",") 
+					+ " FROM data.tick"
+					+ " WHERE ts >= '" + DateUtils.calToString(start) + "'"
 					+ " AND ts <= '" + DateUtils.calToString(end) + "'"
 					+ " AND pair = '" + pair + "'"
 					+ " ORDER BY ts"
@@ -62,7 +64,8 @@ public class DBDataSource implements IDataSource{
 	@Override
 	public ArrayList<OhlcPrice> getOhlcPrices(Pair pair, Interval interval,
 			Calendar start, Calendar end) {
-		String sql = "select " + StringUtils.arrayToString(OhlcPrice.FIELDS,",") + " from data." + interval.value 
+		String sql = "SELECT " + StringUtils.arrayToString(OhlcPrice.FIELDS,",").replace("interval,", "'" + interval.value + "',")
+				+ " FROM data." + interval.value 
 				+ " WHERE ts >= '" + DateUtils.calToString(start) + "'"
 				+ " AND ts <= '" + DateUtils.calToString(end) + "'"
 				+ " AND pair = '" + pair + "'"
@@ -89,7 +92,8 @@ public class DBDataSource implements IDataSource{
 	public OhlcPrice getOhlcPrice(Pair pair, Interval interval,
 			Calendar time) {
 		ArrayList<String[]> rows = new ArrayList<String[]>();
-		String sql = "select " + StringUtils.arrayToString(OhlcPrice.FIELDS,",") + " from data." + interval.value 
+		String sql = "SELECT " + StringUtils.arrayToString(OhlcPrice.FIELDS,",").replace("interval,", "'" + interval.value + "',") 
+				+ " FROM data." + interval.value 
 				+ " WHERE ts = '" + DateUtils.calToString(time) + "'"
 				+ " AND pair = '" + pair + "'"
 				+ " ORDER BY ts"

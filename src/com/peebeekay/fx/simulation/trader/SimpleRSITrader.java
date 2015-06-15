@@ -84,13 +84,13 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 	
 	@Override
 	public void accept(OhlcPrice price) {
-		Logger.debug("received " + price.getInterval() + " at " + price.getTime());
+//		Logger.debug("received " + price.getInterval() + " at " + price.getTime());
 		if(price.getInterval() == INTERVAL){
 			rsi.addDataPoint(price);			
 			signal = chooseAction();
 			prevRsi = rsi.getValue();
+			Logger.debug(price.getTime().toString() + " --- " + prevRsi);
 		}
-//		Logger.debug(prevRsi+"");
 	}
 	
 

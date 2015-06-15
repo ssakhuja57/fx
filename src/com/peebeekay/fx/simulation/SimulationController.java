@@ -91,8 +91,8 @@ public class SimulationController implements Runnable{
 	public void run() {
 		while(true){
 			if(tickClock.after(end) || !moreData){
-				Logger.debug(tickRow+"");
-				Logger.debug(tickClock.getTime().toString() + " " + moreData);
+//				Logger.debug(tickRow+"");
+//				Logger.debug(tickClock.getTime().toString() + " " + moreData);
 				break;
 			}
 			advanceTick();

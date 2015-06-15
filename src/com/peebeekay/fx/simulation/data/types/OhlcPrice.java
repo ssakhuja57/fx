@@ -49,7 +49,7 @@ public class OhlcPrice {
 			throw new RuntimeException("expected " + expected + " values for OHLC, got " + row.length);
 		}
 		Pair pair = StringUtils.getEnumFromString(Pair.class, row[0]);
-		Interval interval = Interval.valueOf(row[1]);
+		Interval interval = Interval.valueOf(row[1].toUpperCase());
 		Date date = null;
 		try {
 			date = DateUtils.parseDate(row[2], DateUtils.DATE_FORMAT_STD);
