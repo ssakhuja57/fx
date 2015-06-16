@@ -89,7 +89,7 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 			rsi.addDataPoint(price);			
 			signal = chooseAction();
 			prevRsi = rsi.getValue();
-			Logger.debug(price.getTime().toString() + " --- " + prevRsi);
+//			Logger.debug(price.getTime().toString() + ":" + prevRsi);
 		}
 	}
 	

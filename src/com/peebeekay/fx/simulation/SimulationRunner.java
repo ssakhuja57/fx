@@ -28,8 +28,8 @@ public class SimulationRunner {
 		String dataFolder = "C:\\fx-data\\final\\recent\\EUR-USD\\";
 		int maxConcurrentTrades = 1;
 		
-		Calendar[] starts = new Calendar[]{DateUtils.getCalendar("2014-03-28 11:00:00", DateUtils.DATE_FORMAT_STD)};
-		Calendar[] ends = new Calendar[]{DateUtils.getCalendar("2014-03-29 00:00:00", DateUtils.DATE_FORMAT_STD)};
+		Calendar[] starts = new Calendar[]{DateUtils.getCalendar("2014-07-21 00:30:00", DateUtils.DATE_FORMAT_STD)};
+		Calendar[] ends = new Calendar[]{DateUtils.getCalendar("2014-07-22 23:00:00", DateUtils.DATE_FORMAT_STD)};
 //		Calendar[] starts = new Calendar[]{
 //				DateUtils.getCalendar("2014-01-05 00:00:00", DateUtils.DATE_FORMAT_STD),
 //				DateUtils.getCalendar("2014-02-01 00:00:00", DateUtils.DATE_FORMAT_STD),
@@ -60,7 +60,7 @@ public class SimulationRunner {
 //		};
 
 		for(int x=0; x<starts.length; x++){
-			DBConfig dbConfig = new VerticaConfig("192.168.91.152", 5433, "fx", "dbadmin", "dbadmin");
+			DBConfig dbConfig = new VerticaConfig("192.168.91.154", 5433, "fx", "dbadmin", "dbadmin");
 			IDataSource dataSource = new DBDataSource(dbConfig, pair, starts[x], ends[x], true);
 			Map<Interval,File> ohlcFiles = new HashMap<Interval,File>();
 //			ohlcFiles.put(Interval.M30, new File(dataFolder + "EURUSD-M30-0.csv_0"));
