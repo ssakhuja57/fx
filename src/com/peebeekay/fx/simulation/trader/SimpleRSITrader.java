@@ -5,6 +5,7 @@ import java.util.Calendar;
 
 import com.peebeekay.fx.info.Interval;
 import com.peebeekay.fx.info.Pair;
+import com.peebeekay.fx.rates.RateStats;
 import com.peebeekay.fx.simulation.data.sources.IDataSource;
 import com.peebeekay.fx.simulation.data.types.OhlcPrice;
 import com.peebeekay.fx.simulation.data.types.Tick;
@@ -13,7 +14,7 @@ import com.peebeekay.fx.simulation.indicator.RSI;
 import com.peebeekay.fx.simulation.monitors.close.StopClose;
 import com.peebeekay.fx.simulation.monitors.open.MarketOpen;
 import com.peebeekay.fx.simulation.trades.Trade;
-import com.peebeekay.fx.utils.Logger;
+import com.peebeekay.fx.utils.RateUtils;
 
 public class SimpleRSITrader extends ATrader implements Runnable{
 	
@@ -29,6 +30,7 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 	private volatile Boolean isReady;
 	private Boolean stillRunning;
 	private Signal signal = Signal.HOLD;
+	private RateStats stats = new RateStats(96, INTERVAL);;
 	
 	private enum Signal{
 		HOLD,BUY,SELL
@@ -51,6 +53,7 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 		prevRsi = rsi.getValue();
 		isReady = true;
 		stillRunning = true;
+		
 	}
 
 	public Signal chooseAction() {
@@ -75,7 +78,11 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 		try {
 			trade = super.tradeMgr.createTrade(pair, tradeLong, 1000);
 			super.tradeMgr.updateTrade(trade, new MarketOpen(trade));
-			super.tradeMgr.updateTrade(trade, new StopClose(trade, stopOffset, true));
+			//super.tradeMgr.updateTrade(trade, new StopClose(trade, stopOffset, true));
+			double stop = stats.getRecentExtremum(1, 3, !tradeLong, tradeLong);
+			int trailAmt = (int)RateUtils.getAbsPipDistance(price.getExitPrice(tradeLong), stop);
+			super.tradeMgr.updateTrade(trade, new StopClose(trade, trailAmt,true));
+			
 		} catch (TradeCreationException e) {
 		} finally{
 			signal = Signal.HOLD;
@@ -89,6 +96,7 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 			rsi.addDataPoint(price);			
 			signal = chooseAction();
 			prevRsi = rsi.getValue();
+			stats.accept(price); // temp
 //			Logger.debug(price.getTime().toString() + ":" + prevRsi);
 		}
 	}

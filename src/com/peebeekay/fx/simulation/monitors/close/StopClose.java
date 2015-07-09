@@ -12,7 +12,7 @@ public class StopClose extends ACloseTradeMonitor{
 	boolean trail;
 	ReferenceLine stopLine;
 	boolean isLong;
-	private Tick lastPrice;
+	Tick lastPrice;
 	
 	
 	public StopClose(Trade trade, int offset, boolean trail) {
@@ -82,6 +82,7 @@ public class StopClose extends ACloseTradeMonitor{
 				}
 			}
 		}
+		
 		lastPrice = price;
 	}
 

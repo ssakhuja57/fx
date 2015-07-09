@@ -33,7 +33,7 @@ public class RateUtils {
 	}
 	
 	public static boolean isEqualOrBetter(Tick price, Tick reference, boolean isLong, boolean isEnter){
-		if( (isLong && isEnter) || (!isLong && !isEnter) ){
+		if( isAsk(isLong, isEnter) ){
 			if( price.getAsk() <= reference.getAsk() )
 				return true;
 			return false;
@@ -46,7 +46,7 @@ public class RateUtils {
 	}
 	
 	public static boolean isEqualOrBetter(Tick price, ReferenceLine reference, boolean isLong, boolean isEnter){
-		if( (isLong && isEnter) || (!isLong && !isEnter) ){
+		if( isAsk(isLong, isEnter) ){
 			if(price.getAsk() <= reference.getValue())
 				return true;
 			return false;
@@ -63,6 +63,10 @@ public class RateUtils {
 			return true;
 		}
 		return false;
+	}
+	
+	public static boolean isAsk(boolean isLong, boolean isEnter){
+		return isLong ^ isEnter;
 	}
 	
 }

@@ -35,8 +35,8 @@ public class RSI implements IIndicator {
 			 historicalPrices.remove(0);
 		 }
 		 
-		 for(OhlcPrice p: historicalPrices)
-			 System.out.println(DateUtils.dateToString(p.getTime()) + "," + p.getBidClose());
+//		 for(OhlcPrice p: historicalPrices)
+//			 System.out.println(DateUtils.dateToString(p.getTime()) + "," + p.getBidClose());
 		 
 		 for(int i=1; i<periods; i++){
 			double change = (useBid)? historicalPrices.get(i).getBidClose() - historicalPrices.get(i-1).getBidClose(): 
@@ -74,7 +74,7 @@ public class RSI implements IIndicator {
 		
 		lastPrice = p;
 		
-		Logger.debug(p.getTime().toString() + " : " + rsi + " (" + p.getBidClose() + ")");
+//		Logger.debug(p.getTime().toString() + " : " + rsi + " (" + p.getBidClose() + ")");
 		
 //		Logger.debug(averageGain + " : " + averageLoss);
 	}

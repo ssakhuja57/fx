@@ -106,6 +106,46 @@ public class OhlcPrice {
 		return bidClose;
 	}
 	
+	public AskBid getAskBid(boolean isAsk){
+		return new AskBid(isAsk);
+	}
+	
+	public class AskBid{
+		
+		double open;
+		double high;
+		double low;
+		double close;
+		
+		private AskBid(boolean isAsk){
+			if(isAsk){
+				open = bidOpen;
+				high = bidHigh;
+				low = bidLow;
+				close = bidClose;
+			}
+			else{
+				open = askOpen;
+				high = askHigh;
+				low = askLow;
+				close = askClose;
+			}
+		}
+		
+		public double getOpen(){
+			return open;
+		}
+		public double getHigh(){
+			return high;
+		}
+		public double getLow(){
+			return low;
+		}
+		public double getClose(){
+			return close;
+		}
+		
+	}
 	
 	
 	
