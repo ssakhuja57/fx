@@ -4,6 +4,7 @@ import com.peebeekay.fx.simulation.data.types.OhlcPrice;
 import com.peebeekay.fx.simulation.data.types.ReferenceLine;
 import com.peebeekay.fx.simulation.data.types.Tick;
 import com.peebeekay.fx.simulation.trades.Trade;
+import com.peebeekay.fx.utils.Logger;
 import com.peebeekay.fx.utils.RateUtils;
 
 public class StopClose extends ACloseTradeMonitor{
@@ -13,6 +14,7 @@ public class StopClose extends ACloseTradeMonitor{
 	ReferenceLine stopLine;
 	boolean isLong;
 	Tick lastPrice;
+	int ticks = 0;
 	
 	
 	public StopClose(Trade trade, int offset, boolean trail) {
@@ -66,6 +68,7 @@ public class StopClose extends ACloseTradeMonitor{
 			lastPrice = price;
 			return;
 		}
+		
 
 		if(!RateUtils.isEqualOrBetter(price, stopLine, isLong, false)){
 			super.execute(price);

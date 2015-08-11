@@ -71,17 +71,16 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 		if(signal == Signal.HOLD)
 			return;
 		
-		boolean tradeLong = true;
-		if(signal == Signal.SELL)
-			tradeLong = false;
+		boolean tradeLong = (signal == Signal.BUY) ? true : false;
 		Trade trade = null;
 		try {
 			trade = super.tradeMgr.createTrade(pair, tradeLong, 1000);
 			super.tradeMgr.updateTrade(trade, new MarketOpen(trade));
-			//super.tradeMgr.updateTrade(trade, new StopClose(trade, stopOffset, true));
-			double stop = stats.getRecentExtremum(1, 3, !tradeLong, tradeLong);
-			int trailAmt = (int)RateUtils.getAbsPipDistance(price.getExitPrice(tradeLong), stop);
-			super.tradeMgr.updateTrade(trade, new StopClose(trade, trailAmt,true));
+			super.tradeMgr.updateTrade(trade, new StopClose(trade, stopOffset, true));
+			super.tradeMgr.addTradeNotes(trade, "open_rsi: " + prevRsi);
+			//double stop = stats.getRecentExtremum(1, 3, !tradeLong, tradeLong);
+			//int trailAmt = (int)RateUtils.getAbsPipDistance(price.getExitPrice(tradeLong), stop);
+			//super.tradeMgr.updateTrade(trade, new StopClose(trade, trailAmt, true));
 			
 		} catch (TradeCreationException e) {
 		} finally{

@@ -93,6 +93,10 @@ public class TradeManager implements IDataSubscriber{
 		monitors.get(trade).cancelTradeMonitors.add(monitor);
 	}
 	
+	public void addTradeNotes(Trade trade, String notes){
+		trade.setNotes(notes);
+	}
+	
 	
 	
 	class MonitorSet{

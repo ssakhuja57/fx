@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
+import com.peebeekay.fx.info.Interval;
 import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.listeners.RequestFailedException;
 import com.peebeekay.fx.session.SessionDependent;
@@ -128,7 +129,7 @@ public class RateCollector implements SessionDependent{
 				ArrayList<ArrayList<Double>> rates = null;
 				try {
 					try {
-						rates = RateHistory.getSnapshot(sm, pair, "t1", startPart, endPart);
+						rates = RateHistory.getSnapshot(sm, pair, Interval.T, startPart, endPart);
 					} catch (RequestFailedException e) {
 					}
 					int ratesSize = rates.get(0).size();
@@ -151,7 +152,7 @@ public class RateCollector implements SessionDependent{
 			ArrayList<ArrayList<Double>> extras = null;
 			try {
 				try {
-					extras = RateHistory.getSnapshot(sm, pair, "t1", startPart, DateUtils.getUTCTime());
+					extras = RateHistory.getSnapshot(sm, pair, Interval.T, startPart, DateUtils.getUTCTime());
 				} catch (RequestFailedException e) {
 				}
 				buyRates.addAll(extras.get(0));

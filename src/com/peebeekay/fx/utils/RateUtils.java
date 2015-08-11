@@ -66,7 +66,11 @@ public class RateUtils {
 	}
 	
 	public static boolean isAsk(boolean isLong, boolean isEnter){
-		return isLong ^ isEnter;
+		return isLong == isEnter;
+	}
+	
+	public static void main(String[] args){
+		Logger.info(isAsk(true, false) + "");
 	}
 	
 }

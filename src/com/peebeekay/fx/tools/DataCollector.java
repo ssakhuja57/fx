@@ -171,8 +171,8 @@ public class DataCollector implements Runnable{
 		
 		// modify these
 		Pair pair = Pair.EURUSD;
-		Interval interval = Interval.T;
-		String parentFolder = "C:\\fx-data\\final\\recent";
+		Interval interval = Interval.M1;
+		String parentFolder = "C:\\fx-data\\final\\m1";
 		String folder = parentFolder + "\\EUR-USD\\";
 		new File(folder).mkdirs();
 		int accounts = 1;
@@ -192,7 +192,7 @@ public class DataCollector implements Runnable{
 //				DateUtils.parseDate("2014-11-01 00:00:00"),
 //				DateUtils.parseDate("2014-12-01 00:00:00")
 				
-				DateUtils.parseDate("2015-06-01 00:00:00")
+				DateUtils.parseDate("2014-01-01 00:00:00")
 		};
 		Date[] ends = new Date[]{
 //				DateUtils.parseDate("2014-02-01 00:00:00"),
@@ -208,7 +208,7 @@ public class DataCollector implements Runnable{
 //				DateUtils.parseDate("2014-12-01 00:00:00"),
 //				DateUtils.parseDate("2015-01-01 00:00:00")
 				
-				DateUtils.parseDate("2015-06-04 00:00:00")
+				DateUtils.parseDate("2015-01-01 00:00:00")
 		};
 		
 		Credentials[] creds = new Credentials[accounts];
