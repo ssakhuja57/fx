@@ -59,14 +59,15 @@ public class SimulationRunner {
 //		};
 
 		for(int x=0; x<starts.length; x++){
-			DBConfig dbConfig = new VerticaConfig("192.168.91.199", 5433, "fx", "dbadmin", "dbadmin");
+			DBConfig dbConfig = new VerticaConfig("192.168.91.202", 5433, "fx", "dbadmin", "dbadmin");
 			IDataSource dataSource = new DBDataSource(dbConfig, pair, starts[x], ends[x], true);
 			Map<Interval,File> ohlcFiles = new HashMap<Interval,File>();
 //			ohlcFiles.put(Interval.M30, new File(dataFolder + "EURUSD-M30-0.csv_0"));
 //			IDataSource dataSource = new DelimitedFileDataSource(dataFolder + "EURUSD-T-0.csv_0", ohlcFiles, ",", pair, starts[x], ends[x], true);
 			SimulationController controller = new SimulationController(pair, starts[x], ends[x], dataSource);
-			for(int i=70; i<=100; i+=10){
-				ATrader t = new SimpleRSITrader("m30RSI-stop" + i + ".csv", "C:\\fx-data\\results", 
+			for(int i=10; i<=100; i+=10){
+//				ATrader t = new SimpleRSITrader("months-7thru12-m30RSI-stop" + i + ".csv", "C:\\fx-data\\results", 
+				ATrader t = new SimpleRSITrader("months-1thru6-m30RSI-recent-extremum-stop" + i + ".csv", "C:\\fx-data\\results",
 						pair, dataSource, starts[x], i, maxConcurrentTrades);
 				controller.addTrader(t);
 			}

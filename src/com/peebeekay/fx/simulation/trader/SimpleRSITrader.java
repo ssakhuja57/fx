@@ -76,11 +76,13 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 		try {
 			trade = super.tradeMgr.createTrade(pair, tradeLong, 1000);
 			super.tradeMgr.updateTrade(trade, new MarketOpen(trade));
-			super.tradeMgr.updateTrade(trade, new StopClose(trade, stopOffset, true));
+//			super.tradeMgr.updateTrade(trade, new StopClose(trade, stopOffset, true)); // constant stop size
 			super.tradeMgr.addTradeNotes(trade, "open_rsi: " + prevRsi);
-			//double stop = stats.getRecentExtremum(1, 3, !tradeLong, tradeLong);
-			//int trailAmt = (int)RateUtils.getAbsPipDistance(price.getExitPrice(tradeLong), stop);
-			//super.tradeMgr.updateTrade(trade, new StopClose(trade, trailAmt, true));
+			double stop = stats.getRecentExtremum(1, 3, !tradeLong, tradeLong); // recent extremum
+			int initialOffset = (int)RateUtils.getAbsPipDistance(price.getExitPrice(tradeLong), stop); // recent extremum
+			if(initialOffset > stopOffset)
+				initialOffset = stopOffset;
+			super.tradeMgr.updateTrade(trade, new StopClose(trade, stopOffset, initialOffset)); // recent extremum
 			
 		} catch (TradeCreationException e) {
 		} finally{
