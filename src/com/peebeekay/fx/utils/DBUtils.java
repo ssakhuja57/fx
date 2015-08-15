@@ -20,7 +20,7 @@ public class DBUtils {
 			Logger.error("driver class not found");
 		}
 		String connString = config.getJDBCString();
-		Connection conn = DriverManager.getConnection(connString);
+		Connection conn = DriverManager.getConnection(connString, config.getDBUser(), config.getDBPass());
 		return conn;
 	}
 	

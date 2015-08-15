@@ -27,8 +27,8 @@ public class SimulationRunner {
 		String dataFolder = "C:\\fx-data\\final\\recent\\EUR-USD\\";
 		int maxConcurrentTrades = 1;
 		
-		Calendar[] starts = new Calendar[]{DateUtils.getCalendar("2014-01-15 00:00:00", DateUtils.DATE_FORMAT_STD)};
-		Calendar[] ends = new Calendar[]{DateUtils.getCalendar("2014-06-30 00:00:00", DateUtils.DATE_FORMAT_STD)};
+		Calendar[] starts = new Calendar[]{DateUtils.getCalendar("2014-06-30 00:00:00", DateUtils.DATE_FORMAT_STD)};
+		Calendar[] ends = new Calendar[]{DateUtils.getCalendar("2014-12-30 00:00:00", DateUtils.DATE_FORMAT_STD)};
 //		Calendar[] starts = new Calendar[]{
 //				DateUtils.getCalendar("2014-01-05 00:00:00", DateUtils.DATE_FORMAT_STD),
 //				DateUtils.getCalendar("2014-02-01 00:00:00", DateUtils.DATE_FORMAT_STD),
@@ -59,7 +59,7 @@ public class SimulationRunner {
 //		};
 
 		for(int x=0; x<starts.length; x++){
-			DBConfig dbConfig = new VerticaConfig("192.168.91.202", 5433, "fx", "dbadmin", "dbadmin");
+			DBConfig dbConfig = new VerticaConfig("192.168.91.203", 5433, "fx", "dbadmin", "dbadmin");
 			IDataSource dataSource = new DBDataSource(dbConfig, pair, starts[x], ends[x], true);
 			Map<Interval,File> ohlcFiles = new HashMap<Interval,File>();
 //			ohlcFiles.put(Interval.M30, new File(dataFolder + "EURUSD-M30-0.csv_0"));
@@ -67,7 +67,7 @@ public class SimulationRunner {
 			SimulationController controller = new SimulationController(pair, starts[x], ends[x], dataSource);
 			for(int i=10; i<=100; i+=10){
 //				ATrader t = new SimpleRSITrader("months-7thru12-m30RSI-stop" + i + ".csv", "C:\\fx-data\\results", 
-				ATrader t = new SimpleRSITrader("months-1thru6-m30RSI-recent-extremum-stop" + i + ".csv", "C:\\fx-data\\results",
+				ATrader t = new SimpleRSITrader("months-7thru12-m30RSI-recent-extremum-stop" + i + ".csv", "C:\\fx-data\\results",
 						pair, dataSource, starts[x], i, maxConcurrentTrades);
 				controller.addTrader(t);
 			}
