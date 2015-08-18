@@ -17,7 +17,6 @@ import com.peebeekay.fx.utils.Logger;
 
 public class SimulationController implements Runnable{
 
-	private int tickRow = 0;
 	private Calendar tickClock;
 	private Calendar ohlcClock;
 	private boolean moreData = true;
@@ -46,8 +45,8 @@ public class SimulationController implements Runnable{
 //		Logger.debug("advancing tick");
 		Tick tick = null;
 		try{
-			tick = dataSource.getTickRow(tickRow);
-		} catch(IndexOutOfBoundsException e){
+			tick = dataSource.getTickRow();
+		} catch(Exception e){
 			Logger.info("no more data in source, finished!");
 			moreData = false;
 			return;
@@ -62,7 +61,6 @@ public class SimulationController implements Runnable{
 			sendOhlc();
 		}
 		sendTick(tick);
-		tickRow++;
 	}
 	
 	private void sendTick(Tick tick){

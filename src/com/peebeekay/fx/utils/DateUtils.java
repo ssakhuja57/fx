@@ -72,6 +72,7 @@ public class DateUtils {
 		return new Date((d1.getTime()/1000) + secs);
 	}
 	
+	
 	public static boolean isMultipleOf(Date date, int minutes){
 		return date.getMinutes() % minutes == 0;
 	}

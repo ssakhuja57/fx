@@ -10,7 +10,7 @@ import com.peebeekay.fx.simulation.data.types.Tick;
 
 public interface IDataSource {
 	
-	public Tick getTickRow(int rowNum);
+	public Tick getTickRow() throws EndOfTickDataException;
 	
 	public ArrayList<Tick> getTicks(Pair pair, Calendar start, Calendar end);
 	

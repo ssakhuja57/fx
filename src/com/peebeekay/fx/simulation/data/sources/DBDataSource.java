@@ -22,38 +22,64 @@ public class DBDataSource implements IDataSource{
 	private Pair pair;
 	private Calendar start;
 	private Calendar end;
-	private boolean cacheAll;
+	private boolean cache;
+	private final int CACHE_DAYS = 20;
+	private Calendar startChunk;
+	private int cacheRow = 0;
 	private ArrayList<String[]> tickCache = new ArrayList<String[]>();
 	
 	
-	public DBDataSource(DBConfig config, Pair pair, Calendar start, Calendar end, boolean cacheAll){
+	public DBDataSource(DBConfig config, Pair pair, Calendar start, Calendar end, boolean cache){
 		this.config = config;
 		this.pair = pair;
 		this.start = start;
+		this.startChunk = start;
 		this.end = end;
-		this.cacheAll = cacheAll;
-		if(cacheAll){
-			String sql = "SELECT " + StringUtils.arrayToString(Tick.FIELDS, ",") 
-					+ " FROM data.tick"
-					+ " WHERE ts >= '" + DateUtils.calToString(start) + "'"
-					+ " AND ts <= '" + DateUtils.calToString(end) + "'"
-					+ " AND pair = '" + pair + "'"
-					+ " ORDER BY ts"
-					+ ";";
-			try {
-				Logger.debug("initializing db data cache");
-				tickCache.addAll(DBUtils.readQuery(config, sql));
-				Logger.debug("db data cache initialized with " + tickCache.size() + " tick rows");
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
+		this.cache = cache;
+		updateCache();
+	}
+	
+	private String getQuery(Calendar startDate, Calendar endDate){
+
+		return "SELECT " + StringUtils.arrayToString(Tick.FIELDS, ",")
+				+ " FROM data.tick"
+				+ " WHERE pair = '" + pair + "'"
+				+ " AND ts >= '" + DateUtils.calToString(startDate, DateUtils.DATE_FORMAT_MILLI) + "'"
+				+ " AND ts < '" + DateUtils.calToString(endDate, DateUtils.DATE_FORMAT_MILLI) + "'"
+				+ " ORDER BY ts"
+				;
+	}
+	
+	private boolean updateCache(){
+		if(startChunk.after(end) || startChunk.equals(end))
+			return false;
+		Calendar endChunk = Calendar.getInstance();
+		endChunk.setTime(startChunk.getTime());
+		endChunk.add(Calendar.DATE, CACHE_DAYS);
+		if(endChunk.after(end))
+			endChunk = end;
+		tickCache.clear();
+		try {
+			Logger.debug("updating cache with tick data from " 
+							+ DateUtils.calToString(startChunk) + " to " + DateUtils.calToString(endChunk));
+			tickCache.addAll(DBUtils.readQuery(config, getQuery(startChunk, endChunk)));
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException();
 		}
+		startChunk = endChunk;
+		return true;
 	}
 	
 	
 	@Override
-	public Tick getTickRow(int rowNum){
-		return Tick.arrayToTick(tickCache.get(rowNum));
+	public Tick getTickRow() throws EndOfTickDataException{
+		if(cacheRow >= tickCache.size()){
+			if(!updateCache())
+				throw new EndOfTickDataException();
+			cacheRow = 0;
+		}
+		return Tick.arrayToTick(tickCache.get(cacheRow++));
 	}
 
 	@Override
