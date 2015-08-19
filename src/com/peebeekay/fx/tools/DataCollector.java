@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import com.peebeekay.fx.info.Interval;
@@ -63,13 +65,13 @@ public class DataCollector implements Runnable{
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-//			collectors.put(i, c);
-//			Thread cThread = new Thread(c);
-//			collectorThreads.put(i, cThread);
-//			cThread.start();
-			c.run();
+			collectors.put(i, c);
+			Thread cThread = new Thread(c);
+			collectorThreads.put(i, cThread);
+			cThread.start();
+//			c.run();
 		}
-		/**
+		
 		for(Thread t: collectorThreads.values()){
 			try {
 				t.join();
@@ -78,7 +80,7 @@ public class DataCollector implements Runnable{
 				e.printStackTrace();
 			}
 		}
-		*/
+		
 	}
 	
 	private class Collector implements Runnable{
@@ -170,10 +172,10 @@ public class DataCollector implements Runnable{
 	{
 		
 		// modify these
-		Pair pair = Pair.EURUSD;
-		Interval interval = Interval.M1;
-		String parentFolder = "C:\\fx-data\\final\\m1";
-		String folder = parentFolder + "\\EUR-USD\\";
+		Pair pair = Pair.USDJPY;
+		Interval interval = Interval.T;
+		String parentFolder = "C:\\fx-data\\final\\tick";
+		String folder = parentFolder + "\\USD-JPY\\";
 		new File(folder).mkdirs();
 		int accounts = 1;
 		int sessionLimit = 1;
