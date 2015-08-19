@@ -32,7 +32,7 @@ public class FxcmRateHistory {
 	
 	
 	private static final int DEF_WAIT_FOR = 3;
-	private static final int LONG_WAIT_FOR = 10;
+	private static final int LONG_WAIT_FOR = 100;
 	//private static final String ANCIENT_DATE = "2000-01-01 00:00:00";
 	private static final int DEF_REQUEST_LENGTH = 1000;
 	private static final String LOG_DF = DateUtils.DATE_FORMAT_STD;
