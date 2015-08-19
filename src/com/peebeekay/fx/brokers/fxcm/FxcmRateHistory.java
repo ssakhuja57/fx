@@ -1,6 +1,5 @@
-package com.peebeekay.fx.rates;
+package com.peebeekay.fx.brokers.fxcm;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -8,6 +7,7 @@ import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import com.fxcore2.O2GMarketDataSnapshotResponseReader;
@@ -21,13 +21,14 @@ import com.fxcore2.O2GTimeframeCollection;
 import com.peebeekay.fx.info.Interval;
 import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.listeners.RequestFailedException;
-import com.peebeekay.fx.session.SessionManager;
+import com.peebeekay.fx.simulation.data.types.OhlcPrice;
+import com.peebeekay.fx.simulation.data.types.Tick;
 import com.peebeekay.fx.utils.ArrayUtils;
 import com.peebeekay.fx.utils.DateUtils;
 import com.peebeekay.fx.utils.Logger;
 import com.peebeekay.fx.utils.PairUtils;
 
-public class RateHistory {
+public class FxcmRateHistory {
 	
 	
 	private static final int DEF_WAIT_FOR = 3;
@@ -36,17 +37,37 @@ public class RateHistory {
 	private static final int DEF_REQUEST_LENGTH = 1000;
 	private static final String LOG_DF = DateUtils.DATE_FORMAT_STD;
 	
-	public static Map<Calendar, double[]> getTickData(SessionManager sm, Pair pair,
+	public static Map<Calendar, double[]> getTickData(FxcmSessionManager sm, Pair pair,
 			Calendar startTime, Calendar endTime){
 		return getAggregatedData(sm, pair, Interval.T, new AskBid(), startTime, endTime);
 	}
 	
-	public static Map<Calendar, double[]> getOHLCData(SessionManager sm, Pair pair, Interval interval,
+	public static ArrayList<Tick> getTicks(FxcmSessionManager fx, Pair pair, Calendar start, Calendar end){
+		ArrayList<Tick> ticks = new ArrayList<Tick>();
+		Map<Calendar, double[]> values = getAggregatedData(fx, pair, Interval.T, new AskBid(), start, end);
+		for(Entry<Calendar, double[]> entry: values.entrySet())
+			ticks.add(new Tick(pair, entry.getKey().getTime(), entry.getValue()[0], entry.getValue()[1]));
+		return ticks;
+	}
+	
+	public static Map<Calendar, double[]> getOHLCData(FxcmSessionManager sm, Pair pair, Interval interval,
 			Calendar startTime, Calendar endTime){
 		return getAggregatedData(sm, pair, interval, new AskBidOHLC(), startTime, endTime);
 	}
 	
-	public static ArrayList<ArrayList<Double>> getSnapshot(SessionManager sm, Pair pair, Interval interval,
+	public static ArrayList<OhlcPrice> getOhlcRows(FxcmSessionManager fx, Pair pair, Interval interval,
+			Calendar start, Calendar end){
+		ArrayList<OhlcPrice> prices = new ArrayList<OhlcPrice>();
+		Map<Calendar, double[]> values = getAggregatedData(fx, pair, interval, new AskBidOHLC(), start, end);
+		for(Entry<Calendar, double[]> entry: values.entrySet()){
+			double[] row = entry.getValue();
+			prices.add(new OhlcPrice(pair, entry.getKey().getTime(), interval, 
+					row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]));
+		}
+		return prices;
+	}
+	
+	public static ArrayList<ArrayList<Double>> getSnapshot(FxcmSessionManager sm, Pair pair, Interval interval,
 			Calendar startTime, Calendar endTime) throws RequestFailedException{
 		O2GMarketDataSnapshotResponseReader snapshotReader = getData(sm, pair, interval, startTime, endTime, 
 				DEF_REQUEST_LENGTH, DEF_WAIT_FOR);
@@ -63,7 +84,7 @@ public class RateHistory {
 		
 	}
 	
-	public static LinkedHashMap<Calendar, double[]> getSnapshotMap(SessionManager sm, Pair pair, Interval interval, 
+	public static LinkedHashMap<Calendar, double[]> getSnapshotMap(FxcmSessionManager sm, Pair pair, Interval interval, 
 			String startTimeString, String endTimeString) throws ParseException, IllegalArgumentException, IllegalAccessException, RequestFailedException{
 		
 		Calendar startTime = Calendar.getInstance(); 
@@ -75,14 +96,14 @@ public class RateHistory {
 		return getSnapshotMap(sm, pair, interval, startTime, endTime);
 	}
 	
-	public static LinkedHashMap<Calendar, double[]> getSnapshotMap(SessionManager sm, Pair pair, Interval interval, 
+	public static LinkedHashMap<Calendar, double[]> getSnapshotMap(FxcmSessionManager sm, Pair pair, Interval interval, 
 			Calendar startTime, Calendar endTime) throws IllegalArgumentException, IllegalAccessException, RequestFailedException{
 
 		O2GMarketDataSnapshotResponseReader snapshotReader = getData(sm, pair, interval, startTime, endTime, DEF_REQUEST_LENGTH, DEF_WAIT_FOR);
 		return getMap(snapshotReader, new AskBidOHLC(), false);
 	}
 	
-	private static TreeMap<Calendar, double[]> getAggregatedData(SessionManager sm, Pair pair, Interval interval,
+	private static TreeMap<Calendar, double[]> getAggregatedData(FxcmSessionManager sm, Pair pair, Interval interval,
 			Extractor extractor, Calendar startTime, Calendar endTime){
 		TreeMap<Calendar, double[]> values = new TreeMap<Calendar, double[]>();
 		Calendar endChunk = null;
@@ -111,7 +132,7 @@ public class RateHistory {
 		return values;
 	}
 	
-	private static O2GMarketDataSnapshotResponseReader getData(SessionManager sm, Pair pair, Interval in,
+	private static O2GMarketDataSnapshotResponseReader getData(FxcmSessionManager sm, Pair pair, Interval in,
 			Calendar startTime, Calendar endTime, int lastN, int waitForSeconds) throws RequestFailedException{
 		if(endTime != null && !endTime.after(startTime)){
 			throw new IllegalArgumentException("end time must be after start time");
@@ -191,6 +212,7 @@ public class RateHistory {
 								reader.getBidLow(rowNum), reader.getBidClose(rowNum)};
 		}
 	}
+	
 }
 
 	

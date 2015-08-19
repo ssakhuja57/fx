@@ -10,11 +10,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
+import com.peebeekay.fx.brokers.fxcm.FxcmSessionManager;
+import com.peebeekay.fx.brokers.fxcm.FxcmRateHistory;
 import com.peebeekay.fx.info.Interval;
 import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.listeners.RequestFailedException;
 import com.peebeekay.fx.session.SessionDependent;
-import com.peebeekay.fx.session.SessionManager;
 import com.peebeekay.fx.utils.ArrayUtils;
 import com.peebeekay.fx.utils.DateUtils;
 import com.peebeekay.fx.utils.Logger;
@@ -22,7 +23,7 @@ import com.peebeekay.fx.utils.RateUtils;
 
 public class RateCollector implements SessionDependent{
 	
-	private SessionManager sm;
+	private FxcmSessionManager sm;
 	private Pair pair;
 	private int length;
 	private int frequency;
@@ -41,7 +42,7 @@ public class RateCollector implements SessionDependent{
 	//private ConcurrentLinkedQueue<Double> lowRates;
 	
 	
-	public RateCollector(SessionManager sm, Pair pair, int length, int frequency) throws IllegalArgumentException{
+	public RateCollector(FxcmSessionManager sm, Pair pair, int length, int frequency) throws IllegalArgumentException{
 			
 //			if (length > 300){
 //				throw new IllegalArgumentException("max allowed length of RateCollector is 300");
@@ -104,8 +105,8 @@ public class RateCollector implements SessionDependent{
 		
 		if(length <= MAX_REQUEST_LENGTH){
 			try {
-				buyRates.addAll(RateHistory.getTickData(sm, pair, length, "buy"));
-				sellRates.addAll(RateHistory.getTickData(sm, pair, length, "sell"));
+				buyRates.addAll(FxcmRateHistory.getTickData(sm, pair, length, "buy"));
+				sellRates.addAll(FxcmRateHistory.getTickData(sm, pair, length, "sell"));
 				//highRates.addAll(RateHistory.getTickData(sm, pair, length, "high"));
 				//lowRates.addAll(RateHistory.getTickData(sm, pair, length, "low"));
 			} catch (IllegalArgumentException e) {
@@ -129,7 +130,7 @@ public class RateCollector implements SessionDependent{
 				ArrayList<ArrayList<Double>> rates = null;
 				try {
 					try {
-						rates = RateHistory.getSnapshot(sm, pair, Interval.T, startPart, endPart);
+						rates = FxcmRateHistory.getSnapshot(sm, pair, Interval.T, startPart, endPart);
 					} catch (RequestFailedException e) {
 					}
 					int ratesSize = rates.get(0).size();
@@ -152,7 +153,7 @@ public class RateCollector implements SessionDependent{
 			ArrayList<ArrayList<Double>> extras = null;
 			try {
 				try {
-					extras = RateHistory.getSnapshot(sm, pair, Interval.T, startPart, DateUtils.getUTCTime());
+					extras = FxcmRateHistory.getSnapshot(sm, pair, Interval.T, startPart, DateUtils.getUTCTime());
 				} catch (RequestFailedException e) {
 				}
 				buyRates.addAll(extras.get(0));

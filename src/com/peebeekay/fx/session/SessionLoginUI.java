@@ -17,12 +17,13 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
+import com.peebeekay.fx.brokers.fxcm.FxcmSessionManager;
 import com.peebeekay.fx.utils.FileUtils;
 import com.peebeekay.fx.utils.Logger;
 
 public class SessionLoginUI extends JFrame{
 
-	private SessionManager sm;
+	private FxcmSessionManager sm;
 	private Credentials creds;
 	
 	JLabel loginNicknameLabel = new JLabel("Saved Preferences:");
@@ -109,7 +110,7 @@ public class SessionLoginUI extends JFrame{
 						new String[]{account1.getText(), account2_check}
 						);
 				try {
-					sm = new SessionManager(
+					sm = new FxcmSessionManager(
 							creds,
 							FileUtils.PROPERTIES_MAP.get((String)loginNickname.getSelectedItem())
 							);
@@ -135,7 +136,7 @@ public class SessionLoginUI extends JFrame{
 		account2.setText(props.getProperty("account2_ID"));
 	}
 	
-	public SessionManager getSessionManager(){
+	public FxcmSessionManager getSessionManager(){
 		return sm;
 	}
 	

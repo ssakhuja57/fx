@@ -1,4 +1,4 @@
-package com.peebeekay.fx.trade.specs;
+package com.peebeekay.fx.trades.specs;
 
 import java.util.Map;
 

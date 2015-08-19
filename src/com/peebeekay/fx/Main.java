@@ -1,13 +1,27 @@
 package com.peebeekay.fx;
-import com.peebeekay.fx.strategies.spike.SpikeTraderUI;
+import java.text.ParseException;
+import java.util.Calendar;
+import java.util.Map.Entry;
+
+import com.peebeekay.fx.brokers.fxcm.FxcmRateHistory;
+import com.peebeekay.fx.brokers.fxcm.FxcmSessionManager;
+import com.peebeekay.fx.info.Pair;
+import com.peebeekay.fx.session.Credentials;
+import com.peebeekay.fx.utils.DateUtils;
+import com.peebeekay.fx.utils.Logger;
+import com.peebeekay.fx.utils.StringUtils;
 
 
 public class Main {
 	
-	public static void main(String[] args){
+	public static void main(String[] args) throws ParseException{
 		
-		//SessionManager sm = new SessionManager("D172741206001", "1008", "Demo", "2743608", "2743608");
-		//SessionManager sm = new SessionManager("D26728250001", "6303", "Demo", "722858", "722858");
+		Credentials creds = new Credentials("D172901772001", "600", "Demo", new String[]{"2743608", ""});
+		FxcmSessionManager fx = new FxcmSessionManager(creds, null);
+		for(Calendar cal: FxcmRateHistory.getTickData(fx, Pair.EURUSD, 
+				DateUtils.getCalendar("2015-08-10 00:00:00"), DateUtils.getCalendar("2015-08-10 00:05:30")).keySet()){
+			Logger.info(DateUtils.calToString(cal));
+		}
 		//System.out.println(sm.orders.getTradeIDs("GBP/AUD", Constants.Buy));
 		//System.out.println(sm.trades.getTradeIDs("GBP/AUD", Constants.Buy));
 		//System.out.println(sm.closedTrades.getTradeIDs("GBP/AUD", Constants.Buy));
@@ -32,7 +46,7 @@ public class Main {
 //			for (double d : RateHistory.getTickData(sm, "EUR/JPY", 10, "sell")){
 //				System.out.println(d);
 //			}
-			SpikeTraderUI ui = new SpikeTraderUI();
+			//SpikeTraderUI ui = new SpikeTraderUI();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

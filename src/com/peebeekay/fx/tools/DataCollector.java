@@ -11,11 +11,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.peebeekay.fx.brokers.fxcm.FxcmSessionManager;
+import com.peebeekay.fx.brokers.fxcm.FxcmRateHistory;
 import com.peebeekay.fx.info.Interval;
 import com.peebeekay.fx.info.Pair;
-import com.peebeekay.fx.rates.RateHistory;
 import com.peebeekay.fx.session.Credentials;
-import com.peebeekay.fx.session.SessionManager;
 import com.peebeekay.fx.utils.DateUtils;
 import com.peebeekay.fx.utils.FXUtils;
 import com.peebeekay.fx.utils.Logger;
@@ -86,7 +86,7 @@ public class DataCollector implements Runnable{
 	private class Collector implements Runnable{
 		
 		int id;
-		SessionManager sm;
+		FxcmSessionManager sm;
 		Date start;
 		Date end;
 		
@@ -100,12 +100,7 @@ public class DataCollector implements Runnable{
 			this.id = id;
 			fileName = output + "_" + id;
 			f = new File(fileName);
-			try {
-				this.sm = new SessionManager(creds, null);
-			} catch (IllegalAccessException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+			this.sm = new FxcmSessionManager(creds, null);
 			this.start = start;
 			this.end = end;
 			
@@ -130,9 +125,9 @@ public class DataCollector implements Runnable{
 				return;
 			Map<Calendar, double[]> data;
 			if(interval == Interval.T)
-				data = RateHistory.getTickData(sm, pair, startTime, endTime);
+				data = FxcmRateHistory.getTickData(sm, pair, startTime, endTime);
 			else
-				data = RateHistory.getOHLCData(sm, pair, interval, startTime, endTime);
+				data = FxcmRateHistory.getOHLCData(sm, pair, interval, startTime, endTime);
 			for(Calendar time: data.keySet()){
 				String meta;
 				if(interval == Interval.T)

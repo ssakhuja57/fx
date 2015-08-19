@@ -8,9 +8,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashMap;
 
-import com.peebeekay.fx.rates.RateHistory;
+import com.peebeekay.fx.brokers.fxcm.FxcmSessionManager;
+import com.peebeekay.fx.brokers.fxcm.FxcmRateHistory;
 import com.peebeekay.fx.session.Credentials;
-import com.peebeekay.fx.session.SessionManager;
 import com.peebeekay.fx.utils.DateUtils;
 import com.peebeekay.fx.utils.FXUtils;
 import com.peebeekay.fx.utils.Logger;
@@ -18,7 +18,7 @@ import com.peebeekay.fx.utils.Logger;
 public class CollectorWorker implements Runnable{
 
 	private int id;
-	private SessionManager sm;
+	private FxcmSessionManager sm;
 	private Date start;
 	private Date end;
 	
@@ -38,7 +38,7 @@ public class CollectorWorker implements Runnable{
 		this.id = id;
 		fileName = output + "_" + id;
 		f = new File(fileName);
-		this.sm = new SessionManager(creds, null);
+		this.sm = new FxcmSessionManager(creds, null);
 		this.start = start;
 		this.end = end;
 		
@@ -62,7 +62,7 @@ public class CollectorWorker implements Runnable{
 				throws IllegalArgumentException, IllegalAccessException, IOException{
 		
 		LinkedHashMap<Calendar,double[]> data = 
-				RateHistory.getSnapshotMap(sm, pair, interval, startTime, endTime);
+				FxcmRateHistory.getSnapshotMap(sm, pair, interval, startTime, endTime);
 		for(Calendar time: data.keySet()){
 			double[] values = data.get(time);
 			bfw.write(DateUtils.dateToString(time.getTime()) + "," + values[0] + "," + values[1] + "\n");

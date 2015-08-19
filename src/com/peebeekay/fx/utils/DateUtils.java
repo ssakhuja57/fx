@@ -22,6 +22,10 @@ public class DateUtils {
 		return new SimpleDateFormat(format, Locale.ENGLISH);
 	}
 	
+	public static Calendar getCalendar(String dateString) throws ParseException{
+		return getCalendar(parseDate(dateString, DATE_FORMAT_STD));
+	}
+	
 	public static Calendar getCalendar(String dateString, String df) throws ParseException{
 		return getCalendar(parseDate(dateString, df));
 	}

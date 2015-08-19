@@ -1,7 +1,7 @@
-package com.peebeekay.fx.trade;
+package com.peebeekay.fx.trades;
 
-import com.peebeekay.fx.trade.specs.CreateTradeSpec;
-import com.peebeekay.fx.trade.specs.UpdateTradeSpec;
+import com.peebeekay.fx.trades.specs.CreateTradeSpec;
+import com.peebeekay.fx.trades.specs.UpdateTradeSpec;
 
 public interface TradeActionProvider {
 

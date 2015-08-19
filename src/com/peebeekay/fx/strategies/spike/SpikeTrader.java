@@ -10,10 +10,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import com.fxcore2.Constants;
+import com.peebeekay.fx.brokers.fxcm.FxcmSessionManager;
 import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.rates.RateCollector;
 import com.peebeekay.fx.session.SessionHolder;
-import com.peebeekay.fx.session.SessionManager;
 import com.peebeekay.fx.utils.DateUtils;
 import com.peebeekay.fx.utils.Logger;
 import com.peebeekay.fx.utils.PairUtils;
@@ -24,7 +24,7 @@ public class SpikeTrader implements SessionHolder{
 	private String[] currencies;
 	private Calendar eventDate;
 	
-	private SessionManager sm;
+	private FxcmSessionManager sm;
 	private boolean isActive;
 	private ArrayList<Pair> pairs;
 	
@@ -60,7 +60,7 @@ public class SpikeTrader implements SessionHolder{
 	private HashMap<Pair, Integer[]> params = new HashMap<Pair, Integer[]>(); //amount, spike buffer, stop buffer
 	
 	
-	public SpikeTrader(SessionManager sm, String[] currencies, String eventDate_string, double accountUtilization,
+	public SpikeTrader(FxcmSessionManager sm, String[] currencies, String eventDate_string, double accountUtilization,
 			boolean autoStart, int autoStartBefore, int expireAfter, boolean autoRecalibrate, int recalibratorFreq, 
 			int recalibrateUntil){
 		this.sm = sm;

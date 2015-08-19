@@ -1,4 +1,4 @@
-package com.peebeekay.fx.actions;
+package com.peebeekay.fx.brokers.fxcm;
 import java.util.Collection;
 
 import com.fxcore2.Constants;
@@ -16,15 +16,14 @@ import com.fxcore2.O2GTradingSettingsProvider;
 import com.fxcore2.O2GValueMap;
 import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.listeners.ResponseListener;
-import com.peebeekay.fx.session.SessionManager;
 import com.peebeekay.fx.utils.Logger;
 import com.peebeekay.fx.utils.PairUtils;
 
 
-public class OrderActions {
+public class FxcmOrderActions {
 	
 	
-	   public static String createMarketOrder(SessionManager sessionMgr, String accountID, Pair pair, String buySell, 
+	   public static String createMarketOrder(FxcmSessionManager sessionMgr, String accountID, Pair pair, String buySell, 
 			   					int amount, ResponseListener responseListener) { 
 	       
 	        O2GValueMap valuemap = getDefaultValMap(sessionMgr, accountID, pair, buySell, amount);
@@ -38,7 +37,7 @@ public class OrderActions {
 	   
 
 			
-	   public static String createEntryOrderWithStop(SessionManager sessionMgr, String accountID, Pair pair, String buySell, 
+	   public static String createEntryOrderWithStop(FxcmSessionManager sessionMgr, String accountID, Pair pair, String buySell, 
 			   					int amount, double rate, int stopOffset, boolean trailStop, ResponseListener responseListener){ 
 		   
 		   stopOffset = buySell.equals(Constants.Buy) ? -stopOffset : stopOffset; // make offset negative if buy 
@@ -58,7 +57,7 @@ public class OrderActions {
 	        return createOrder(sessionMgr, valuemap, responseListener);
 	    }
 	   
-	   public static String createOpposingOCOEntryOrdersWithStops(SessionManager sessionMgr, String accountID, Pair pair,
+	   public static String createOpposingOCOEntryOrdersWithStops(FxcmSessionManager sessionMgr, String accountID, Pair pair,
 			   int amount, double longRate, double shortRate, int stopOffset, boolean trailStop, ResponseListener responseListener){
 		   O2GValueMap parentValueMap = getEmptyValMap(sessionMgr);
 		   parentValueMap.setString(O2GRequestParamsEnum.COMMAND, Constants.Commands.CreateOCO);
@@ -95,7 +94,7 @@ public class OrderActions {
 	        return createOrder(sessionMgr, parentValueMap, responseListener);
 	   }
 	   
-	   public static void adjustOpposingOCOEntryOrders(SessionManager sessionMgr, String accountID, String longOrderID, double newLongRate,
+	   public static void adjustOpposingOCOEntryOrders(FxcmSessionManager sessionMgr, String accountID, String longOrderID, double newLongRate,
 			   String shortOrderID, double newShortRate, ResponseListener responseListener){
 		   
 		   //System.out.println("adjusting OCO orders " + longOrderID + "/" + shortOrderID);
@@ -117,7 +116,7 @@ public class OrderActions {
 	   }
 	   
 	   // this is an alternative to using TrueMarketClose
-	   public static String closeTrade(SessionManager sessionMgr, String accountID, String tradeID, Pair pair, String buySell, 
+	   public static String closeTrade(FxcmSessionManager sessionMgr, String accountID, String tradeID, Pair pair, String buySell, 
 			   int amount, ResponseListener responseListener){ 
 		
 		   String oppositeBuySell = buySell.equals(Constants.Buy) ? Constants.Sell : Constants.Buy; 
@@ -142,7 +141,7 @@ public class OrderActions {
 //	   }
 	   
 	   
-	   public static String cancelOrder(SessionManager sessionMgr, String accountID, String orderID,
+	   public static String cancelOrder(FxcmSessionManager sessionMgr, String accountID, String orderID,
 			   ResponseListener responseListener) throws InterruptedException { 
 	
 		   	O2GValueMap valuemap = getEmptyValMap(sessionMgr);
@@ -154,14 +153,14 @@ public class OrderActions {
 		   return createOrder(sessionMgr, valuemap, responseListener);
 	   }
 	   
-	   public static void cancelAllOCOOrders(SessionManager sessionMgr, ResponseListener responseListener) throws InterruptedException{
+	   public static void cancelAllOCOOrders(FxcmSessionManager sessionMgr, ResponseListener responseListener) throws InterruptedException{
 		   Logger.info("cancelling all OCO orders");
 		   for (String[] ids: sessionMgr.ordersTable.getAllOCOOrderIDs()){
 			   cancelOrder(sessionMgr, ids[0], ids[1], responseListener);
 		   }
 	   }
 	   
-	   public static String setPairSubscription(SessionManager sessionMgr, Pair pair, String status, ResponseListener responseListener){
+	   public static String setPairSubscription(FxcmSessionManager sessionMgr, Pair pair, String status, ResponseListener responseListener){
 		   
 		   if (status.equals(Constants.SubscriptionStatuses.Tradable)){
 			   int subscribed = sessionMgr.offersTable.getSubscriptionCount();
@@ -183,14 +182,14 @@ public class OrderActions {
 	        return createOrder(sessionMgr, valuemap, responseListener);
 	   }
 	   
-	   public static void removeAllPairSubscriptions(SessionManager sessionMgr, ResponseListener responseListener){
+	   public static void removeAllPairSubscriptions(FxcmSessionManager sessionMgr, ResponseListener responseListener){
 		   Logger.info("unsubscribing from all pairs...");
 		   for (Pair pair: PairUtils.getAllPairs()){
 			   setPairSubscription(sessionMgr, pair, Constants.SubscriptionStatuses.Disable, responseListener);
 		   }
 	   }
 	   
-	   public static void setPairSubscriptionByCurrency(SessionManager sessionMgr, String[] currencies, ResponseListener responseListener){
+	   public static void setPairSubscriptionByCurrency(FxcmSessionManager sessionMgr, String[] currencies, ResponseListener responseListener){
 		   
 		   Logger.info("Setting all pairs related to " 
 				   + currencies.toString() + " to tradable");
@@ -200,7 +199,7 @@ public class OrderActions {
 		   }
 	   }
 	   
-	   public static void updateMarginRequirements(SessionManager sessionMgr, ResponseListener responseListener) {
+	   public static void updateMarginRequirements(FxcmSessionManager sessionMgr, ResponseListener responseListener) {
 		    O2GRequestFactory requestFactory = sessionMgr.session.getRequestFactory();
 		    if (requestFactory != null) {
 		    	O2GValueMap valuemap = getEmptyValMap(sessionMgr);
@@ -209,7 +208,7 @@ public class OrderActions {
 		    }
 		 }
 		 
-		public static double[] getMarginRequirements(SessionManager sessionMgr, Pair pair) {
+		public static double[] getMarginRequirements(FxcmSessionManager sessionMgr, Pair pair) {
 		        O2GLoginRules loginRules = sessionMgr.session.getLoginRules();
 		        O2GTradingSettingsProvider tradingSetting = loginRules.getTradingSettingsProvider();
 		        O2GResponse accountsResponse = loginRules.getTableRefreshResponse(O2GTableType.ACCOUNTS);
@@ -226,7 +225,7 @@ public class OrderActions {
 
 
 	   
-		private static O2GValueMap getDefaultValMap(SessionManager sessionMgr, String accountID, Pair pair, String buySell, int amount){
+		private static O2GValueMap getDefaultValMap(FxcmSessionManager sessionMgr, String accountID, Pair pair, String buySell, int amount){
 	        
 			O2GRequestFactory reqFactory = sessionMgr.session.getRequestFactory();
 		       if (reqFactory == null) {
@@ -241,7 +240,7 @@ public class OrderActions {
 	        return valuemap;
 		}
 		
-		private static O2GValueMap getEmptyValMap(SessionManager sessionMgr){
+		private static O2GValueMap getEmptyValMap(FxcmSessionManager sessionMgr){
 	        
 			O2GRequestFactory reqFactory = sessionMgr.session.getRequestFactory();
 		       if (reqFactory == null) {
@@ -251,7 +250,7 @@ public class OrderActions {
 	        return valuemap;
 		}
 		
-		private static String createOrder(SessionManager sessionMgr, O2GValueMap valuemap, ResponseListener responseListener){
+		private static String createOrder(FxcmSessionManager sessionMgr, O2GValueMap valuemap, ResponseListener responseListener){
 			O2GRequestFactory reqFactory = sessionMgr.session.getRequestFactory();
 		       if (reqFactory == null) {
 		           return null;

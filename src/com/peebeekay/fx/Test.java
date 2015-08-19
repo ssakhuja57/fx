@@ -2,9 +2,9 @@ package com.peebeekay.fx;
 import java.text.ParseException;
 import java.util.Collection;
 
-import com.peebeekay.fx.rates.RateHistory;
+import com.peebeekay.fx.brokers.fxcm.FxcmSessionManager;
+import com.peebeekay.fx.brokers.fxcm.FxcmRateHistory;
 import com.peebeekay.fx.session.Credentials;
-import com.peebeekay.fx.session.SessionManager;
 import com.peebeekay.fx.utils.DateUtils;
 
 
@@ -12,7 +12,7 @@ public class Test {
 
 	public static void main(String[] args) throws ParseException {
 		Credentials creds = new Credentials("D26728250001", "6303", "Demo", new String[]{"722858", "722858"});
-		SessionManager sm = new SessionManager(creds, null);
+		FxcmSessionManager sm = new FxcmSessionManager(creds, null);
 		try{
 //			LinkedHashMap<Calendar, double[]> ticks = null;
 //			try {

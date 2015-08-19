@@ -22,7 +22,7 @@ public interface DataProvider{
 	public OhlcPrice getOhlcRow(Pair p, Interval i, Calendar d);
 
 
-	public ArrayList<Tick> getTicks(Pair p, Date start, Date end);
+	public ArrayList<Tick> getTicks(Pair p, Calendar start, Calendar end);
 
 
 	public ArrayList<OhlcPrice> getOhlcRows(Pair p, Interval i, Calendar start, Calendar end);
