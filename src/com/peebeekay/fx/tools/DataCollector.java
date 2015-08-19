@@ -66,20 +66,20 @@ public class DataCollector implements Runnable{
 				e.printStackTrace();
 			}
 			collectors.put(i, c);
-			Thread cThread = new Thread(c);
-			collectorThreads.put(i, cThread);
-			cThread.start();
-//			c.run();
+			// Thread cThread = new Thread(c);
+			// collectorThreads.put(i, cThread);
+			//cThread.start();
+			c.run();
 		}
 		
-		for(Thread t: collectorThreads.values()){
-			try {
-				t.join();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		// for(Thread t: collectorThreads.values()){
+		// 	try {
+		// 		t.join();
+		// 	} catch (InterruptedException e) {
+		// 		// TODO Auto-generated catch block
+		// 		e.printStackTrace();
+		// 	}
+		// }
 		
 	}
 	
