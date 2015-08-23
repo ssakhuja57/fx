@@ -1,34 +1,66 @@
 package com.peebeekay.fx;
-import java.text.ParseException;
-import java.util.Calendar;
-import java.util.Map.Entry;
-
-import com.peebeekay.fx.brokers.fxcm.FxcmRateHistory;
 import com.peebeekay.fx.brokers.fxcm.FxcmSessionManager;
-import com.peebeekay.fx.info.Pair;
+import com.peebeekay.fx.brokers.fxcm.FxcmTickDataDistributor;
 import com.peebeekay.fx.session.Credentials;
-import com.peebeekay.fx.utils.DateUtils;
+import com.peebeekay.fx.simulation.data.IDataSubscriber;
+import com.peebeekay.fx.simulation.data.types.OhlcPrice;
+import com.peebeekay.fx.simulation.data.types.Tick;
 import com.peebeekay.fx.utils.Logger;
-import com.peebeekay.fx.utils.StringUtils;
 
 
 public class Main {
 	
-	public static void main(String[] args) throws ParseException{
+	public static void main(String[] args) throws Exception{
 		
 		Credentials creds = new Credentials("D172901772001", "600", "Demo", new String[]{"2743608", ""});
 		FxcmSessionManager fx = new FxcmSessionManager(creds, null);
-		for(Calendar cal: FxcmRateHistory.getTickData(fx, Pair.EURUSD, 
-				DateUtils.getCalendar("2015-08-10 00:00:00"), DateUtils.getCalendar("2015-08-10 00:05:30")).keySet()){
-			Logger.info(DateUtils.calToString(cal));
-		}
+//		for(Calendar cal: FxcmRateHistory.getTickData(fx, Pair.EURUSD, 
+//				DateUtils.getCalendar("2015-08-10 00:00:00"), DateUtils.getCalendar("2015-08-10 00:05:30")).keySet()){
+//			Logger.info(DateUtils.calToString(cal));
+//		}
+//		O2GOfferRow row = fx.offersTable.getRateRow(Pair.EURUSD);
+//		Logger.info(row.getInstrument() + " " + row.getAsk() + " " + row.getBid());
+		
+		FxcmTickDataDistributor tdd = new FxcmTickDataDistributor(fx);
+		
+		IDataSubscriber d = new IDataSubscriber() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public Boolean isReady() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			
+			@Override
+			public void accept(Tick price) {
+				Logger.info(price.toString());
+			}
+			
+			@Override
+			public void accept(OhlcPrice price) {
+				// TODO Auto-generated method stub
+				
+			}
+		};
+		
+//		tdd.addSubscriber(d);
+		
+		
+		//Thread.sleep(5000);
+		
 		//System.out.println(sm.orders.getTradeIDs("GBP/AUD", Constants.Buy));
 		//System.out.println(sm.trades.getTradeIDs("GBP/AUD", Constants.Buy));
 		//System.out.println(sm.closedTrades.getTradeIDs("GBP/AUD", Constants.Buy));
-		//sm.tradesTable.printTable();
-		//sm.closedTrades.printTable();
+		fx.tradesTable.printTable();
+		fx.closedTrades.printTable();
 		//sm.offersTable.printTable();
-		//sm.ordersTable.printTable();
+		fx.ordersTable.printTable();
 		//sm.accountsTable.printTable();
 		//SpikeTraderUI ui = new SpikeTraderUI();
 		try {

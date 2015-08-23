@@ -14,6 +14,10 @@ public class PairUtils {
 		return new String[]{pair.name().substring(0, 3), pair.name().substring(3, 6)};
 	}
 	
+	public static Pair slashedStringToPair(String s){
+		return Pair.valueOf(s.replace("/", ""));
+	}
+	
 	public static String insertSlash(Pair pair){
 		String[] currs = splitPair(pair);
 		return currs[0] + "/" + currs[1];

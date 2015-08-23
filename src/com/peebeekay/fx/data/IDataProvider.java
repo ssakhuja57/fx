@@ -2,7 +2,7 @@ package com.peebeekay.fx.data;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.List;
 
 import com.peebeekay.fx.info.Interval;
 import com.peebeekay.fx.info.Pair;
@@ -10,7 +10,7 @@ import com.peebeekay.fx.simulation.data.types.OhlcPrice;
 import com.peebeekay.fx.simulation.data.types.Tick;
 
 
-public interface DataProvider{
+public interface IDataProvider{
 
 
 	public Tick getTick(Pair p);
@@ -26,6 +26,8 @@ public interface DataProvider{
 
 
 	public ArrayList<OhlcPrice> getOhlcRows(Pair p, Interval i, Calendar start, Calendar end);
+	
+	public List<Pair> getSubscribedPairs();
 
 
 

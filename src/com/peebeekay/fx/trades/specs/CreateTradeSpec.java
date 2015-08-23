@@ -27,6 +27,10 @@ public class CreateTradeSpec extends TradeSpec{
 
 	private boolean isLong;
 	
+	private OpenTradeType openType;
+	
+	private CloseTradeType closeType;
+	
 	public CreateTradeSpec(Pair pair, int lots, boolean isLong, 
 			OpenTradeType openType, CloseTradeType closeType,
 			Map<TradeProperty, String> tradeProperties){
@@ -34,6 +38,8 @@ public class CreateTradeSpec extends TradeSpec{
 		this.pair = pair;
 		this.lots = lots;
 		this.isLong = isLong;
+		this.openType = openType;
+		this.closeType = closeType;
 	}
 	
 	public Pair getPair(){
@@ -44,6 +50,12 @@ public class CreateTradeSpec extends TradeSpec{
 	}
 	public boolean getIsLong(){
 		return isLong;
+	}
+	public OpenTradeType getOpenType(){
+		return openType;
+	}
+	public CloseTradeType getCloseType(){
+		return closeType;
 	}
 
 

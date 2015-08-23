@@ -1,5 +1,6 @@
 package com.peebeekay.fx.trades;
 
+import com.peebeekay.fx.simulation.trader.TradeCreationException;
 import com.peebeekay.fx.trades.specs.CreateTradeSpec;
 import com.peebeekay.fx.trades.specs.UpdateTradeSpec;
 
@@ -9,7 +10,7 @@ public interface TradeActionProvider {
 		// trade spec should have the trade details 
 		// like how to open, close, and any stops, etc.
 
-		public String createOrder(CreateTradeSpec spec);
+		public String createOrder(CreateTradeSpec spec) throws TradeCreationException;
 
 		public void closeTrade(String tradeId);
 

@@ -3,7 +3,7 @@ package com.peebeekay.fx.trades.specs;
 import java.util.Map;
 
 
-abstract class TradeSpec{
+public abstract class TradeSpec{
 
 
 	public enum TradeProperty{
@@ -18,6 +18,10 @@ abstract class TradeSpec{
 
 	public TradeSpec(Map<TradeProperty, String> tradeProperties){
 			this.tradeProperties = tradeProperties;
+	}
+	
+	public Map<TradeProperty, String> getTradeProperties(){
+		return tradeProperties;
 	}
 
 }

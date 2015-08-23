@@ -2,17 +2,20 @@ package com.peebeekay.fx.brokers.fxcm;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import com.fxcore2.Constants;
 import com.fxcore2.O2GOrderTableRow;
 import com.fxcore2.O2GSession;
+import com.fxcore2.O2GTable;
 import com.fxcore2.O2GTableManager;
 import com.fxcore2.O2GTableManagerMode;
+import com.fxcore2.O2GTableType;
 import com.fxcore2.O2GTradeTableRow;
 import com.fxcore2.O2GTransport;
-import com.peebeekay.fx.data.DataProvider;
+import com.peebeekay.fx.data.IDataProvider;
 import com.peebeekay.fx.db.DBManager;
 import com.peebeekay.fx.info.Interval;
 import com.peebeekay.fx.info.Pair;
@@ -23,6 +26,7 @@ import com.peebeekay.fx.session.SessionDependent;
 import com.peebeekay.fx.session.SessionHolder;
 import com.peebeekay.fx.simulation.data.types.OhlcPrice;
 import com.peebeekay.fx.simulation.data.types.Tick;
+import com.peebeekay.fx.simulation.trader.TradeCreationException;
 import com.peebeekay.fx.tables.Accounts;
 import com.peebeekay.fx.tables.ClosedTrades;
 import com.peebeekay.fx.tables.Offers;
@@ -31,11 +35,15 @@ import com.peebeekay.fx.tables.Summaries;
 import com.peebeekay.fx.tables.Trades;
 import com.peebeekay.fx.trades.TradeActionProvider;
 import com.peebeekay.fx.trades.specs.CreateTradeSpec;
+import com.peebeekay.fx.trades.specs.CreateTradeSpec.CloseTradeType;
+import com.peebeekay.fx.trades.specs.CreateTradeSpec.OpenTradeType;
+import com.peebeekay.fx.trades.specs.TradeSpec.TradeProperty;
 import com.peebeekay.fx.trades.specs.UpdateTradeSpec;
+import com.peebeekay.fx.utils.DateUtils;
 import com.peebeekay.fx.utils.Logger;
 import com.peebeekay.fx.utils.RateUtils;
 
-public class FxcmSessionManager implements SessionHolder, TradeActionProvider, DataProvider{
+public class FxcmSessionManager implements SessionHolder, TradeActionProvider, IDataProvider{
 	
 	public O2GSession session;
 	private Properties preferences;
@@ -182,29 +190,30 @@ public class FxcmSessionManager implements SessionHolder, TradeActionProvider, D
 	public String getAccountID(int number){
 		return this.accounts[number-1];
 	}
+	
+	public O2GTable getTable(O2GTableType type){
+		return tableMgr.getTable(type);
+	}
 
 
 
 	@Override
 	public Tick getTick(Pair p) {
-		// TODO Auto-generated method stub
-		return null;
+		return FxcmUtils.offerToTick(offersTable.getRateRow(p));
 	}
 
 
 
 	@Override
 	public OhlcPrice getOhlcRow(Pair p, Interval i) {
-		// TODO Auto-generated method stub
-		return null;
+		return getOhlcRow(p, i, DateUtils.getLastIntervalTime(i));
 	}
 
 
 
 	@Override
 	public OhlcPrice getOhlcRow(Pair p, Interval i, Calendar d) {
-		// TODO Auto-generated method stub
-		return null;
+		return FxcmRateHistory.getOhlcRows(this, p, i, d, d).get(0);
 	}
 
 
@@ -225,8 +234,25 @@ public class FxcmSessionManager implements SessionHolder, TradeActionProvider, D
 
 
 	@Override
-	public String createOrder(CreateTradeSpec spec) {
+	public String createOrder(CreateTradeSpec spec) throws TradeCreationException {
+		Pair pair = spec.getPair();
+		int amount = spec.getLots()*1000;
+		String buySell = spec.getIsLong() ? Constants.Buy : Constants.Sell;
+		OpenTradeType openType = spec.getOpenType();
+		CloseTradeType closeType = spec.getCloseType();
+		Map<TradeProperty, String> props = spec.getTradeProperties();
 		
+		String orderId;
+		
+		if(openType == OpenTradeType.MARKET_OPEN && closeType == CloseTradeType.STOP_CLOSE){
+			orderId = FxcmOrderActions.createMarketOrderWithStop(this, getAccountID(1), pair, buySell, 
+					amount,Integer.parseInt(props.get(TradeProperty.STOP_SIZE)), true, responseListener);
+		}
+		else{
+			throw new TradeCreationException("open trade and close trade types are not supported yet yo: " + openType + "," + closeType);
+		}
+		
+		return orderId;
 	}
 
 
@@ -257,6 +283,13 @@ public class FxcmSessionManager implements SessionHolder, TradeActionProvider, D
 
 	@Override
 	public String getTradeId(String orderId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public List<Pair> getSubscribedPairs() {
 		// TODO Auto-generated method stub
 		return null;
 	}

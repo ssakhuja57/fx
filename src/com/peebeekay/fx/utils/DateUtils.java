@@ -8,6 +8,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import com.peebeekay.fx.info.Interval;
+
 public class DateUtils {
 
 	/**
@@ -89,8 +91,43 @@ public class DateUtils {
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-		return null;
-		
+		return null;	
+	}
+	
+	public static Calendar getNextIntervalTime(Interval interval){
+			
+		Calendar c = Calendar.getInstance();
+		if(interval == Interval.T)
+			return c;
+		c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		while(c.before(Calendar.getInstance())){
+			c.add(Calendar.MINUTE, interval.minutes);
+		}
+		return c;
 	}
 
+	public static Calendar getLastIntervalTime(Interval interval){
+		
+		Calendar c = Calendar.getInstance();
+		if(interval == Interval.T)
+			return c;
+		c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		while(c.before(Calendar.getInstance())){
+			c.add(Calendar.MINUTE, interval.minutes);
+		}
+		c.add(Calendar.MINUTE, -interval.minutes); // go back one interval
+		return c;
+	}
+	
+	public static void main(String[] args){
+		for(Interval i: Interval.values())
+			Logger.info(i + ": " + DateUtils.calToString(getLastIntervalTime(i)));
+	}
+	
 }
