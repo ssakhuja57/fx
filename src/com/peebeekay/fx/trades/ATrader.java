@@ -11,12 +11,13 @@ import com.peebeekay.fx.simulation.trader.TradeManager;
 public abstract class ATrader implements IDataSubscriber {
 
 	public TradeManager tradeMgr;
-	
+	ITradeActionProvider tradeProvider;
 	String name;
 	
 	
-	public ATrader(ADataDistributor tickDataProvider, String name, String outputFolder, int maxConcurrentTrades) {
+	public ATrader(ITradeActionProvider tradeProvider, ADataDistributor tickDataProvider, String name, String outputFolder, int maxConcurrentTrades) {
 		tickDataProvider.addSubscriber(this);
+		this.tradeProvider = tradeProvider;
 		this.name = name;
 		tradeMgr = new TradeManager(outputFolder, name, maxConcurrentTrades);
 	}
@@ -29,8 +30,6 @@ public abstract class ATrader implements IDataSubscriber {
 	public abstract void accept(Tick price);
 	@Override
 	public abstract void accept(OhlcPrice price);
-	@Override
-	public abstract Boolean isReady();
 	
 	
 }

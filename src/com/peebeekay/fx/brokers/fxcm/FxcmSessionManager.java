@@ -33,7 +33,7 @@ import com.peebeekay.fx.tables.Offers;
 import com.peebeekay.fx.tables.Orders;
 import com.peebeekay.fx.tables.Summaries;
 import com.peebeekay.fx.tables.Trades;
-import com.peebeekay.fx.trades.TradeActionProvider;
+import com.peebeekay.fx.trades.ITradeActionProvider;
 import com.peebeekay.fx.trades.specs.CreateTradeSpec;
 import com.peebeekay.fx.trades.specs.CreateTradeSpec.CloseTradeType;
 import com.peebeekay.fx.trades.specs.CreateTradeSpec.OpenTradeType;
@@ -43,7 +43,7 @@ import com.peebeekay.fx.utils.DateUtils;
 import com.peebeekay.fx.utils.Logger;
 import com.peebeekay.fx.utils.RateUtils;
 
-public class FxcmSessionManager implements SessionHolder, TradeActionProvider, IDataProvider{
+public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, IDataProvider{
 	
 	public O2GSession session;
 	private Properties preferences;
@@ -292,6 +292,34 @@ public class FxcmSessionManager implements SessionHolder, TradeActionProvider, I
 	public List<Pair> getSubscribedPairs() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+
+	@Override
+	public String getOrderId(Pair pair, boolean isLong) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public String getTradeId(Pair pair) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public void adjustTradeStop(String tradeId, int newStopSize) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void adjustOrderStop(String orderId, int newStopSize) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	

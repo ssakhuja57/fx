@@ -18,7 +18,7 @@ import com.peebeekay.fx.simulation.trades.Trade;
 import com.peebeekay.fx.utils.RateUtils;
 
 
-public class SimpleRsiTrader {
+public abstract class ARsiTrader {
 	
 		
 		private IIndicator rsi;
@@ -39,7 +39,7 @@ public class SimpleRsiTrader {
 			HOLD,BUY,SELL
 		}
 		
-		public SimpleRsiTrader(String name, String outputFolder, Pair pair, IDataSource ds, 
+		public ARsiTrader(String name, String outputFolder, Pair pair, IDataSource ds, 
 				Calendar startTime, int stopOffset, int maxConcurrentTrades){
 			super(ds, name, outputFolder, maxConcurrentTrades);
 			this.startTime = startTime;
@@ -108,18 +108,6 @@ public class SimpleRsiTrader {
 		}
 		
 
-		@Override
-		public Boolean isReady() {
-			return isReady;
-		}
 		
-
-		@Override
-		public void run() {
-
-		}
-
-		
-	}
 
 }

@@ -72,11 +72,6 @@ public class StopClose extends ACloseTradeMonitor{
 	}
 
 	@Override
-	public Boolean isReady() {
-		return null;
-	}
-
-	@Override
 	public void run() {
 		// TODO Auto-generated method stub
 		
