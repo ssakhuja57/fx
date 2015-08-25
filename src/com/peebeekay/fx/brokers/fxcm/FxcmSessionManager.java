@@ -217,7 +217,9 @@ public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, 
 
 	@Override
 	public OhlcPrice getOhlcRow(Pair p, Interval i, Calendar d) {
-		return FxcmRateHistory.getOhlcRows(this, p, i, d, d).get(0);
+		Calendar dLess1 = Calendar.getInstance(); dLess1.setTime(d.getTime()); dLess1.add(Calendar.SECOND, -1);
+		Calendar dMore1 = Calendar.getInstance(); dMore1.setTime(d.getTime()); dMore1.add(Calendar.SECOND, 1);
+		return FxcmRateHistory.getOhlcRows(this, p, i, dLess1, dMore1).get(0);
 	}
 
 
