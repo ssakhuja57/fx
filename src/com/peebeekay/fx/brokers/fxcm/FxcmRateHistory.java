@@ -134,7 +134,7 @@ public class FxcmRateHistory {
 	
 	private static O2GMarketDataSnapshotResponseReader getData(FxcmSessionManager sm, Pair pair, Interval in,
 			Calendar startTime, Calendar endTime, int lastN, int waitForSeconds) throws RequestFailedException{
-		if(endTime != null && !endTime.after(startTime)){
+		if(endTime != null && !endTime.after(startTime) && !endTime.equals(startTime)){
 			throw new IllegalArgumentException("end time must be after start time");
 		}
 		Logger.debug("requesting " + pair + " " + in.value + " data for " 
