@@ -23,5 +23,13 @@ public abstract class TradeSpec{
 	public Map<TradeProperty, String> getTradeProperties(){
 		return tradeProperties;
 	}
+	
+	public String getTradeProperty(TradeProperty prop){
+		return tradeProperties.get(prop);
+	}
+	
+	public void setTradeProperty(TradeProperty prop, String value){
+		tradeProperties.put(prop, value);
+	}
 
 }

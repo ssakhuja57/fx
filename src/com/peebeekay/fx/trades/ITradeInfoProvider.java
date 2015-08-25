@@ -4,6 +4,13 @@ import com.peebeekay.fx.info.Pair;
 
 public interface ITradeInfoProvider {
 	
+	enum TradeStatus{
+		OPEN, NOT_OPEN;
+	}
+	
+	enum OrderStatus{
+		WAITING, NOT_WAITING;
+	}
 	
 	public Order getOrder(String orderId);
 
@@ -22,4 +29,9 @@ public interface ITradeInfoProvider {
 	public int getStopSize(Trade trade);
 	
 	public int getStopSize(Order order);
+	
+	
+	public TradeStatus getTradeStatus(Trade trade);
+	
+	public OrderStatus getOrderStatus(Order order);
 }

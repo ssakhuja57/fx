@@ -1,13 +1,12 @@
 package com.peebeekay.fx.trades;
 
-import com.peebeekay.fx.simulation.trader.TradeCreationException;
 import com.peebeekay.fx.trades.specs.CreateTradeSpec;
 import com.peebeekay.fx.trades.specs.UpdateTradeSpec;
 
 public interface ITradeActionProvider {
 
 
-		public String createOrder(CreateTradeSpec spec) throws TradeCreationException;
+		public Order createOrder(CreateTradeSpec spec) throws OrderCreationException;
 
 		public void closeTrade(Trade trade);
 

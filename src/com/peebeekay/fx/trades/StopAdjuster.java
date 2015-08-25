@@ -5,7 +5,7 @@ import com.peebeekay.fx.simulation.data.types.Tick;
 import com.peebeekay.fx.trades.Trade;
 import com.peebeekay.fx.utils.RateUtils;
 
-public class StopAdjuster extends TradeMonitor{
+public class StopAdjuster implements ITradeMonitor{
 	
 	int maxStopSize;
 	int initialStopSize;

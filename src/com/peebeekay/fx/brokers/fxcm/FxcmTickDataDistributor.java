@@ -7,7 +7,7 @@ import com.fxcore2.O2GTableStatus;
 import com.fxcore2.O2GTableType;
 import com.fxcore2.O2GTableUpdateType;
 import com.peebeekay.fx.data.ADataDistributor;
-import com.peebeekay.fx.info.Interval;
+import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.simulation.data.IDataSubscriber;
 import com.peebeekay.fx.simulation.data.types.Tick;
 
@@ -39,8 +39,10 @@ public class FxcmTickDataDistributor extends ADataDistributor implements IO2GTab
 
 	private void distributeData(O2GOfferTableRow row) {
 		Tick t = FxcmUtils.offerToTick(row);
+		Pair pair = t.getPair();
 		for(IDataSubscriber ds: super.subscribers){
-			ds.accept(t);
+			if(super.subscriberPairs.get(ds).contains(pair))
+				ds.accept(t);
 		}
 	}
 

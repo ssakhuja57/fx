@@ -57,6 +57,22 @@ public class CreateTradeSpec extends TradeSpec{
 	public CloseTradeType getCloseType(){
 		return closeType;
 	}
+	
+	public void setPair(Pair pair){
+		this.pair = pair;
+	}
+	public void setLots(int lots){
+		this.lots = lots;
+	}
+	public void setIsLong(boolean isLong){
+		this.isLong = isLong;
+	}
+	public void setOpenType(OpenTradeType openType){
+		this.openType = openType;
+	}
+	public void setCloseType(CloseTradeType closeType){
+		this.closeType = closeType;
+	}
 
 
 	

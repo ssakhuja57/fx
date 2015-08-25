@@ -53,7 +53,7 @@ public abstract class FXTable<TableClass extends O2GTable, TableRowClass extends
 	        O2GTableColumnCollection collection = rowData.getColumns();
 	        for (int i = 0; i < collection.size(); i++) {
 	           O2GTableColumn column = collection.get(i);
-	           Logger.debug(column.getId() + "=" + rowData.getCell(i) + ";");
+	           System.out.println(column.getId() + "=" + rowData.getCell(i) + ";");
 	        }
 		}
 	}
