@@ -31,8 +31,6 @@ public abstract class ATrader implements IDataSubscriber {
 	public abstract void accept(Tick price);
 	@Override
 	public abstract void accept(OhlcPrice price);
-	@Override
-	public abstract Boolean isReady();
 	
 	
 }

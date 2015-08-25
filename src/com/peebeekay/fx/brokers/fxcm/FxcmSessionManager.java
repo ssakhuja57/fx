@@ -34,6 +34,10 @@ import com.peebeekay.fx.tables.Orders;
 import com.peebeekay.fx.tables.Summaries;
 import com.peebeekay.fx.tables.Trades;
 import com.peebeekay.fx.trades.ITradeActionProvider;
+import com.peebeekay.fx.trades.ITradeInfoProvider;
+import com.peebeekay.fx.trades.Order;
+import com.peebeekay.fx.trades.OrderCreationException;
+import com.peebeekay.fx.trades.Trade;
 import com.peebeekay.fx.trades.specs.CreateTradeSpec;
 import com.peebeekay.fx.trades.specs.CreateTradeSpec.CloseTradeType;
 import com.peebeekay.fx.trades.specs.CreateTradeSpec.OpenTradeType;
@@ -43,7 +47,7 @@ import com.peebeekay.fx.utils.DateUtils;
 import com.peebeekay.fx.utils.Logger;
 import com.peebeekay.fx.utils.RateUtils;
 
-public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, IDataProvider{
+public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, IDataProvider, ITradeInfoProvider{
 	
 	public O2GSession session;
 	private Properties preferences;
@@ -234,7 +238,7 @@ public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, 
 
 
 	@Override
-	public String createOrder(CreateTradeSpec spec) throws TradeCreationException {
+	public Order createOrder(CreateTradeSpec spec) throws OrderCreationException {
 		Pair pair = spec.getPair();
 		int amount = spec.getLots()*1000;
 		String buySell = spec.getIsLong() ? Constants.Buy : Constants.Sell;
@@ -245,47 +249,18 @@ public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, 
 		String orderId;
 		
 		if(openType == OpenTradeType.MARKET_OPEN && closeType == CloseTradeType.STOP_CLOSE){
+			int stopSize = Integer.parseInt(props.get(TradeProperty.STOP_SIZE));
 			orderId = FxcmOrderActions.createMarketOrderWithStop(this, getAccountID(1), pair, buySell, 
-					amount,Integer.parseInt(props.get(TradeProperty.STOP_SIZE)), true, responseListener);
+					amount, stopSize, true, responseListener);
 		}
 		else{
-			throw new TradeCreationException("open trade and close trade types are not supported yet yo: " + openType + "," + closeType);
+			throw new OrderCreationException("open trade and close trade types are not supported yet yo: " + openType + "," + closeType);
 		}
 		
-		return orderId;
+		return getOrder(orderId);
 	}
 
 
-
-	@Override
-	public void closeTrade(String tradeId) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-
-	@Override
-	public void updateTrade(String tradeId, UpdateTradeSpec spec) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-
-	@Override
-	public void cancelOrder(String orderId) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-
-	@Override
-	public String getTradeId(String orderId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 
 	@Override
@@ -295,31 +270,102 @@ public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, 
 	}
 
 
-	@Override
-	public String getOrderId(Pair pair, boolean isLong) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 
 	@Override
-	public String getTradeId(Pair pair) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	public void adjustTradeStop(String tradeId, int newStopSize) {
+	public void closeTrade(Trade trade) {
 		// TODO Auto-generated method stub
 		
 	}
 
 
 	@Override
-	public void adjustOrderStop(String orderId, int newStopSize) {
+	public void updateTrade(Order order, UpdateTradeSpec spec) {
 		// TODO Auto-generated method stub
 		
+	}
+
+
+	@Override
+	public void cancelOrder(Order order) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void adjustTradeStop(Trade trade, int newStopSize) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void adjustOrderStop(Order order, int newStopSize) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public Order getOrder(String orderId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public Order getOrder(Pair pair, boolean isLong) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public Trade getTradeFromTradeId(String tradeId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public Trade getTradeFromOrderId(String orderId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public Trade getTrade(Pair pair) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public int getStopSize(Trade trade) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public int getStopSize(Order order) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public TradeStatus getTradeStatus(Trade trade) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public OrderStatus getOrderStatus(Order order) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	

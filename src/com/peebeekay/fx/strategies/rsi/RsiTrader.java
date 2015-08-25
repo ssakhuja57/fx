@@ -2,29 +2,27 @@ package com.peebeekay.fx.strategies.rsi;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import com.peebeekay.fx.data.ADataDistributor;
+import com.peebeekay.fx.data.ATickDataDistributor;
 import com.peebeekay.fx.data.IDataProvider;
 import com.peebeekay.fx.data.OhlcDataDistributor;
 import com.peebeekay.fx.info.Interval;
 import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.rates.RateStats;
-import com.peebeekay.fx.simulation.data.distributors.TickDataDistributor;
 import com.peebeekay.fx.simulation.data.types.OhlcPrice;
 import com.peebeekay.fx.simulation.data.types.Tick;
 import com.peebeekay.fx.simulation.indicator.RSI;
-import com.peebeekay.fx.simulation.monitors.close.StopClose;
-import com.peebeekay.fx.simulation.monitors.open.MarketOpen;
-import com.peebeekay.fx.simulation.trader.TradeCreationException;
 import com.peebeekay.fx.simulation.trades.Trade;
 import com.peebeekay.fx.trades.ATrader;
 import com.peebeekay.fx.trades.ITradeActionProvider;
 import com.peebeekay.fx.trades.ITradeInfoProvider;
+import com.peebeekay.fx.trades.OrderCreationException;
 import com.peebeekay.fx.trades.specs.CreateTradeSpec;
 import com.peebeekay.fx.trades.specs.CreateTradeSpec.CloseTradeType;
 import com.peebeekay.fx.trades.specs.CreateTradeSpec.OpenTradeType;
+import com.peebeekay.fx.trades.specs.TradeSpec.TradeProperty;
 import com.peebeekay.fx.utils.RateUtils;
 
 
@@ -37,7 +35,7 @@ public class RsiTrader extends ATrader{
 		int maxConcurrentTrades;
 		Interval interval;
 		
-		TickDataDistributor tDD;
+		ATickDataDistributor tDD;
 		OhlcDataDistributor ohlcDD;
 		
 		private RateStats stats;
@@ -45,6 +43,8 @@ public class RsiTrader extends ATrader{
 		public final int PERIOD = 14;
 		public final int HIGH_MARK = 70;
 		public final double LOW_MARK = 30;
+		
+		final int LOTS = 1;
 		
 		private volatile Boolean isReady;
 		private Boolean stillRunning;
@@ -54,8 +54,8 @@ public class RsiTrader extends ATrader{
 			HOLD,BUY,SELL
 		}
 		
-		public RsiTrader(String name, ITradeActionProvider ap, ITradeInfoProvider ip, 
-				TickDataDistributor tDD, OhlcDataDistributor ohlcDD, IDataProvider dataProvider,
+		public RsiTrader(String name, ITradeActionProvider ap, ITradeInfoProvider ip,
+				IDataProvider dp, ATickDataDistributor tDD, OhlcDataDistributor ohlcDD,
 				Interval interval, Pair pair, int maxStopSize, int maxConcurrentTrades){
 			super(ap, ip, name);
 			this.pair = pair;
@@ -67,15 +67,23 @@ public class RsiTrader extends ATrader{
 			
 			stats = new RateStats(96, interval);
 			
-			
+			// rsi
 			Calendar nowMinusPeriod = Calendar.getInstance();
 //			nowMinusPeriod.setTime(startTime.getTime());
 //			nowMinusPeriod.add(Calendar.MINUTE, -period*INTERVAL.minutes);
 			nowMinusPeriod.add(Calendar.HOUR, -120); // add extra in case run over weekend/holiday data
-			
-			ArrayList<OhlcPrice> historicalPrices = dataProvider.getOhlcRows(pair, interval, nowMinusPeriod, Calendar.getInstance());
+			ArrayList<OhlcPrice> historicalPrices = dp.getOhlcRows(pair, interval, nowMinusPeriod, Calendar.getInstance());
 			rsi = new RSI(interval, PERIOD, true, true, historicalPrices);
 			prevRsi = rsi.getValue();
+			
+			// subscribe
+			List<Pair> pairs = new ArrayList<Pair>();
+			pairs.add(pair);
+			List<Interval> intervals = new ArrayList<Interval>();
+			intervals.add(interval);
+			
+			tDD.addSubscriber(this, pairs, intervals);
+			ohlcDD.addSubscriber(this, pairs, intervals);
 			
 			isReady = true;
 			stillRunning = true;
@@ -106,11 +114,12 @@ public class RsiTrader extends ATrader{
 				int initialOffset = (int)RateUtils.getAbsPipDistance(price.getExitPrice(tradeLong), stop);
 				if(initialOffset > maxStopSize)
 					initialOffset = maxStopSize;
-				CreateTradeSpec spec = new CreateTradeSpec(pair, lots, tradeLong, OpenTradeType.MARKET_OPEN, CloseTradeType.STOP_CLOSE, tradeProperties)
-				super.tradeMgr.updateTrade(trade, new StopClose(trade, stopOffset, initialOffset));
+				CreateTradeSpec spec = new CreateTradeSpec(pair, LOTS, tradeLong, OpenTradeType.MARKET_OPEN, CloseTradeType.STOP_CLOSE);
+				spec.setTradeProperty(TradeProperty.STOP_SIZE, String.valueOf(initialOffset));
+				super.createOrder(spec);
 				// end: lines for recent extremum
-				
-			} catch (TradeCreationException e) {
+			} catch (OrderCreationException e) {
+				e.printStackTrace();
 			} finally{
 				signal = Signal.HOLD;
 			}
@@ -119,10 +128,11 @@ public class RsiTrader extends ATrader{
 		@Override
 		public void accept(OhlcPrice price) {
 //			Logger.debug("received " + price.getInterval() + " at " + price.getTime());
-				rsi.addDataPoint(price);			
+				rsi.addDataPoint(price);
+				stats.accept(price);
+				
 				signal = chooseAction();
 				prevRsi = rsi.getValue();
-				stats.accept(price); // temp
 //				Logger.debug(price.getTime().toString() + ":" + prevRsi);
 			}
 

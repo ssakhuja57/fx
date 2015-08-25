@@ -31,6 +31,16 @@ public class CreateTradeSpec extends TradeSpec{
 	
 	private CloseTradeType closeType;
 	
+	public CreateTradeSpec(Pair pair, int lots, boolean isLong,
+			OpenTradeType openType, CloseTradeType closeType){
+		super();
+		this.pair = pair;
+		this.lots = lots;
+		this.isLong = isLong;
+		this.openType = openType;
+		this.closeType = closeType;
+	}
+	
 	public CreateTradeSpec(Pair pair, int lots, boolean isLong, 
 			OpenTradeType openType, CloseTradeType closeType,
 			Map<TradeProperty, String> tradeProperties){

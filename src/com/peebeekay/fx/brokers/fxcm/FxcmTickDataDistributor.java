@@ -6,12 +6,12 @@ import com.fxcore2.O2GRow;
 import com.fxcore2.O2GTableStatus;
 import com.fxcore2.O2GTableType;
 import com.fxcore2.O2GTableUpdateType;
-import com.peebeekay.fx.data.ADataDistributor;
+import com.peebeekay.fx.data.ATickDataDistributor;
 import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.simulation.data.IDataSubscriber;
 import com.peebeekay.fx.simulation.data.types.Tick;
 
-public class FxcmTickDataDistributor extends ADataDistributor implements IO2GTableListener{
+public class FxcmTickDataDistributor extends ATickDataDistributor implements IO2GTableListener{
 
 	
 	public FxcmTickDataDistributor(FxcmSessionManager fx) {

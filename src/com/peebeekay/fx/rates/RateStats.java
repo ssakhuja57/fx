@@ -22,18 +22,12 @@ public class RateStats implements IDataSubscriber{
 		this.interval = interval;
 	}
 
-	@Override
-	public void run() {
-		
-	}
 
 	@Override
 	public void accept(OhlcPrice price) {
-		if(price.getInterval() == interval){
-			if(prices.size() == maxPrices)
-				prices.remove();
-			prices.add(price);
-		}
+		if(prices.size() == maxPrices)
+			prices.remove();
+		prices.add(price);
 	}
 
 	@Override
@@ -41,12 +35,6 @@ public class RateStats implements IDataSubscriber{
 		
 	}
 
-	@Override
-	public Boolean isReady() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
 	public double getExtreme(boolean isHigh, boolean isAsk){
 		OhlcPrice price = prices.peek();
 		AskBid p = price.getAskBid(isAsk);

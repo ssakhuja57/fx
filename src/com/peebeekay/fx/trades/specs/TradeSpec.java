@@ -1,5 +1,6 @@
 package com.peebeekay.fx.trades.specs;
 
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -16,6 +17,10 @@ public abstract class TradeSpec{
 	Map<TradeProperty, String> tradeProperties;
 
 
+	public TradeSpec(){
+		tradeProperties = new HashMap<TradeProperty, String>();
+	}
+	
 	public TradeSpec(Map<TradeProperty, String> tradeProperties){
 			this.tradeProperties = tradeProperties;
 	}
