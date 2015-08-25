@@ -32,6 +32,7 @@ public class Runner {
 		
 		List<Interval> intervals = new ArrayList<Interval>();
 		intervals.add(interval);
+		intervals.add(Interval.M1); // temporary to test if ohlc data is being retrieved without error
 		
 		
 		FxcmSessionManager fx = getSession();
