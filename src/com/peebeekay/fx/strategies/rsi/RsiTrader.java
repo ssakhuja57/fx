@@ -138,7 +138,7 @@ public class RsiTrader extends ATrader{
 
 		@Override
 		public boolean okToCreateOrder() {
-			if(super.getNumberOfOpenTrades() >= maxConcurrentTrades)
+			if(super.getNumberOfOpenTrades(pair) >= maxConcurrentTrades)
 				return false;
 			return true;
 		}

@@ -5,8 +5,8 @@ import com.peebeekay.fx.trades.specs.UpdateTradeSpec;
 
 public interface ITradeActionProvider {
 
-
-		public Order createOrder(CreateTradeSpec spec) throws OrderCreationException;
+		// returns orderId
+		public String createOrder(CreateTradeSpec spec) throws OrderCreationException;
 
 		public void closeTrade(Trade trade);
 

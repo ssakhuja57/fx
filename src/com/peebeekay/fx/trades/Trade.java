@@ -14,8 +14,11 @@ public class Trade {
 	private String id;
 	private Pair pair;
 	private boolean isLong;
-	private int lots;
 	private Date createdTime;
+	
+	// can be modified by trade table listener
+	private int lots;
+	private double stopPrice;
 	
 	private double openPrice;
 	private Tick openTick;
@@ -32,11 +35,12 @@ public class Trade {
 
 	private String notes;
 	
-	public Trade(String id, Pair pair, boolean isLong, int lots){
+	public Trade(String id, Pair pair, boolean isLong, int lots, double stopPrice){
 		this.id = id;
 		this.pair = pair;
 		this.isLong = isLong;
 		this.lots = lots;
+		this.stopPrice = stopPrice;
 	}
 	
 	
@@ -62,6 +66,10 @@ public class Trade {
 
 	public int getLots() {
 		return lots;
+	}
+	
+	public double getStopPrice(){
+		return stopPrice;
 	}
 
 	public double getOpenPrice() {
@@ -101,6 +109,17 @@ public class Trade {
 	public int hashCode(){
 		return id.hashCode();
 	}
+	
+	
+	
+	public void updateStopPrice(double stopPrice){
+		this.stopPrice = stopPrice;
+	}
+	
+	public void updateLots(int lots){
+		this.lots = lots;
+	}
+	
 	
 	public static String getHeaderRow(){
 		return "id,pair,lots,status,createdTime,isLong," +

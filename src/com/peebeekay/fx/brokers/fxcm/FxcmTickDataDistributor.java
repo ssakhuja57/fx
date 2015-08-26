@@ -8,13 +8,17 @@ import com.fxcore2.O2GTableType;
 import com.fxcore2.O2GTableUpdateType;
 import com.peebeekay.fx.data.ATickDataDistributor;
 import com.peebeekay.fx.info.Pair;
+import com.peebeekay.fx.session.SessionDependent;
 import com.peebeekay.fx.simulation.data.IDataSubscriber;
 import com.peebeekay.fx.simulation.data.types.Tick;
 
-public class FxcmTickDataDistributor extends ATickDataDistributor implements IO2GTableListener{
+public class FxcmTickDataDistributor extends ATickDataDistributor implements IO2GTableListener, SessionDependent{
 
+	FxcmSessionManager fx;
 	
 	public FxcmTickDataDistributor(FxcmSessionManager fx) {
+		this.fx = fx;
+		fx.registerDependent(this);
 		fx.getTable(O2GTableType.OFFERS).subscribeUpdate(O2GTableUpdateType.UPDATE, this);
 	}
 	
@@ -44,6 +48,11 @@ public class FxcmTickDataDistributor extends ATickDataDistributor implements IO2
 			if(super.subscriberPairs.get(ds).contains(pair))
 				ds.accept(t);
 		}
+	}
+	
+	@Override
+	public void close(){
+		fx.getTable(O2GTableType.OFFERS).unsubscribeUpdate(O2GTableUpdateType.UPDATE, this);
 	}
 
 }

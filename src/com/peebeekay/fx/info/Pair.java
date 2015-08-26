@@ -1,5 +1,7 @@
 package com.peebeekay.fx.info;
 
+import java.util.HashMap;
+import java.util.Map;
 
 public enum Pair {
 	
@@ -55,9 +57,22 @@ public enum Pair {
 //		USDCNH(105),
 		;
 		
+		private static Map<Integer, Pair> idValueMap = new HashMap<Integer, Pair>();
+		
+		
+	    static {
+	        for (Pair pair : Pair.values()) {
+	            idValueMap.put(pair.id, pair);
+	        }
+	    }
+	
 		public int id;
-		private Pair(int id){
+		Pair(int id){
 			this.id = id;
 		}
+
+	    public static Pair valueOf(int id) {
+	        return idValueMap.get(id);
+	    }
 
 }

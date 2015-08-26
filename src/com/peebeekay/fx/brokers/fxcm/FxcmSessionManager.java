@@ -26,7 +26,6 @@ import com.peebeekay.fx.session.SessionDependent;
 import com.peebeekay.fx.session.SessionHolder;
 import com.peebeekay.fx.simulation.data.types.OhlcPrice;
 import com.peebeekay.fx.simulation.data.types.Tick;
-import com.peebeekay.fx.simulation.trader.TradeCreationException;
 import com.peebeekay.fx.tables.Accounts;
 import com.peebeekay.fx.tables.ClosedTrades;
 import com.peebeekay.fx.tables.Offers;
@@ -34,7 +33,6 @@ import com.peebeekay.fx.tables.Orders;
 import com.peebeekay.fx.tables.Summaries;
 import com.peebeekay.fx.tables.Trades;
 import com.peebeekay.fx.trades.ITradeActionProvider;
-import com.peebeekay.fx.trades.ITradeInfoProvider;
 import com.peebeekay.fx.trades.Order;
 import com.peebeekay.fx.trades.OrderCreationException;
 import com.peebeekay.fx.trades.Trade;
@@ -47,7 +45,7 @@ import com.peebeekay.fx.utils.DateUtils;
 import com.peebeekay.fx.utils.Logger;
 import com.peebeekay.fx.utils.RateUtils;
 
-public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, IDataProvider, ITradeInfoProvider{
+public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, IDataProvider {
 	
 	public O2GSession session;
 	private Properties preferences;
@@ -110,7 +108,7 @@ public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, 
         session.unsubscribeSessionStatus(statusListener);
         session.dispose();
         for (SessionDependent dep:dependents){
-        	dep.end();
+        	dep.close();
         }
         //dbMgr.close(); //not needed for now
 	}
@@ -240,7 +238,7 @@ public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, 
 
 
 	@Override
-	public Order createOrder(CreateTradeSpec spec) throws OrderCreationException {
+	public String createOrder(CreateTradeSpec spec) throws OrderCreationException {
 		Pair pair = spec.getPair();
 		int amount = spec.getLots()*1000;
 		String buySell = spec.getIsLong() ? Constants.Buy : Constants.Sell;
@@ -259,7 +257,7 @@ public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, 
 			throw new OrderCreationException("open trade and close trade types are not supported yet yo: " + openType + "," + closeType);
 		}
 		
-		return getOrder(orderId);
+		return orderId;
 	}
 
 
@@ -305,69 +303,6 @@ public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, 
 	public void adjustOrderStop(Order order, int newStopSize) {
 		// TODO Auto-generated method stub
 		
-	}
-
-
-	@Override
-	public Order getOrder(String orderId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	public Order getOrder(Pair pair, boolean isLong) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	public Trade getTradeFromTradeId(String tradeId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	public Trade getTradeFromOrderId(String orderId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	public Trade getTrade(Pair pair) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	public int getStopSize(Trade trade) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-
-	@Override
-	public int getStopSize(Order order) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-
-	@Override
-	public TradeStatus getTradeStatus(Trade trade) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	public OrderStatus getOrderStatus(Order order) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	

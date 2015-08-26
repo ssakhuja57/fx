@@ -5,11 +5,13 @@ import java.util.List;
 
 import com.peebeekay.fx.brokers.fxcm.FxcmSessionManager;
 import com.peebeekay.fx.brokers.fxcm.FxcmTickDataDistributor;
+import com.peebeekay.fx.brokers.fxcm.FxcmTradeInfoProvider;
 import com.peebeekay.fx.data.ATickDataDistributor;
 import com.peebeekay.fx.data.OhlcDataDistributor;
 import com.peebeekay.fx.info.Interval;
 import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.session.Credentials;
+import com.peebeekay.fx.trades.ITradeInfoProvider;
 
 public class Runner {
 
@@ -20,6 +22,7 @@ public class Runner {
 	
 	static void standard(){
 		
+		int defStop = 15;
 		Interval interval = Interval.M30;
 		
 		List<Pair> pairs = new ArrayList<Pair>();
@@ -38,13 +41,14 @@ public class Runner {
 		FxcmSessionManager fx = getSession();
 		ATickDataDistributor tDD = new FxcmTickDataDistributor(fx);
 		OhlcDataDistributor ohlcDD = new OhlcDataDistributor(fx, pairs, intervals);
+		ITradeInfoProvider ip = new FxcmTradeInfoProvider(fx);
 		
-		RsiTrader t1 = new RsiTrader("test1", fx, fx, fx, tDD, ohlcDD, interval, pairs.get(0), 9999, 1);
-		RsiTrader t2 = new RsiTrader("test2", fx, fx, fx, tDD, ohlcDD, interval, pairs.get(1), 9999, 1);
-		RsiTrader t3 = new RsiTrader("test3", fx, fx, fx, tDD, ohlcDD, interval, pairs.get(2), 9999, 1);
-		RsiTrader t4 = new RsiTrader("test4", fx, fx, fx, tDD, ohlcDD, interval, pairs.get(3), 9999, 1);
-		RsiTrader t5 = new RsiTrader("test5", fx, fx, fx, tDD, ohlcDD, interval, pairs.get(4), 9999, 1);
-		RsiTrader t6 = new RsiTrader("test6", fx, fx, fx, tDD, ohlcDD, interval, pairs.get(5), 9999, 1);
+		RsiTrader t1 = new RsiTrader("test1", fx, ip, fx, tDD, ohlcDD, interval, pairs.get(0), defStop, 1);
+		RsiTrader t2 = new RsiTrader("test2", fx, ip, fx, tDD, ohlcDD, interval, pairs.get(1), defStop, 1);
+		RsiTrader t3 = new RsiTrader("test3", fx, ip, fx, tDD, ohlcDD, interval, pairs.get(2), defStop, 1);
+		RsiTrader t4 = new RsiTrader("test4", fx, ip, fx, tDD, ohlcDD, interval, pairs.get(3), defStop, 1);
+		RsiTrader t5 = new RsiTrader("test5", fx, ip, fx, tDD, ohlcDD, interval, pairs.get(4), defStop, 1);
+		RsiTrader t6 = new RsiTrader("test6", fx, ip, fx, tDD, ohlcDD, interval, pairs.get(5), defStop, 1);
 		
 
 	}

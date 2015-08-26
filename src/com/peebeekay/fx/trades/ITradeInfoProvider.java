@@ -1,37 +1,18 @@
 package com.peebeekay.fx.trades;
 
-import com.peebeekay.fx.info.Pair;
-
 public interface ITradeInfoProvider {
 	
-	enum TradeStatus{
-		OPEN, NOT_OPEN;
+	enum TradingStatus{
+		WAITING, OPEN, NOT_FOUND;
 	}
 	
-	enum OrderStatus{
-		WAITING, NOT_WAITING;
-	}
 	
-	public Order getOrder(String orderId);
-
-	public Order getOrder(Pair pair, boolean isLong);
+	public Trade getTrade(String orderId) throws TradeNotFoundException;
 	
+	public Order getOrder(String orderId) throws TradeNotFoundException;
 	
+	public double getStopSize(String orderId) throws TradeNotFoundException;
 	
-	public Trade getTradeFromTradeId(String tradeId);
-
-	public Trade getTradeFromOrderId(String orderId);
+	public TradingStatus getTradingStatus(String orderId);
 	
-	public Trade getTrade(Pair pair);
-	
-	
-	
-	public int getStopSize(Trade trade);
-	
-	public int getStopSize(Order order);
-	
-	
-	public TradeStatus getTradeStatus(Trade trade);
-	
-	public OrderStatus getOrderStatus(Order order);
 }
