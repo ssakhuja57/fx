@@ -106,7 +106,6 @@ public class RsiTrader extends ATrader{
 				return;
 			
 			boolean tradeLong = (signal == Signal.BUY) ? true : false;
-			Trade trade = null;
 			try {
 //				super.tradeMgr.updateTrade(trade, new StopClose(trade, stopOffset, true)); // constant stop size
 				
@@ -135,7 +134,7 @@ public class RsiTrader extends ATrader{
 				signal = chooseAction();
 				prevRsi = rsi.getValue();
 				Logger.debug("bid close price for " + price.getPair() + " at " + DateUtils.dateToString(price.getTime()) + ": " 
-								+ price.getBidClose() + ", and rsi: "+ prevRsi);
+								+ price.getBidClose() + ", and RSI: "+ prevRsi);
 			}
 
 		@Override

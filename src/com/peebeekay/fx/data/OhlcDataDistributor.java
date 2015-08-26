@@ -1,6 +1,7 @@
 package com.peebeekay.fx.data;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -27,7 +28,9 @@ public class OhlcDataDistributor extends ADataDistributor{
 			if(interval == Interval.T)
 				continue;
 			Timer worker = new Timer();
-			worker.schedule(new Distributor(interval), DateUtils.getNextIntervalTime(interval).getTime(), interval.minutes*60*1000);
+			Calendar initial = DateUtils.getNextIntervalTime(interval);
+			initial.add(Calendar.SECOND, 3); // give broker a few extra seconds to publish ohlc data
+			worker.schedule(new Distributor(interval), initial.getTime(), interval.minutes*60*1000);
 			workers.add(worker);
 		}
 	}
@@ -50,7 +53,8 @@ public class OhlcDataDistributor extends ADataDistributor{
 		@Override
 		public void run() {
 			for(Pair p: pairs){
-				OhlcPrice row = dp.getOhlcRow(p, interval);
+				Calendar time = DateUtils.getLastIntervalTime(interval);
+				OhlcPrice row = dp.getOhlcRow(p, interval, time);
 				Pair pair = row.getPair();
 				for(IDataSubscriber ds: subscribers){
 					if(subscriberIntervals.get(ds).contains(interval) && subscriberPairs.get(ds).contains(pair))

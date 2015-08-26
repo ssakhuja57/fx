@@ -23,15 +23,15 @@ public class Runner {
 	static void standard(){
 		
 		int defStop = 15;
-		Interval interval = Interval.M5;
+		Interval interval = Interval.M1;
 		
 		List<Pair> pairs = new ArrayList<Pair>();
 		pairs.add(Pair.EURUSD);
-		pairs.add(Pair.USDJPY);
-		pairs.add(Pair.GBPUSD);
-		pairs.add(Pair.AUDUSD);
-		pairs.add(Pair.USDCAD);
-		pairs.add(Pair.NZDUSD);
+//		pairs.add(Pair.USDJPY);
+//		pairs.add(Pair.GBPUSD);
+//		pairs.add(Pair.AUDUSD);
+//		pairs.add(Pair.USDCAD);
+//		pairs.add(Pair.NZDUSD);
 		
 		List<Interval> intervals = new ArrayList<Interval>();
 		intervals.add(interval);
@@ -44,11 +44,11 @@ public class Runner {
 		ITradeInfoProvider ip = new FxcmTradeInfoProvider(fx);
 		
 		RsiTrader t1 = new RsiTrader("test1", fx, ip, fx, tDD, ohlcDD, interval, pairs.get(0), defStop, 1);
-		RsiTrader t2 = new RsiTrader("test2", fx, ip, fx, tDD, ohlcDD, interval, pairs.get(1), defStop, 1);
-		RsiTrader t3 = new RsiTrader("test3", fx, ip, fx, tDD, ohlcDD, interval, pairs.get(2), defStop, 1);
-		RsiTrader t4 = new RsiTrader("test4", fx, ip, fx, tDD, ohlcDD, interval, pairs.get(3), defStop, 1);
-		RsiTrader t5 = new RsiTrader("test5", fx, ip, fx, tDD, ohlcDD, interval, pairs.get(4), defStop, 1);
-		RsiTrader t6 = new RsiTrader("test6", fx, ip, fx, tDD, ohlcDD, interval, pairs.get(5), defStop, 1);
+//		RsiTrader t2 = new RsiTrader("test2", fx, ip, fx, tDD, ohlcDD, interval, pairs.get(1), defStop, 1);
+//		RsiTrader t3 = new RsiTrader("test3", fx, ip, fx, tDD, ohlcDD, interval, pairs.get(2), defStop, 1);
+//		RsiTrader t4 = new RsiTrader("test4", fx, ip, fx, tDD, ohlcDD, interval, pairs.get(3), defStop, 1);
+//		RsiTrader t5 = new RsiTrader("test5", fx, ip, fx, tDD, ohlcDD, interval, pairs.get(4), defStop, 1);
+//		RsiTrader t6 = new RsiTrader("test6", fx, ip, fx, tDD, ohlcDD, interval, pairs.get(5), defStop, 1);
 		
 
 	}

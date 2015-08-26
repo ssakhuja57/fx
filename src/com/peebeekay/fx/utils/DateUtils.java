@@ -84,14 +84,19 @@ public class DateUtils {
 	}
 	
 	public static Calendar roundDownToMinute(Calendar cal){
-		String time = cal.get(Calendar.YEAR) + "-" + ( 1 + cal.get(Calendar.MONTH) ) + "-" + cal.get(Calendar.DAY_OF_MONTH)
-				+ " " + cal.get(Calendar.HOUR_OF_DAY) + ":" + cal.get(Calendar.MINUTE) + ":00";
-		try {
-			return getCalendar(time, DATE_FORMAT_STD);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-		return null;	
+		Calendar res = Calendar.getInstance();
+		res.setTime(cal.getTime());
+		res.set(Calendar.SECOND, 0);
+		return res;
+	}
+	
+	public static Calendar roundToNearestMinute(Calendar cal){
+		Calendar res = Calendar.getInstance();
+		res.setTime(cal.getTime());
+		if(res.get(Calendar.SECOND) >= 30)
+			res.add(Calendar.MINUTE, 1);
+		res.set(Calendar.SECOND, 0);
+		return res;
 	}
 	
 	public static Calendar getNextIntervalTime(Interval interval){
@@ -128,6 +133,7 @@ public class DateUtils {
 	public static void main(String[] args){
 		for(Interval i: Interval.values())
 			Logger.info(i + ": " + DateUtils.calToString(getLastIntervalTime(i)));
+		Logger.info(roundToNearestMinute(Calendar.getInstance()).getTime().toString());
 	}
 	
 }

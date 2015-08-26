@@ -13,7 +13,7 @@ public class RSI implements IIndicator {
 	
 	private Interval interval;
 	private int periods;
-	Boolean simple; //if true use simple moving average 
+	private Boolean simple; //if true use simple moving average 
 	private Boolean useBid; //
 	private double rsi;
 	
@@ -58,7 +58,7 @@ public class RSI implements IIndicator {
 	
 	@Override
 	public void addDataPoint(OhlcPrice p) {
-//		Logger.debug("received " + p.getBidClose() + " at " + DateUtils.dateToString(p.getTime(), DateUtils.DATE_FORMAT_MILLI));
+		Logger.debug("received " + p.getBidClose() + " at " + DateUtils.dateToString(p.getTime()));
 		if(p.getInterval() != interval){
 			throw new RuntimeException(interval + "data expected, got " + p.getInterval());
 		}

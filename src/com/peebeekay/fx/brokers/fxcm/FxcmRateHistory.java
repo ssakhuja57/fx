@@ -55,6 +55,18 @@ public class FxcmRateHistory {
 		return getAggregatedData(sm, pair, interval, new AskBidOHLC(), startTime, endTime);
 	}
 	
+	public static OhlcPrice getOhlcRow(FxcmSessionManager fx, Pair pair, Interval interval, Calendar time){
+		Calendar start = Calendar.getInstance(); start.setTime(time.getTime()); start.add(Calendar.MINUTE, -interval.minutes);
+		Calendar end = Calendar.getInstance(); end.setTime(time.getTime()); end.add(Calendar.MINUTE, interval.minutes);
+//		for(Calendar c: getOHLCData(fx, pair, interval, start, end).keySet())
+//			Logger.debug(c.getTime().toString());
+//		Logger.debug("desired: " + time.getTime().toString());
+		double[] row = getOHLCData(fx, pair, interval, start, end).get(time);
+		return new OhlcPrice(pair, time.getTime(), interval, 
+				row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]);
+//		return null;
+	}
+	
 	public static ArrayList<OhlcPrice> getOhlcRows(FxcmSessionManager fx, Pair pair, Interval interval,
 			Calendar start, Calendar end){
 		ArrayList<OhlcPrice> prices = new ArrayList<OhlcPrice>();
