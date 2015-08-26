@@ -13,7 +13,6 @@ import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.rates.RateStats;
 import com.peebeekay.fx.simulation.data.types.OhlcPrice;
 import com.peebeekay.fx.simulation.data.types.Tick;
-import com.peebeekay.fx.simulation.indicator.RSI;
 import com.peebeekay.fx.simulation.trades.Trade;
 import com.peebeekay.fx.trades.ATrader;
 import com.peebeekay.fx.trades.ITradeActionProvider;
@@ -23,6 +22,8 @@ import com.peebeekay.fx.trades.specs.CreateTradeSpec;
 import com.peebeekay.fx.trades.specs.CreateTradeSpec.CloseTradeType;
 import com.peebeekay.fx.trades.specs.CreateTradeSpec.OpenTradeType;
 import com.peebeekay.fx.trades.specs.TradeSpec.TradeProperty;
+import com.peebeekay.fx.utils.DateUtils;
+import com.peebeekay.fx.utils.Logger;
 import com.peebeekay.fx.utils.RateUtils;
 
 
@@ -133,7 +134,8 @@ public class RsiTrader extends ATrader{
 				
 				signal = chooseAction();
 				prevRsi = rsi.getValue();
-//				Logger.debug(price.getTime().toString() + ":" + prevRsi);
+				Logger.debug("bid close price for " + price.getPair() + " at " + DateUtils.dateToString(price.getTime()) + ": " 
+								+ price.getBidClose() + ", and rsi: "+ prevRsi);
 			}
 
 		@Override

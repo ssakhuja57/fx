@@ -23,7 +23,7 @@ public class Runner {
 	static void standard(){
 		
 		int defStop = 15;
-		Interval interval = Interval.M30;
+		Interval interval = Interval.M5;
 		
 		List<Pair> pairs = new ArrayList<Pair>();
 		pairs.add(Pair.EURUSD);
@@ -35,7 +35,7 @@ public class Runner {
 		
 		List<Interval> intervals = new ArrayList<Interval>();
 		intervals.add(interval);
-		intervals.add(Interval.M1); // temporary to test if ohlc data is being retrieved without error
+//		intervals.add(Interval.M1); // temporary to test if ohlc data is being retrieved without error
 		
 		
 		FxcmSessionManager fx = getSession();

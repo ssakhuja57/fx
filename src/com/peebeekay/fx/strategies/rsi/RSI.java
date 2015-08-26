@@ -1,10 +1,11 @@
-package com.peebeekay.fx.simulation.indicator;
+package com.peebeekay.fx.strategies.rsi;
 
 import java.util.ArrayList;
 
 import com.peebeekay.fx.info.Interval;
 import com.peebeekay.fx.simulation.data.types.OhlcPrice;
 import com.peebeekay.fx.simulation.data.types.Tick;
+import com.peebeekay.fx.simulation.indicator.IIndicator;
 import com.peebeekay.fx.utils.DateUtils;
 import com.peebeekay.fx.utils.Logger;
 
@@ -39,6 +40,8 @@ public class RSI implements IIndicator {
 //			 System.out.println(DateUtils.dateToString(p.getTime()) + "," + p.getBidClose());
 		 
 		 for(int i=1; i<periods; i++){
+			 Logger.debug("bid close price on " + DateUtils.dateToString(historicalPrices.get(i).getTime()) + " was " + historicalPrices.get(i).getBidClose()
+					 + " for " + historicalPrices.get(i).getPair());
 			double change = (useBid)? historicalPrices.get(i).getBidClose() - historicalPrices.get(i-1).getBidClose(): 
 										historicalPrices.get(i).getAskClose() - historicalPrices.get(i-1).getAskClose();
 //				Logger.debug(i + ": calculation for period " + prices.get(i-1).getTime().toString() + " to " + prices.get(i).getTime().toString() + ": " + change);

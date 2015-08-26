@@ -10,10 +10,10 @@ import com.peebeekay.fx.simulation.data.sources.IDataSource;
 import com.peebeekay.fx.simulation.data.types.OhlcPrice;
 import com.peebeekay.fx.simulation.data.types.Tick;
 import com.peebeekay.fx.simulation.indicator.IIndicator;
-import com.peebeekay.fx.simulation.indicator.RSI;
 import com.peebeekay.fx.simulation.monitors.close.StopClose;
 import com.peebeekay.fx.simulation.monitors.open.MarketOpen;
 import com.peebeekay.fx.simulation.trades.Trade;
+import com.peebeekay.fx.strategies.rsi.RSI;
 import com.peebeekay.fx.utils.RateUtils;
 
 public class SimpleRSITrader extends ATrader implements Runnable{
