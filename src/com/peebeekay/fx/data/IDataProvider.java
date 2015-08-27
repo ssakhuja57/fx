@@ -15,17 +15,13 @@ public interface IDataProvider{
 
 	public Tick getTick(Pair p);
 
+	public OhlcPrice getOhlcRow(Pair p, Interval i) throws DataNotFoundException;
 
-	public OhlcPrice getOhlcRow(Pair p, Interval i);
-
-
-	public OhlcPrice getOhlcRow(Pair p, Interval i, Calendar d);
-
+	public OhlcPrice getOhlcRow(Pair p, Interval i, Calendar d) throws DataNotFoundException;
+	
+	public ArrayList<OhlcPrice> getOhlcRows(Pair p, Interval i, Calendar start, Calendar end);
 
 	public ArrayList<Tick> getTicks(Pair p, Calendar start, Calendar end);
-
-
-	public ArrayList<OhlcPrice> getOhlcRows(Pair p, Interval i, Calendar start, Calendar end);
 	
 	public List<Pair> getSubscribedPairs();
 

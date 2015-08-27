@@ -58,7 +58,7 @@ public class RSI implements IIndicator {
 	
 	@Override
 	public void addDataPoint(OhlcPrice p) {
-		Logger.debug("received " + p.getBidClose() + " at " + DateUtils.dateToString(p.getTime()));
+//		Logger.debug("received " + p.getBidClose() + " at " + DateUtils.dateToString(p.getTime()));
 		if(p.getInterval() != interval){
 			throw new RuntimeException(interval + "data expected, got " + p.getInterval());
 		}

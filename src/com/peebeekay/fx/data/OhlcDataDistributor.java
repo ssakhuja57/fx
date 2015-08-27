@@ -11,6 +11,7 @@ import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.simulation.data.IDataSubscriber;
 import com.peebeekay.fx.simulation.data.types.OhlcPrice;
 import com.peebeekay.fx.utils.DateUtils;
+import com.peebeekay.fx.utils.Logger;
 
 public class OhlcDataDistributor extends ADataDistributor{
 
@@ -18,6 +19,9 @@ public class OhlcDataDistributor extends ADataDistributor{
 	List<Pair> pairs;
 	List<Interval> intervals;
 	List<Timer> workers = new ArrayList<Timer>();
+	
+	final int DELAY = 5;
+	final int MAX_ATTEMPTS = 3;
 	
 	public OhlcDataDistributor(IDataProvider dp, List<Pair> pairs, List<Interval> intervals) {
 		
@@ -29,7 +33,7 @@ public class OhlcDataDistributor extends ADataDistributor{
 				continue;
 			Timer worker = new Timer();
 			Calendar initial = DateUtils.getNextIntervalTime(interval);
-			initial.add(Calendar.SECOND, 3); // give broker a few extra seconds to publish ohlc data
+			initial.add(Calendar.SECOND, DELAY); // give broker a few extra seconds to publish ohlc data
 			worker.schedule(new Distributor(interval), initial.getTime(), interval.minutes*60*1000);
 			workers.add(worker);
 		}
@@ -54,10 +58,25 @@ public class OhlcDataDistributor extends ADataDistributor{
 		public void run() {
 			for(Pair p: pairs){
 				Calendar time = DateUtils.getLastIntervalTime(interval);
-				OhlcPrice row = dp.getOhlcRow(p, interval, time);
-				Pair pair = row.getPair();
+				OhlcPrice row = null;
+				int attempts = 0;
+				while(attempts < MAX_ATTEMPTS){
+					try {
+						row = dp.getOhlcRow(p, interval, time);
+						break;
+					} catch (DataNotFoundException e) {
+						Logger.error(p + " " + interval + " data not found for " + DateUtils.calToString(time) + ", retrying...");
+						attempts++;
+					}
+				}
+				
+				if(attempts == MAX_ATTEMPTS){
+					Logger.error("could not find data, skipping...");
+					continue;
+				}
+				
 				for(IDataSubscriber ds: subscribers){
-					if(subscriberIntervals.get(ds).contains(interval) && subscriberPairs.get(ds).contains(pair))
+					if(subscriberIntervals.get(ds).contains(interval) && subscriberPairs.get(ds).contains(p))
 						ds.accept(row);
 				}
 			}

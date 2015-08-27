@@ -15,6 +15,7 @@ import com.fxcore2.O2GTableManagerMode;
 import com.fxcore2.O2GTableType;
 import com.fxcore2.O2GTradeTableRow;
 import com.fxcore2.O2GTransport;
+import com.peebeekay.fx.data.DataNotFoundException;
 import com.peebeekay.fx.data.IDataProvider;
 import com.peebeekay.fx.db.DBManager;
 import com.peebeekay.fx.info.Interval;
@@ -207,15 +208,18 @@ public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, 
 
 
 	@Override
-	public OhlcPrice getOhlcRow(Pair p, Interval i) {
+	public OhlcPrice getOhlcRow(Pair p, Interval i) throws DataNotFoundException {
 		return getOhlcRow(p, i, DateUtils.getLastIntervalTime(i));
 	}
 
 
 
 	@Override
-	public OhlcPrice getOhlcRow(Pair p, Interval i, Calendar d) {
-		return FxcmRateHistory.getOhlcRow(this, p, i, d);
+	public OhlcPrice getOhlcRow(Pair p, Interval i, Calendar d) throws DataNotFoundException{
+		OhlcPrice row = FxcmRateHistory.getOhlcRow(this, p, i, d);
+		if(row == null)
+			throw new DataNotFoundException("unable to get " + p + " " + i + " data for " + DateUtils.calToString(d));
+		return row;
 	}
 
 

@@ -62,9 +62,10 @@ public class FxcmRateHistory {
 //			Logger.debug(c.getTime().toString());
 //		Logger.debug("desired: " + time.getTime().toString());
 		double[] row = getOHLCData(fx, pair, interval, start, end).get(time);
+		if(row == null)
+			return null;
 		return new OhlcPrice(pair, time.getTime(), interval, 
 				row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7]);
-//		return null;
 	}
 	
 	public static ArrayList<OhlcPrice> getOhlcRows(FxcmSessionManager fx, Pair pair, Interval interval,

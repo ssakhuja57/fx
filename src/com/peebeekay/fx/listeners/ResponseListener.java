@@ -80,9 +80,9 @@ public class ResponseListener implements IO2GResponseListener{
 				if(requestsFailed.contains(requestID)){
 					return null;
 				}
-				Logger.debug("waiting for response: " + description);
+//				Logger.debug("waiting for response: " + description);
 			} catch (NullPointerException e){
-				Logger.debug("waiting for response: " + description);
+//				Logger.debug("waiting for response: " + description);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
