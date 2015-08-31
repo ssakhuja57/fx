@@ -58,6 +58,7 @@ public class OhlcDataDistributor extends ADataDistributor{
 		public void run() {
 			for(Pair p: pairs){
 				Calendar time = DateUtils.getLastIntervalTime(interval);
+				time.add(Calendar.MINUTE, -interval.minutes); // get period that just closed
 				OhlcPrice row = null;
 				int attempts = 0;
 				while(attempts < MAX_ATTEMPTS){
@@ -74,6 +75,8 @@ public class OhlcDataDistributor extends ADataDistributor{
 					Logger.error("could not find data, skipping...");
 					continue;
 				}
+				
+				Logger.debug("sending " + interval + " ohlc data for " + DateUtils.calToString(time));
 				
 				for(IDataSubscriber ds: subscribers){
 					if(subscriberIntervals.get(ds).contains(interval) && subscriberPairs.get(ds).contains(p))

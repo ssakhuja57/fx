@@ -22,7 +22,6 @@ public class RSI implements IIndicator {
 	
 	private OhlcPrice lastPrice;
 	
-	
 	public RSI(Interval interval, int periods, Boolean simple, Boolean useBid, ArrayList<OhlcPrice> historicalPrices){
 		this.interval = interval;
 		 this.periods = periods;
@@ -30,20 +29,23 @@ public class RSI implements IIndicator {
 		 this.useBid = useBid;
 		 
 		 // trim off extra prices
-		 while(historicalPrices.size() > periods){
+		 while(historicalPrices.size() > periods+2){
 			 if(historicalPrices.get(0).getInterval() != interval)
 				throw new RuntimeException(interval + "data expected");
 			 historicalPrices.remove(0);
 		 }
 		 
+		 // trim off most recent price
+		 historicalPrices.remove(historicalPrices.size()-1);
+		 
 //		 for(OhlcPrice p: historicalPrices)
 //			 System.out.println(DateUtils.dateToString(p.getTime()) + "," + p.getBidClose());
 		 
-		 for(int i=1; i<periods; i++){
-			 Logger.debug("bid close price on " + DateUtils.dateToString(historicalPrices.get(i).getTime()) + " was " + historicalPrices.get(i).getBidClose()
-					 + " for " + historicalPrices.get(i).getPair());
-			double change = (useBid)? historicalPrices.get(i).getBidClose() - historicalPrices.get(i-1).getBidClose(): 
-										historicalPrices.get(i).getAskClose() - historicalPrices.get(i-1).getAskClose();
+		 for(int i=1; i<periods+1; i++){
+			 Logger.debug(historicalPrices.get(i).getBidClose() + " --- " + "bid close price on " + DateUtils.dateToString(historicalPrices.get(i).getTime()) + " was " + 
+					 " for " + historicalPrices.get(i).getPair());
+			 double change = (useBid)? historicalPrices.get(i).getBidClose() - historicalPrices.get(i-1).getBidClose(): 
+				historicalPrices.get(i).getAskClose() - historicalPrices.get(i-1).getAskClose();			 
 //				Logger.debug(i + ": calculation for period " + prices.get(i-1).getTime().toString() + " to " + prices.get(i).getTime().toString() + ": " + change);
 			if(change > 0)
 				averageGain += change/periods;
@@ -54,6 +56,8 @@ public class RSI implements IIndicator {
 		rsi = 100 - (100/(1+(averageGain/averageLoss)));
 		
 		lastPrice = historicalPrices.get(historicalPrices.size()-1);
+		
+		Logger.debug(rsi + " --- first rsi calc");
 	}
 	
 	@Override
@@ -74,7 +78,6 @@ public class RSI implements IIndicator {
 		}
 		
 		rsi = 100 - (100/(1+(averageGain/averageLoss)));
-		
 		lastPrice = p;
 		
 //		Logger.debug(p.getTime().toString() + " : " + rsi + " (" + p.getBidClose() + ")");

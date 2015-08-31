@@ -210,7 +210,8 @@ public class DataCollector implements Runnable{
 		
 		Credentials[] creds = new Credentials[accounts];
 		for(int i=0; i<accounts;i++){
-			creds[i] = FXUtils.createDemoAccount();
+			//creds[i] = FXUtils.createDemoAccount();
+			creds[i] = new Credentials("your account id", "your password", "Real", new String[] { "your account number", ""});
 		}
 		
 		
