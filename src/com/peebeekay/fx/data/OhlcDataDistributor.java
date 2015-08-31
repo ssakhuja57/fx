@@ -69,6 +69,10 @@ public class OhlcDataDistributor extends ADataDistributor{
 						Logger.error(p + " " + interval + " data not found for " + DateUtils.calToString(time) + ", retrying...");
 						attempts++;
 					}
+					catch (Exception e){
+						Logger.error("an unexpected error occurred in retrieving " + p + " " + interval + " data");
+						attempts++;
+					}
 				}
 				
 				if(attempts == MAX_ATTEMPTS){
@@ -76,7 +80,7 @@ public class OhlcDataDistributor extends ADataDistributor{
 					continue;
 				}
 				
-				Logger.debug("sending " + interval + " ohlc data for " + DateUtils.calToString(time));
+				Logger.debug("sending " + p + " " + interval + " ohlc data for " + DateUtils.calToString(time));
 				
 				for(IDataSubscriber ds: subscribers){
 					if(subscriberIntervals.get(ds).contains(interval) && subscriberPairs.get(ds).contains(p))

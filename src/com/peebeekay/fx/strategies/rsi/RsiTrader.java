@@ -76,7 +76,7 @@ public class RsiTrader extends ATrader{
 			Calendar nowMinusPeriod = Calendar.getInstance();
 //			nowMinusPeriod.setTime(startTime.getTime());
 //			nowMinusPeriod.add(Calendar.MINUTE, -period*INTERVAL.minutes);
-			nowMinusPeriod.add(Calendar.HOUR, -120); // add extra in case run over weekend/holiday data
+			nowMinusPeriod.add(Calendar.HOUR, -150); // add extra in case run over weekend/holiday data
 			ArrayList<OhlcPrice> historicalPrices = dp.getOhlcRows(pair, interval, nowMinusPeriod, Calendar.getInstance());
 			rsi = new RSI(interval, PERIOD, true, true, historicalPrices);
 			prevRsi = rsi.getValue();
@@ -145,8 +145,8 @@ public class RsiTrader extends ATrader{
 				
 				signal = chooseAction();
 				prevRsi = rsi.getValue();
-				Logger.debug("bid close price for " + price.getPair() + " at " + DateUtils.dateToString(price.getTime()) + ": " 
-								+ price.getBidClose() + ", and RSI: "+ prevRsi + " (previous: " + priorRsi + ")");
+//				Logger.debug("bid close price for " + price.getPair() + " at " + DateUtils.dateToString(price.getTime()) + ": " 
+//								+ price.getBidClose() + ", and RSI: "+ prevRsi + " (previous: " + priorRsi + ")");
 			}
 
 		@Override
