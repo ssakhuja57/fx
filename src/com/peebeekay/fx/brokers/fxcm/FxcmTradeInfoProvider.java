@@ -11,7 +11,6 @@ import com.fxcore2.O2GTableType;
 import com.fxcore2.O2GTableUpdateType;
 import com.fxcore2.O2GTradeTableRow;
 import com.peebeekay.fx.session.SessionDependent;
-import com.peebeekay.fx.simulation.trader.TradeCreationException;
 import com.peebeekay.fx.trades.ITradeInfoProvider;
 import com.peebeekay.fx.trades.Order;
 import com.peebeekay.fx.trades.Trade;
@@ -31,14 +30,27 @@ public class FxcmTradeInfoProvider implements ITradeInfoProvider, SessionDepende
 	public FxcmTradeInfoProvider(FxcmSessionManager fx){
 		this.fx = fx;
 		fx.registerDependent(this);
-		ol = new OrdersListener(fx);
-		tl = new TradesListener(fx);
+		ol = new OrdersListener();
+		tl = new TradesListener();
+		connect();
+	}
+	
+	public void connect(){
+		ol.connect();
+		tl.connect();
 	}
 	
 	@Override
 	public void close(){
 		ol.close();
 		tl.close();
+	}
+	
+
+	@Override
+	public void reconnect() {
+		close();
+		connect();
 	}
 	
 	@Override
@@ -85,9 +97,9 @@ public class FxcmTradeInfoProvider implements ITradeInfoProvider, SessionDepende
 	}
 
 	
-	class OrdersListener implements IO2GTableListener, SessionDependent{
+	class OrdersListener implements IO2GTableListener{
 		
-		OrdersListener(FxcmSessionManager fx){
+		void connect(){
 			fx.getTable(O2GTableType.ORDERS).subscribeUpdate(O2GTableUpdateType.INSERT, this);
 			fx.getTable(O2GTableType.ORDERS).subscribeUpdate(O2GTableUpdateType.DELETE, this);
 			fx.getTable(O2GTableType.ORDERS).subscribeUpdate(O2GTableUpdateType.UPDATE, this);
@@ -121,17 +133,18 @@ public class FxcmTradeInfoProvider implements ITradeInfoProvider, SessionDepende
 			
 		}
 
-		@Override
 		public void close() {
 			fx.getTable(O2GTableType.ORDERS).unsubscribeUpdate(O2GTableUpdateType.INSERT, this);
 			fx.getTable(O2GTableType.ORDERS).unsubscribeUpdate(O2GTableUpdateType.DELETE, this);
 			fx.getTable(O2GTableType.ORDERS).unsubscribeUpdate(O2GTableUpdateType.UPDATE, this);
 		}
+
 	}
 	
-	class TradesListener implements IO2GTableListener, SessionDependent{
+	class TradesListener implements IO2GTableListener{
 		
-		public TradesListener(FxcmSessionManager fx){
+		
+		public void connect(){
 			fx.getTable(O2GTableType.TRADES).subscribeUpdate(O2GTableUpdateType.INSERT, this);
 			fx.getTable(O2GTableType.TRADES).subscribeUpdate(O2GTableUpdateType.DELETE, this);
 			fx.getTable(O2GTableType.TRADES).subscribeUpdate(O2GTableUpdateType.UPDATE, this);
@@ -167,14 +180,16 @@ public class FxcmTradeInfoProvider implements ITradeInfoProvider, SessionDepende
 			
 		}
 
-		@Override
 		public void close() {
 			fx.getTable(O2GTableType.TRADES).unsubscribeUpdate(O2GTableUpdateType.INSERT, this);
 			fx.getTable(O2GTableType.TRADES).unsubscribeUpdate(O2GTableUpdateType.DELETE, this);
 			fx.getTable(O2GTableType.TRADES).unsubscribeUpdate(O2GTableUpdateType.UPDATE, this);
 		}
+
 		
 	}
+
+
 
 	
 	

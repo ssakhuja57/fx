@@ -15,10 +15,6 @@ public class TimeCancel extends ACancelTradeMonitor{
 		this.cancelTime = cancelTime;
 	}
 
-	@Override
-	public Boolean isReady() {
-		return true;
-	}
 
 	@Override
 	public void run() {

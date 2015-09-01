@@ -58,7 +58,7 @@ public abstract class ATrader implements IDataSubscriber {
 		return count;
 	}
 	
-	public void close() throws IOException{
+	public void close(){
 		
 	}
 	

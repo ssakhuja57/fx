@@ -18,11 +18,6 @@ public class MarketOpen extends AOpenTradeMonitor{
 	}
 
 	@Override
-	public Boolean isReady() {
-		return true;
-	}
-
-	@Override
 	public void run() {
 		
 	}

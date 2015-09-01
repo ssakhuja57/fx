@@ -105,11 +105,6 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 	}
 	
 
-	@Override
-	public Boolean isReady() {
-		return isReady;
-	}
-	
 
 	@Override
 	public void run() {

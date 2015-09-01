@@ -100,7 +100,7 @@ public class DataCollector implements Runnable{
 			this.id = id;
 			fileName = output + "_" + id;
 			f = new File(fileName);
-			this.sm = new FxcmSessionManager(creds, null);
+			this.sm = new FxcmSessionManager(creds);
 			this.start = start;
 			this.end = end;
 			
