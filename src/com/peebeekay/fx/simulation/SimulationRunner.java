@@ -14,7 +14,7 @@ import com.peebeekay.fx.simulation.trader.ATrader;
 import com.peebeekay.fx.simulation.trader.SimpleRSITrader;
 import com.peebeekay.fx.utils.DateUtils;
 import com.peebeekay.fx.utils.config.DBConfig;
-import com.peebeekay.fx.utils.config.VerticaConfig;
+import com.peebeekay.fx.utils.config.PostgresConfig;
 
 public class SimulationRunner {
 	
@@ -59,7 +59,7 @@ public class SimulationRunner {
 //		};
 
 		for(int x=0; x<starts.length; x++){
-			DBConfig dbConfig = new VerticaConfig("192.168.91.207", 5433, "fx", "dbadmin", "dbadmin");
+			DBConfig dbConfig = new PostgresConfig("localhost", 5432, "postgres", "your user", "your password");
 			IDataSource dataSource = new DBDataSource(dbConfig, pair, starts[x], ends[x], true);
 			Map<Interval,File> ohlcFiles = new HashMap<Interval,File>();
 //			ohlcFiles.put(Interval.M30, new File(dataFolder + "EURUSD-M30-0.csv_0"));

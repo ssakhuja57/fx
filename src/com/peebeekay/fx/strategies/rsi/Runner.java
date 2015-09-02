@@ -13,6 +13,7 @@ import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.session.Credentials;
 import com.peebeekay.fx.session.Credentials.LoginProperties;
 import com.peebeekay.fx.trades.ITradeInfoProvider;
+import com.peebeekay.fx.utils.Logger;
 
 public class Runner {
 
@@ -24,7 +25,6 @@ public class Runner {
 	
 	static void standard(){
 		
-		int defStop = 15;
 		Interval interval = Interval.M30;
 		
 		List<Pair> pairs = new ArrayList<Pair>();
@@ -45,18 +45,22 @@ public class Runner {
 		OhlcDataDistributor ohlcDD = new OhlcDataDistributor(fx, pairs, intervals);
 		ITradeInfoProvider ip = new FxcmTradeInfoProvider(fx);
 		
-		new RsiTrader("test1", fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(0), defStop, 1).run();
-		new RsiTrader("test2", fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(1), defStop, 1).run();
-		new RsiTrader("test3", fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(2), defStop, 1).run();
-		new RsiTrader("test4", fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(3), defStop, 1).run();
-		new RsiTrader("test5", fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(4), defStop, 1).run();
-		new RsiTrader("test6", fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(5), defStop, 1).run();
+		new RsiTrader("test1", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(0), 15, 1).run();
+		new RsiTrader("test2", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(1), 30, 1).run();
+		new RsiTrader("test3", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(2), 25, 1).run();
+		new RsiTrader("test4", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(3), 20, 1).run();
+		new RsiTrader("test5", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(4), 15, 1).run();
+		new RsiTrader("test6", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(5), 25, 1).run();
 		
 
 	}
 	
 	public static void main(String[] args){
 		standard();
+//		FxcmSessionManager fx = getSession();
+//		Logger.debug(fx.getTotalAccountBalance()+"");
+//		Logger.debug(fx.getLots(Pair.EURUSD, fx.getAvailableAccountBalance())+"");
+		
 	}
 	
 }

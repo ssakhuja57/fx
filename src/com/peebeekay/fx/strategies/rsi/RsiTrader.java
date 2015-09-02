@@ -15,6 +15,7 @@ import com.peebeekay.fx.session.SessionDependent;
 import com.peebeekay.fx.simulation.data.types.OhlcPrice;
 import com.peebeekay.fx.simulation.data.types.Tick;
 import com.peebeekay.fx.trades.ATrader;
+import com.peebeekay.fx.trades.IAccountInfoProvider;
 import com.peebeekay.fx.trades.ITradeActionProvider;
 import com.peebeekay.fx.trades.ITradeInfoProvider;
 import com.peebeekay.fx.trades.OrderCreationException;
@@ -41,6 +42,7 @@ public class RsiTrader extends ATrader implements SessionDependent{
 		ATickDataDistributor tDD;
 		OhlcDataDistributor ohlcDD;
 		IDataProvider dp;
+		IAccountInfoProvider aip;
 		
 		private RateStats stats;
 		
@@ -59,7 +61,8 @@ public class RsiTrader extends ATrader implements SessionDependent{
 			HOLD,BUY,SELL
 		}
 		
-		public RsiTrader(String name, FxcmSessionManager fx, ITradeActionProvider ap, ITradeInfoProvider ip,
+		public RsiTrader(String name, FxcmSessionManager fx, IAccountInfoProvider aip, ITradeActionProvider ap, 
+				ITradeInfoProvider ip,
 				IDataProvider dp, ATickDataDistributor tDD, OhlcDataDistributor ohlcDD,
 				Interval interval, Pair pair, int maxStopSize, int maxConcurrentTrades){
 			super(ap, ip, name);
@@ -71,6 +74,7 @@ public class RsiTrader extends ATrader implements SessionDependent{
 			this.pair = pair;
 			this.tDD = tDD;
 			this.ohlcDD = ohlcDD;
+			this.aip = aip;
 			this.dp = dp;
 			this.interval = interval;
 			this.maxStopSize = maxStopSize;
@@ -119,6 +123,12 @@ public class RsiTrader extends ATrader implements SessionDependent{
 		@Override
 		public void accept(Tick price) {
 //			Logger.debug("received tick " + price.getTime());
+
+			
+		}
+		
+		void execute(){
+			
 			if(signal == Signal.HOLD)
 				return;
 			
@@ -128,12 +138,13 @@ public class RsiTrader extends ATrader implements SessionDependent{
 				
 				// start: lines for recent extremum
 				double stop = stats.getRecentExtremum(1, 3, !tradeLong, tradeLong);
-				int initialOffset = (int)RateUtils.getAbsPipDistance(price.getExitPrice(tradeLong), stop);
+//				int initialOffset = (int)RateUtils.getAbsPipDistance(price.getExitPrice(tradeLong), stop);
+				int initialOffset = (int)RateUtils.getAbsPipDistance(dp.getTick(pair).getExitPrice(tradeLong), stop);
 				if(initialOffset > maxStopSize)
 					initialOffset = maxStopSize;
 				if(initialOffset < MIN_STOP)
 					initialOffset = MIN_STOP;
-				CreateTradeSpec spec = new CreateTradeSpec(pair, LOTS, tradeLong, OpenTradeType.MARKET_OPEN, CloseTradeType.STOP_CLOSE);
+				CreateTradeSpec spec = new CreateTradeSpec(pair, getLots(), tradeLong, OpenTradeType.MARKET_OPEN, CloseTradeType.STOP_CLOSE);
 				spec.setTradeProperty(TradeProperty.STOP_SIZE, String.valueOf(initialOffset));
 				super.createOrder(spec);
 				// end: lines for recent extremum
@@ -156,6 +167,7 @@ public class RsiTrader extends ATrader implements SessionDependent{
 				prevRsi = rsi.getValue();
 //				Logger.debug("bid close price for " + price.getPair() + " at " + DateUtils.dateToString(price.getTime()) + ": " 
 //								+ price.getBidClose() + ", and RSI: "+ prevRsi + " (previous: " + priorRsi + ")");
+				execute();
 			}
 
 		@Override
@@ -170,7 +182,11 @@ public class RsiTrader extends ATrader implements SessionDependent{
 			run();
 		}
 		
-
+		private int getLots(){
+			if(pair == Pair.EURUSD)
+				return aip.getLots(pair, aip.getAvailableAccountBalance()*.8);
+			return LOTS;
+		}
 		
 
 }

@@ -33,6 +33,7 @@ import com.peebeekay.fx.tables.Offers;
 import com.peebeekay.fx.tables.Orders;
 import com.peebeekay.fx.tables.Summaries;
 import com.peebeekay.fx.tables.Trades;
+import com.peebeekay.fx.trades.IAccountInfoProvider;
 import com.peebeekay.fx.trades.ITradeActionProvider;
 import com.peebeekay.fx.trades.Order;
 import com.peebeekay.fx.trades.OrderCreationException;
@@ -46,7 +47,7 @@ import com.peebeekay.fx.utils.DateUtils;
 import com.peebeekay.fx.utils.Logger;
 import com.peebeekay.fx.utils.RateUtils;
 
-public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, IDataProvider {
+public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, IDataProvider, IAccountInfoProvider {
 	
 	public O2GSession session;
 	private Credentials creds;
@@ -323,6 +324,21 @@ public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, 
 	public void adjustOrderStop(Order order, int newStopSize) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public double getTotalAccountBalance() {
+		return accountsTable.getBalance(accounts[0]);
+	}
+
+	@Override
+	public double getAvailableAccountBalance() {
+		return getTotalAccountBalance() - accountsTable.getAccountRow(accounts[0]).getUsedMargin();
+	}
+
+	@Override
+	public int getLots(Pair p, double accountValue) {
+		return (int)(accountValue/getMarginReqs(p)[0]);
 	}
 
 	
