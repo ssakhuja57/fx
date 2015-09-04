@@ -138,11 +138,15 @@ public class RsiTrader extends ATrader implements SessionDependent{
 				
 				// start: lines for recent extremum
 				double stop = stats.getRecentExtremum(1, 3, !tradeLong, tradeLong);
+				Tick t = dp.getTick(pair);
 //				int initialOffset = (int)RateUtils.getAbsPipDistance(price.getExitPrice(tradeLong), stop);
-				int initialOffset = (int)RateUtils.getAbsPipDistance(dp.getTick(pair).getExitPrice(tradeLong), stop);
-				if(initialOffset > maxStopSize)
+				int initialOffset = (int)RateUtils.getAbsPipDistance(t.getExitPrice(tradeLong), stop);
+				
+				if(RateUtils.isEqualOrBetter(t, stop, tradeLong, true))
+					initialOffset = MIN_STOP; // if tick is better price than recent extremum, then use min stop size
+				else if(initialOffset > maxStopSize)
 					initialOffset = maxStopSize;
-				if(initialOffset < MIN_STOP)
+				else if(initialOffset < MIN_STOP)
 					initialOffset = MIN_STOP;
 				CreateTradeSpec spec = new CreateTradeSpec(pair, getLots(), tradeLong, OpenTradeType.MARKET_OPEN, CloseTradeType.STOP_CLOSE);
 				spec.setTradeProperty(TradeProperty.STOP_SIZE, String.valueOf(initialOffset));

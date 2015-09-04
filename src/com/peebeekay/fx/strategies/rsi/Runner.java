@@ -46,11 +46,11 @@ public class Runner {
 		ITradeInfoProvider ip = new FxcmTradeInfoProvider(fx);
 		
 		new RsiTrader("test1", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(0), 15, 1).run();
-		new RsiTrader("test2", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(1), 30, 1).run();
-		new RsiTrader("test3", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(2), 25, 1).run();
+		new RsiTrader("test2", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(1), 20, 1).run();
+		new RsiTrader("test3", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(2), 20, 1).run();
 		new RsiTrader("test4", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(3), 20, 1).run();
-		new RsiTrader("test5", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(4), 15, 1).run();
-		new RsiTrader("test6", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(5), 25, 1).run();
+		new RsiTrader("test5", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(4), 20, 1).run();
+		new RsiTrader("test6", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(5), 20, 1).run();
 		
 
 	}
