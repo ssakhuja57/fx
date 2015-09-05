@@ -11,7 +11,6 @@ import com.fxcore2.O2GTableType;
 import com.fxcore2.O2GTableUpdateType;
 import com.fxcore2.O2GTradeTableRow;
 import com.peebeekay.fx.session.SessionDependent;
-import com.peebeekay.fx.simulation.trader.TradeCreationException;
 import com.peebeekay.fx.trades.ITradeInfoProvider;
 import com.peebeekay.fx.trades.Order;
 import com.peebeekay.fx.trades.Trade;

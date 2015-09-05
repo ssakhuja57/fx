@@ -37,6 +37,7 @@ import com.peebeekay.fx.trades.ITradeActionProvider;
 import com.peebeekay.fx.trades.Order;
 import com.peebeekay.fx.trades.OrderCreationException;
 import com.peebeekay.fx.trades.Trade;
+import com.peebeekay.fx.trades.TradeNotFoundException;
 import com.peebeekay.fx.trades.specs.CreateTradeSpec;
 import com.peebeekay.fx.trades.specs.CreateTradeSpec.CloseTradeType;
 import com.peebeekay.fx.trades.specs.CreateTradeSpec.OpenTradeType;
@@ -153,15 +154,29 @@ public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, 
 				shortOrderID, newShortRate, responseListener);
 	}
 	
-	public String closeTrade(Pair pair, String buySell) throws InterruptedException{
+	public String closeTrade(Pair pair, String buySell) throws InterruptedException, TradeNotFoundException{
 		O2GTradeTableRow trade = tradesTable.getTradeRow(pair, buySell);
 		if (trade == null){
 			Logger.error("No open positions found for " + pair + ":" + buySell);
-			return null;
+			throw new TradeNotFoundException();
 		}
-		String requestID = FxcmOrderActions.closeTrade(this, trade.getAccountID(), trade.getTradeID(), 
+		String requestID = FxcmOrderActions.closeTrade(this, trade.getAccountID(),
 				pair, buySell, trade.getAmount(), responseListener);
 		return requestID;
+	}
+	
+	public String partialClose(Pair pair, String buySell, int percent) throws TradeNotFoundException{
+		O2GTradeTableRow trade = tradesTable.getTradeRow(pair, buySell);
+		if(trade == null){
+			Logger.error("No open positions found for " + pair + ":" + buySell);
+			throw new TradeNotFoundException();
+		}
+		int total = trade.getAmount()*1000;
+		int lots = (int)((percent/100)*total);
+		String requestID = FxcmOrderActions.closeTrade(this, trade.getAccountID(), pair, buySell, lots, responseListener);
+		Logger.info("Partial close of " + percent + "%");
+		return requestID;
+			
 	}
 	
 	public String cancelOrder(Pair pair, String buySell) throws InterruptedException{

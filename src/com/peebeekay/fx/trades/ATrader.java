@@ -2,6 +2,7 @@ package com.peebeekay.fx.trades;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.simulation.data.IDataSubscriber;
@@ -27,6 +28,16 @@ public abstract class ATrader implements IDataSubscriber {
 			String orderId = tradeProvider.createOrder(spec);
 			orderIds.add(orderId);
 		}
+	}
+	
+	public List<Trade> getOpenTrades(){
+		ArrayList<Trade> trades = new ArrayList<Trade>();
+		for (String orderId: orderIds){
+			try {
+				trades.add(infoProvider.getTrade(orderId));
+			} catch (TradeNotFoundException e) {}
+		}
+		return trades;
 	}
 	
 	public int getNumberOfOpenTrades(Pair pair){

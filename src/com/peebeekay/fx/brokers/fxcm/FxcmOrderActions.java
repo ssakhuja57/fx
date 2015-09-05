@@ -146,7 +146,7 @@ public class FxcmOrderActions {
 	   }
 	   
 	   // this is an alternative to using TrueMarketClose
-	   public static String closeTrade(FxcmSessionManager sessionMgr, String accountID, String tradeID, Pair pair, String buySell, 
+	   public static String closeTrade(FxcmSessionManager sessionMgr, String accountID, Pair pair, String buySell, 
 			   int amount, ResponseListener responseListener){ 
 		
 		   String oppositeBuySell = buySell.equals(Constants.Buy) ? Constants.Sell : Constants.Buy; 
