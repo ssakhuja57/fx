@@ -4,15 +4,18 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import com.peebeekay.fx.brokers.fxcm.FxcmSessionManager;
 import com.peebeekay.fx.data.ATickDataDistributor;
 import com.peebeekay.fx.data.IDataProvider;
 import com.peebeekay.fx.data.OhlcDataDistributor;
 import com.peebeekay.fx.info.Interval;
 import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.rates.RateStats;
+import com.peebeekay.fx.session.SessionDependent;
 import com.peebeekay.fx.simulation.data.types.OhlcPrice;
 import com.peebeekay.fx.simulation.data.types.Tick;
 import com.peebeekay.fx.trades.ATrader;
+import com.peebeekay.fx.trades.IAccountInfoProvider;
 import com.peebeekay.fx.trades.ITradeActionProvider;
 import com.peebeekay.fx.trades.ITradeInfoProvider;
 import com.peebeekay.fx.trades.OrderCreationException;
@@ -20,12 +23,13 @@ import com.peebeekay.fx.trades.specs.CreateTradeSpec;
 import com.peebeekay.fx.trades.specs.CreateTradeSpec.CloseTradeType;
 import com.peebeekay.fx.trades.specs.CreateTradeSpec.OpenTradeType;
 import com.peebeekay.fx.trades.specs.TradeSpec.TradeProperty;
-import com.peebeekay.fx.utils.DateUtils;
 import com.peebeekay.fx.utils.Logger;
 import com.peebeekay.fx.utils.RateUtils;
 
 
-public class RsiTrader extends ATrader{
+public class RsiTrader extends ATrader implements SessionDependent{
+	
+		FxcmSessionManager fx;
 	
 		String name;
 		Pair pair;
@@ -37,6 +41,8 @@ public class RsiTrader extends ATrader{
 		
 		ATickDataDistributor tDD;
 		OhlcDataDistributor ohlcDD;
+		IDataProvider dp;
+		IAccountInfoProvider aip;
 		
 		private RateStats stats;
 		
@@ -55,7 +61,8 @@ public class RsiTrader extends ATrader{
 			HOLD,BUY,SELL
 		}
 		
-		public RsiTrader(String name, ITradeActionProvider ap, ITradeInfoProvider ip,
+		public RsiTrader(String name, FxcmSessionManager fx, IAccountInfoProvider aip, ITradeActionProvider ap, 
+				ITradeInfoProvider ip,
 				IDataProvider dp, ATickDataDistributor tDD, OhlcDataDistributor ohlcDD,
 				Interval interval, Pair pair, int maxStopSize, int maxConcurrentTrades){
 			super(ap, ip, name);
@@ -63,32 +70,35 @@ public class RsiTrader extends ATrader{
 			Logger.info("initializing RSI trader " + name);
 			
 			this.name = name;
+			this.fx = fx;
 			this.pair = pair;
 			this.tDD = tDD;
 			this.ohlcDD = ohlcDD;
+			this.aip = aip;
+			this.dp = dp;
 			this.interval = interval;
 			this.maxStopSize = maxStopSize;
 			this.maxConcurrentTrades = maxConcurrentTrades;
 			
 			stats = new RateStats(96, interval);
 			
+		}
+		
+		public void run(){
+			
+			fx.registerDependent(this);
+			
 			// rsi
 			Calendar nowMinusPeriod = Calendar.getInstance();
 //			nowMinusPeriod.setTime(startTime.getTime());
 //			nowMinusPeriod.add(Calendar.MINUTE, -period*INTERVAL.minutes);
-			nowMinusPeriod.add(Calendar.HOUR, -120); // add extra in case run over weekend/holiday data
+			nowMinusPeriod.add(Calendar.HOUR, -150); // add extra in case run over weekend/holiday data
 			ArrayList<OhlcPrice> historicalPrices = dp.getOhlcRows(pair, interval, nowMinusPeriod, Calendar.getInstance());
 			rsi = new RSI(interval, PERIOD, true, true, historicalPrices);
 			prevRsi = rsi.getValue();
 			
-			isReady = true;
-			stillRunning = true;
-			
 			Logger.info("trader " + name + " initialized");
 			
-		}
-		
-		public void run(){
 			// subscribe
 			List<Pair> pairs = new ArrayList<Pair>();
 			pairs.add(pair);
@@ -97,6 +107,9 @@ public class RsiTrader extends ATrader{
 			tDD.addSubscriber(this, pairs, intervals);
 			ohlcDD.addSubscriber(this, pairs, intervals);
 			Logger.info("trader " + name + " started");
+			
+			isReady = true;
+			stillRunning = true;
 		}
 
 		public Signal chooseAction() {
@@ -110,6 +123,12 @@ public class RsiTrader extends ATrader{
 		@Override
 		public void accept(Tick price) {
 //			Logger.debug("received tick " + price.getTime());
+
+			
+		}
+		
+		void execute(){
+			
 			if(signal == Signal.HOLD)
 				return;
 			
@@ -119,12 +138,17 @@ public class RsiTrader extends ATrader{
 				
 				// start: lines for recent extremum
 				double stop = stats.getRecentExtremum(1, 3, !tradeLong, tradeLong);
-				int initialOffset = (int)RateUtils.getAbsPipDistance(price.getExitPrice(tradeLong), stop);
-				if(initialOffset > maxStopSize)
+				Tick t = dp.getTick(pair);
+//				int initialOffset = (int)RateUtils.getAbsPipDistance(price.getExitPrice(tradeLong), stop);
+				int initialOffset = (int)RateUtils.getAbsPipDistance(t.getExitPrice(tradeLong), stop);
+				
+				if(RateUtils.isEqualOrBetter(t, stop, tradeLong, true))
+					initialOffset = MIN_STOP; // if tick is better price than recent extremum, then use min stop size
+				else if(initialOffset > maxStopSize)
 					initialOffset = maxStopSize;
-				if(initialOffset < MIN_STOP)
+				else if(initialOffset < MIN_STOP)
 					initialOffset = MIN_STOP;
-				CreateTradeSpec spec = new CreateTradeSpec(pair, LOTS, tradeLong, OpenTradeType.MARKET_OPEN, CloseTradeType.STOP_CLOSE);
+				CreateTradeSpec spec = new CreateTradeSpec(pair, getLots(), tradeLong, OpenTradeType.MARKET_OPEN, CloseTradeType.STOP_CLOSE);
 				spec.setTradeProperty(TradeProperty.STOP_SIZE, String.valueOf(initialOffset));
 				super.createOrder(spec);
 				// end: lines for recent extremum
@@ -145,8 +169,9 @@ public class RsiTrader extends ATrader{
 				
 				signal = chooseAction();
 				prevRsi = rsi.getValue();
-				Logger.debug("bid close price for " + price.getPair() + " at " + DateUtils.dateToString(price.getTime()) + ": " 
-								+ price.getBidClose() + ", and RSI: "+ prevRsi + " (previous: " + priorRsi + ")");
+//				Logger.debug("bid close price for " + price.getPair() + " at " + DateUtils.dateToString(price.getTime()) + ": " 
+//								+ price.getBidClose() + ", and RSI: "+ prevRsi + " (previous: " + priorRsi + ")");
+				execute();
 			}
 
 		@Override
@@ -157,8 +182,17 @@ public class RsiTrader extends ATrader{
 			}
 			return true;
 		}
-		
 
+		@Override
+		public void reconnect() {
+			run();
+		}
+		
+		private int getLots(){
+			if(pair == Pair.EURUSD)
+				return aip.getLots(pair, aip.getAvailableAccountBalance()*.8);
+			return LOTS;
+		}
 		
 
 }

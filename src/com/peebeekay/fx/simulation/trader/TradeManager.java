@@ -115,22 +115,12 @@ public class TradeManager implements IDataSubscriber{
 
 
 	@Override
-	public void run() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public void accept(OhlcPrice price) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	@Override
-	public Boolean isReady() {
-		// TODO Auto-generated method stub
-		return null;
-	}	
+
 
 
 }

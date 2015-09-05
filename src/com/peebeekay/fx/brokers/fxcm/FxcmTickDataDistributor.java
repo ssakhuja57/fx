@@ -55,4 +55,11 @@ public class FxcmTickDataDistributor extends ATickDataDistributor implements IO2
 		fx.getTable(O2GTableType.OFFERS).unsubscribeUpdate(O2GTableUpdateType.UPDATE, this);
 	}
 
+
+	@Override
+	public void reconnect() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

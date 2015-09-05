@@ -15,10 +15,6 @@ public class EntryOpen extends AOpenTradeMonitor{
 		entryLine = new ReferenceLine(entryPrice);
 	}
 
-	@Override
-	public Boolean isReady() {
-		return true;
-	}
 
 	@Override
 	public void run() {

@@ -45,24 +45,33 @@ public class RateUtils {
 		}
 	}
 	
-	public static boolean isEqualOrBetter(Tick price, ReferenceLine reference, boolean isLong, boolean isEnter){
+	
+	public static boolean isEqualOrBetter(Tick price, double reference, boolean isLong, boolean isEnter){
 		if( isAsk(isLong, isEnter) ){
-			if(price.getAsk() <= reference.getValue())
+			if(price.getAsk() <= reference)
 				return true;
 			return false;
 		}
 		else{
-			if(price.getBid() >= reference.getValue())
+			if(price.getBid() >= reference)
 				return true;
 			return false;
 		}
 	}
 	
-	public static boolean crosses(Tick price0, Tick price1, ReferenceLine reference, boolean isLong, boolean isEnter){
+	public static boolean isEqualOrBetter(Tick price, ReferenceLine reference, boolean isLong, boolean isEnter){
+		return isEqualOrBetter(price, reference.getValue(), isLong, isEnter);
+	}
+	
+	public static boolean crosses(Tick price0, Tick price1, double reference, boolean isLong, boolean isEnter){
 		if(isEqualOrBetter(price0, reference, isLong, isEnter) && !isEqualOrBetter(price1, reference, isLong, isEnter)){
 			return true;
 		}
 		return false;
+	}
+	
+	public static boolean crosses(Tick price0, Tick price1, ReferenceLine reference, boolean isLong, boolean isEnter){
+		return crosses(price0, price1, reference.getValue(), isLong, isEnter);
 	}
 	
 	public static boolean isAsk(boolean isLong, boolean isEnter){

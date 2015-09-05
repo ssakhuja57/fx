@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import com.fxcore2.Constants;
 import com.fxcore2.O2GOrderTableRow;
@@ -23,6 +22,7 @@ import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.listeners.ResponseListener;
 import com.peebeekay.fx.listeners.SessionStatusListener;
 import com.peebeekay.fx.session.Credentials;
+import com.peebeekay.fx.session.Credentials.LoginProperties;
 import com.peebeekay.fx.session.SessionDependent;
 import com.peebeekay.fx.session.SessionHolder;
 import com.peebeekay.fx.simulation.data.types.OhlcPrice;
@@ -33,6 +33,7 @@ import com.peebeekay.fx.tables.Offers;
 import com.peebeekay.fx.tables.Orders;
 import com.peebeekay.fx.tables.Summaries;
 import com.peebeekay.fx.tables.Trades;
+import com.peebeekay.fx.trades.IAccountInfoProvider;
 import com.peebeekay.fx.trades.ITradeActionProvider;
 import com.peebeekay.fx.trades.Order;
 import com.peebeekay.fx.trades.OrderCreationException;
@@ -47,10 +48,10 @@ import com.peebeekay.fx.utils.DateUtils;
 import com.peebeekay.fx.utils.Logger;
 import com.peebeekay.fx.utils.RateUtils;
 
-public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, IDataProvider {
+public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, IDataProvider, IAccountInfoProvider {
 	
 	public O2GSession session;
-	private Properties preferences;
+	private Credentials creds;
 	public O2GTableManager tableMgr;
 	public SessionStatusListener statusListener;
 	public ResponseListener responseListener;
@@ -69,13 +70,17 @@ public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, 
 	public final int subscriptionLimit = 20;
 	
 	
-	public FxcmSessionManager(Credentials creds, Properties preferences){
+	public FxcmSessionManager(Credentials creds){
+		this.creds = creds;
+		connect();
+	}
+	
+	public void connect(){
 		
-		this.preferences = preferences;
 		session = O2GTransport.createSession();
 		dependents = new ArrayList<SessionDependent>();
 		
-        statusListener = new SessionStatusListener();
+        statusListener = new SessionStatusListener(this);
         responseListener = new ResponseListener();
         
         session.subscribeSessionStatus(statusListener);
@@ -83,9 +88,7 @@ public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, 
         
         session.useTableManager(O2GTableManagerMode.YES, null);
         session.login(creds.getLogin(), creds.getPassword(), "http://www.fxcorporate.com/Hosts.jsp", creds.getDemoOrReal());
-        if (!statusListener.waitForLogin()){
-        	throw new RuntimeException();
-        }
+        statusListener.waitForLogin();
         
         accounts = creds.getAccountNumbers();
         
@@ -100,6 +103,11 @@ public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, 
         ordersTable = new Orders(tableMgr);
         summariesTable = new Summaries(tableMgr);
         tradesTable = new Trades(tableMgr);
+        
+        // re-register dependents in case re-connecting
+        for (SessionDependent dep: dependents){
+        	registerDependent(dep);
+        }
 	}
 	
 	
@@ -109,10 +117,21 @@ public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, 
         session.unsubscribeResponse(responseListener);
         session.unsubscribeSessionStatus(statusListener);
         session.dispose();
-        for (SessionDependent dep:dependents){
+        for (SessionDependent dep: dependents){
         	dep.close();
         }
         //dbMgr.close(); //not needed for now
+	}
+	
+	public void reconnect(){
+		close();
+		connect();
+		for(SessionDependent dep: dependents)
+			dep.reconnect();
+	}
+	
+	public String getLoginProperty(LoginProperties prop){
+		return creds.getProperty(prop);
 	}
 	
 	public void registerDependent(SessionDependent dep){
@@ -320,6 +339,21 @@ public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, 
 	public void adjustOrderStop(Order order, int newStopSize) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public double getTotalAccountBalance() {
+		return accountsTable.getBalance(accounts[0]);
+	}
+
+	@Override
+	public double getAvailableAccountBalance() {
+		return getTotalAccountBalance() - accountsTable.getAccountRow(accounts[0]).getUsedMargin();
+	}
+
+	@Override
+	public int getLots(Pair p, double accountValue) {
+		return (int)(accountValue/getMarginReqs(p)[0]);
 	}
 
 	

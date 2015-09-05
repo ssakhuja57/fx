@@ -1,7 +1,6 @@
 package com.peebeekay.fx.rates;
 
 import java.util.LinkedList;
-import java.util.Queue;
 
 import com.peebeekay.fx.info.Interval;
 import com.peebeekay.fx.simulation.data.IDataSubscriber;

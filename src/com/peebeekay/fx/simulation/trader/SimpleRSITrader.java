@@ -83,7 +83,8 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 			int initialOffset = (int)RateUtils.getAbsPipDistance(price.getExitPrice(tradeLong), stop);
 			if(initialOffset > stopOffset)
 				initialOffset = stopOffset;
-			super.tradeMgr.updateTrade(trade, new StopClose(trade, stopOffset, initialOffset));
+			//super.tradeMgr.updateTrade(trade, new StopClose(trade, stopOffset, initialOffset)); // for adjusting stop
+			super.tradeMgr.updateTrade(trade, new StopClose(trade, stopOffset, true)); // for not adjusting stop
 			// end: lines for recent extremum
 			
 		} catch (TradeCreationException e) {
@@ -105,11 +106,6 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 	}
 	
 
-	@Override
-	public Boolean isReady() {
-		return isReady;
-	}
-	
 
 	@Override
 	public void run() {
