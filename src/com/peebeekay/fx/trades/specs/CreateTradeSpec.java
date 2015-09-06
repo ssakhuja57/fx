@@ -1,6 +1,7 @@
 package com.peebeekay.fx.trades.specs;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.peebeekay.fx.info.Pair;
 
@@ -82,6 +83,11 @@ public class CreateTradeSpec extends TradeSpec{
 	}
 	public void setCloseType(CloseTradeType closeType){
 		this.closeType = closeType;
+	}
+
+	@Override
+	public String toString() {
+		return "Type:Create,Pair:" + pair + ",Lots:" + lots + ",Long:" + isLong + super.getPropsString();
 	}
 
 

@@ -30,10 +30,11 @@ public class FxcmUtils {
 	
 	public static Trade getTrade(O2GTradeTableRow row){
 		String orderId = row.getOpenOrderReqID();
+		String accountId = row.getAccountID();
 		Pair pair = Pair.valueOf(Integer.parseInt(row.getOfferID()));
 		boolean isLong = row.getBuySell() == Constants.Buy ? true : false;
 		int lots = row.getAmount()/1000;
 		double stopPrice = row.getStop();
-		return new Trade(orderId, pair, isLong, lots, stopPrice);
+		return new Trade(orderId, accountId, pair, isLong, lots, stopPrice);
 	}
 }

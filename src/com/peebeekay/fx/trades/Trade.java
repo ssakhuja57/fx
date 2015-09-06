@@ -12,6 +12,7 @@ import com.peebeekay.fx.utils.StringUtils;
 public class Trade {
 	
 	private String id;
+	private String accountId;
 	private Pair pair;
 	private boolean isLong;
 	private Date createdTime;
@@ -35,8 +36,9 @@ public class Trade {
 
 	private String notes;
 	
-	public Trade(String id, Pair pair, boolean isLong, int lots, double stopPrice){
+	public Trade(String id, String accountId, Pair pair, boolean isLong, int lots, double stopPrice){
 		this.id = id;
+		this.accountId = accountId;
 		this.pair = pair;
 		this.isLong = isLong;
 		this.lots = lots;
@@ -50,6 +52,10 @@ public class Trade {
 	
 	public String getId(){
 		return id;
+	}
+	
+	public String getAccountId(){
+		return accountId;
 	}
 	
 	public Pair getPair(){

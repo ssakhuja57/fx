@@ -68,10 +68,12 @@ public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, 
 	
 	String[] accounts;
 	public final int subscriptionLimit = 20;
+	double percentMaxAccountUse;
 	
 	
-	public FxcmSessionManager(Credentials creds){
+	public FxcmSessionManager(Credentials creds, double percentMaxAccountUse){
 		this.creds = creds;
+		this.percentMaxAccountUse = percentMaxAccountUse;
 		connect();
 	}
 	
@@ -133,6 +135,7 @@ public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, 
 	public String getLoginProperty(LoginProperties prop){
 		return creds.getProperty(prop);
 	}
+
 	
 	public void registerDependent(SessionDependent dep){
 		dependents.add(dep);
@@ -184,18 +187,19 @@ public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, 
 		return requestID;
 	}
 	
-	public String partialClose(Pair pair, String buySell, int percent) throws TradeNotFoundException{
-		O2GTradeTableRow trade = tradesTable.getTradeRow(pair, buySell);
-		if(trade == null){
-			Logger.error("No open positions found for " + pair + ":" + buySell);
-			throw new TradeNotFoundException();
-		}
-		int total = trade.getAmount()*1000;
-		int lots = (int)((percent/100)*total);
-		String requestID = FxcmOrderActions.closeTrade(this, trade.getAccountID(), pair, buySell, lots, responseListener);
-		Logger.info("Partial close of " + percent + "%");
+	
+	public String partialClose(Trade trade, int lots){
+		String buySell = trade.getIsLong() ? Constants.Buy : Constants.Sell;
+		String requestID = FxcmOrderActions.closeTrade(this, trade.getAccountId(), trade.getPair(), buySell, lots, responseListener);
 		return requestID;
-			
+	}
+	
+	public String partialClose(Trade trade, double percent) throws TradeNotFoundException{
+		int total = trade.getLots();
+		int lots = (int)(percent*total);
+		String requestID = partialClose(trade, lots);
+		Logger.info("Partial close of " + percent*100 + "%");
+		return requestID;	
 	}
 	
 	public String cancelOrder(Pair pair, String buySell) throws InterruptedException{
@@ -340,15 +344,25 @@ public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, 
 		// TODO Auto-generated method stub
 		
 	}
-
+	
 	@Override
-	public double getTotalAccountBalance() {
-		return accountsTable.getBalance(accounts[0]);
+	public double getPercentMaxAccountUse(){
+		return percentMaxAccountUse;
 	}
 
 	@Override
-	public double getAvailableAccountBalance() {
-		return getTotalAccountBalance() - accountsTable.getAccountRow(accounts[0]).getUsedMargin();
+	public double getTotalUsableAccountBalance() {
+		return accountsTable.getBalance(accounts[0])*percentMaxAccountUse;
+	}
+
+	@Override
+	public double getAvailableUsableAccountBalance() {
+		return getTotalUsableAccountBalance() - accountsTable.getAccountRow(accounts[0]).getUsedMargin();
+	}
+	
+	@Override
+	public double getAvailableUsablePercentAccountBalance(){
+		return getAvailableUsableAccountBalance()/getTotalUsableAccountBalance();
 	}
 
 	@Override

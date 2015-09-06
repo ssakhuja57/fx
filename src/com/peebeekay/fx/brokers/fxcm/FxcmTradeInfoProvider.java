@@ -10,6 +10,7 @@ import com.fxcore2.O2GTableStatus;
 import com.fxcore2.O2GTableType;
 import com.fxcore2.O2GTableUpdateType;
 import com.fxcore2.O2GTradeTableRow;
+import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.session.SessionDependent;
 import com.peebeekay.fx.trades.ITradeInfoProvider;
 import com.peebeekay.fx.trades.Order;
@@ -53,6 +54,7 @@ public class FxcmTradeInfoProvider implements ITradeInfoProvider, SessionDepende
 		connect();
 	}
 	
+	
 	@Override
 	public Trade getTrade(String orderId) throws TradeNotFoundException {
 		Trade trade = trades.get(orderId);
@@ -70,18 +72,27 @@ public class FxcmTradeInfoProvider implements ITradeInfoProvider, SessionDepende
 	}
 	
 	@Override
-	public double getStopSize(String orderId) throws TradeNotFoundException {
-		Trade trade = trades.get(orderId);
-		if(trade == null){
-			Order order = orders.get(orderId);
-			if(order == null)
-				throw new TradeNotFoundException();
-			return order.getStopPrice();
+	public Trade getTrade(Pair pair) throws TradeNotFoundException {
+		for(Trade trade: trades.values()){
+			if(trade.getPair() == pair)
+				return trade;
 		}
-		else{
-			return trade.getStopPrice();
-		}
+		throw new TradeNotFoundException();
 	}
+	
+//	@Override
+//	public double getStopSize(String orderId) throws TradeNotFoundException {
+//		Trade trade = trades.get(orderId);
+//		if(trade == null){
+//			Order order = orders.get(orderId);
+//			if(order == null)
+//				throw new TradeNotFoundException();
+//			return order.getStopPrice();
+//		}
+//		else{
+//			return trade.getStopPrice();
+//		}
+//	}
 
 	@Override
 	public TradingStatus getTradingStatus(String orderId) {
@@ -188,6 +199,8 @@ public class FxcmTradeInfoProvider implements ITradeInfoProvider, SessionDepende
 
 		
 	}
+
+
 
 
 

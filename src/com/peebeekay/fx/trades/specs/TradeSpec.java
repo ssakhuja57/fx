@@ -2,6 +2,9 @@ package com.peebeekay.fx.trades.specs;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import com.peebeekay.fx.trades.specs.TradeSpec.TradeProperty;
 
 
 public abstract class TradeSpec{
@@ -35,6 +38,15 @@ public abstract class TradeSpec{
 	
 	public void setTradeProperty(TradeProperty prop, String value){
 		tradeProperties.put(prop, value);
+	}
+	
+	public abstract String toString();
+	
+	protected String getPropsString(){
+		String res = "";
+		for(Entry<TradeProperty, String> prop: tradeProperties.entrySet())
+			res += "," + prop.getKey() + ":" + prop.getValue();
+		return res;
 	}
 
 }

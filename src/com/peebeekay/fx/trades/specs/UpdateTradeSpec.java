@@ -12,4 +12,9 @@ public class UpdateTradeSpec extends TradeSpec{
 		super(tradeProperties);
 	}
 
+	@Override
+	public String toString() {
+		return "Type:Update" + super.getPropsString();
+	}
+
 }

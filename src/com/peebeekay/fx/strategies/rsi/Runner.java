@@ -13,19 +13,20 @@ import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.session.Credentials;
 import com.peebeekay.fx.session.Credentials.LoginProperties;
 import com.peebeekay.fx.trades.ITradeInfoProvider;
-import com.peebeekay.fx.utils.Logger;
 
 public class Runner {
 
-	static FxcmSessionManager getSession(){
-		Credentials creds = new Credentials("D172901772001", "600", "Demo", new String[]{"2904130", ""});
+	static Credentials demo_creds = new Credentials("D172901772001", "600", "Demo", new String[]{"2904130", ""});
+	
+	static FxcmSessionManager getSession(Credentials creds){
 		creds.setProperty(LoginProperties.AUTO_RECONNECT_ATTEMPTS, "10");
-		return new FxcmSessionManager(creds);
+		return new FxcmSessionManager(creds, .9);
 	}
+	
 	
 	static void standard(){
 		
-		Interval interval = Interval.M30;
+		Interval interval = Interval.M1;
 		
 		List<Pair> pairs = new ArrayList<Pair>();
 		pairs.add(Pair.EURUSD);
@@ -40,7 +41,7 @@ public class Runner {
 //		intervals.add(Interval.M1); // temporary to test if ohlc data is being retrieved without error
 		
 		
-		FxcmSessionManager fx = getSession();
+		FxcmSessionManager fx = getSession(demo_creds);
 		ATickDataDistributor tDD = new FxcmTickDataDistributor(fx);
 		OhlcDataDistributor ohlcDD = new OhlcDataDistributor(fx, pairs, intervals);
 		ITradeInfoProvider ip = new FxcmTradeInfoProvider(fx);

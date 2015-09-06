@@ -19,6 +19,7 @@ import com.peebeekay.fx.trades.IAccountInfoProvider;
 import com.peebeekay.fx.trades.ITradeActionProvider;
 import com.peebeekay.fx.trades.ITradeInfoProvider;
 import com.peebeekay.fx.trades.OrderCreationException;
+import com.peebeekay.fx.trades.Trade;
 import com.peebeekay.fx.trades.specs.CreateTradeSpec;
 import com.peebeekay.fx.trades.specs.CreateTradeSpec.CloseTradeType;
 import com.peebeekay.fx.trades.specs.CreateTradeSpec.OpenTradeType;
@@ -165,7 +166,7 @@ public class RsiTrader extends ATrader implements SessionDependent{
 				rsi.addDataPoint(price);
 				stats.accept(price);
 				
-				double priorRsi = prevRsi; // just for logging
+//				double priorRsi = prevRsi; // just for logging
 				
 				signal = chooseAction();
 				prevRsi = rsi.getValue();
@@ -189,9 +190,31 @@ public class RsiTrader extends ATrader implements SessionDependent{
 		}
 		
 		private int getLots(){
-			if(pair == Pair.EURUSD)
-				return aip.getLots(pair, aip.getAvailableAccountBalance()*.8);
-			return LOTS;
+			int openTrades = super.getNumberOfOpenTrades();
+			double neededMargin = aip.getPercentMaxAccountUse()/(openTrades+1);
+			double availableMargin = aip.getAvailableUsablePercentAccountBalance();
+			if (availableMargin >= neededMargin)
+				return aip.getLots(pair, availableMargin*aip.getTotalUsableAccountBalance());
+			
+			double marginToOpen = neededMargin - availableMargin;
+			List<Trade> trades = super.getOpenTrades();
+			List<Trade> tradesToAdjust = new ArrayList<Trade>();
+			for(Trade trade: trades){
+				double percentMargin = trade.getLots()/aip.getTotalUsableAccountBalance();
+				if(percentMargin > neededMargin)
+					tradesToAdjust.add(trade);
+			}
+			
+			double tradesToAdjustTargetMargin = marginToOpen/tradesToAdjust.size();
+			
+			for(Trade trade: tradesToAdjust){
+				double percentMargin = trade.getLots()/aip.getTotalUsableAccountBalance();
+				double toClose = percentMargin - tradesToAdjustTargetMargin;
+				int lots = aip.getLots(pair, aip.getTotalUsableAccountBalance()*toClose);
+				fx.partialClose(trade, lots);
+			}
+			
+			return aip.getLots(pair, aip.getTotalUsableAccountBalance()*neededMargin);
 		}
 		
 

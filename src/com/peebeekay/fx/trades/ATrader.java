@@ -1,6 +1,5 @@
 package com.peebeekay.fx.trades;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +49,15 @@ public abstract class ATrader implements IDataSubscriber {
 					}
 				} catch (TradeNotFoundException e) {}
 			}
+		}
+		return count;
+	}
+	
+	public int getNumberOfOpenTrades(){
+		int count = 0;
+		for(String orderId: orderIds){
+			if(infoProvider.getTradingStatus(orderId) == TradingStatus.OPEN)
+				count++;
 		}
 		return count;
 	}

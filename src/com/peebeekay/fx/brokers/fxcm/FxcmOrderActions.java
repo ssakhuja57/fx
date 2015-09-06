@@ -70,7 +70,7 @@ public class FxcmOrderActions {
 	        if(trailStop){
 	        	valuemap.setInt(O2GRequestParamsEnum.TRAIL_STEP_STOP, 1);
 	        }
-	        Logger.info("Creating entry order on " + pair + "of amount " + amount/1000 + "K of type " + buySell + " with stop offset of "
+	        Logger.info("Creating entry order on " + pair + " of amount " + amount/1000 + "K of type " + buySell + " with stop offset of "
 	        		+ stopOffset + (trailStop ? " with trail" : ""));
 	        
 	        return createOrder(sessionMgr, valuemap, responseListener);
