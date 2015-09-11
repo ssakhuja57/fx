@@ -22,19 +22,35 @@ public abstract class ATrader implements IDataSubscriber {
 		this.name = name;
 	}
 	
-	protected void createOrder(CreateTradeSpec spec) throws OrderCreationException{
+	protected boolean createOrder(CreateTradeSpec spec) throws OrderCreationException{
 		if(okToCreateOrder()){
 			String orderId = tradeProvider.createOrder(spec);
 			orderIds.add(orderId);
+			return true;
 		}
+		return false;
 	}
 	
 	public List<Trade> getOpenTrades(){
-		ArrayList<Trade> trades = new ArrayList<Trade>();
+		List<Trade> trades = new ArrayList<Trade>();
 		for (String orderId: orderIds){
 			try {
 				trades.add(infoProvider.getTrade(orderId));
 			} catch (TradeNotFoundException e) {}
+		}
+		return trades;
+	}
+	
+	public List<Trade> getOpenTrades(Pair pair){
+		List<Trade> trades = new ArrayList<Trade>();
+		for(String orderId: orderIds){
+			if(infoProvider.getTradingStatus(orderId) == TradingStatus.OPEN){
+				try {
+					if(pair == infoProvider.getTrade(orderId).getPair()){
+						trades.add(infoProvider.getTrade(orderId));
+					}
+				} catch (TradeNotFoundException e) {}
+			}
 		}
 		return trades;
 	}

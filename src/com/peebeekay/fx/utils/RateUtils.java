@@ -6,12 +6,13 @@ import com.peebeekay.fx.simulation.data.types.Tick;
 
 public class RateUtils {
 	
-	public static double addPips(double rate, int pips){
+	public static double addPips(double rate, double pips){
 		if (rate > 30){ //check if JPY
 			return rate + pips/100.0;
 		}
 		return rate + pips/10000.0;
 	}
+	
 	
 	public static double convertToPips(double amount, Pair pair){
 		String[] currencies = PairUtils.splitPair(pair);
@@ -21,15 +22,19 @@ public class RateUtils {
 		return Math.round(10000*amount*10)/10;
 	}
 	
-	public static int getAbsPipDistance(double amount1, double amount2){
-		int pips = 0;
+	public static double getAbsPipDistanceDbl(double amount1, double amount2){
+		double pips = 0;
 		if(amount1 > 30 || amount2 > 30){
-			pips = (int)convertToPips(amount1 - amount2, Pair.USDJPY);
+			pips = convertToPips(amount1 - amount2, Pair.USDJPY);
 		}
 		else{
-			pips = (int)convertToPips(amount1 - amount2, Pair.EURUSD);
+			pips = convertToPips(amount1 - amount2, Pair.EURUSD);
 		}
 		return Math.abs(pips);
+	}
+	
+	public static int getAbsPipDistance(double amount1, double amount2){
+		return (int)getAbsPipDistanceDbl(amount1, amount2);
 	}
 	
 	public static boolean isEqualOrBetter(Tick price, Tick reference, boolean isLong, boolean isEnter){

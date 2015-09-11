@@ -332,17 +332,11 @@ public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, 
 	}
 
 
-	@Override
-	public void adjustTradeStop(Trade trade, int newStopSize) {
-		// TODO Auto-generated method stub
-		
-	}
-
 
 	@Override
-	public void adjustOrderStop(Order order, int newStopSize) {
-		// TODO Auto-generated method stub
-		
+	public void adjustStop(Order order, double newPrice) {
+//		Logger.debug("adjusting order for " + order.getPair());
+		FxcmOrderActions.adjustOrder(this, accounts[0], order.getId(), newPrice, responseListener);
 	}
 	
 	@Override

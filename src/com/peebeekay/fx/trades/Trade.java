@@ -22,12 +22,11 @@ public class Trade {
 	private double stopPrice;
 	
 	private double openPrice;
-	private Tick openTick;
 	private Date openTime;
 	private AOpenTradeMonitor openMethod;
+	private double initialStopPrice;
 	
 	private double closePrice;
-	private Tick closeTick;
 	private Date closeTime;
 	private ACloseTradeMonitor closeMethod;
 	
@@ -82,12 +81,12 @@ public class Trade {
 		return openPrice;
 	}
 	
-	public Tick getOpenTick(){
-		return openTick;
-	}
-
 	public Date getOpenTime() {
 		return openTime;
+	}
+	
+	public double getInitialStopPrice(){
+		return initialStopPrice;
 	}
 
 	public AOpenTradeMonitor getOpenMethod() {
@@ -98,9 +97,6 @@ public class Trade {
 		return closePrice;
 	}
 	
-	public Tick getCloseTick(){
-		return closeTick;
-	}
 
 	public Date getCloseTime() {
 		return closeTime;
@@ -116,7 +112,19 @@ public class Trade {
 		return id.hashCode();
 	}
 	
+	public void setOpenPrice(double price){
+		this.openPrice = price;
+	}
 	
+	public void setOpenTime(Date time){
+		this.openTime = time;
+	}
+	
+	public void setInitialStopPrice(double price){
+		this.initialStopPrice = price;
+	}
+	
+	// constantly updated by listeners
 	
 	public void updateStopPrice(double stopPrice){
 		this.stopPrice = stopPrice;

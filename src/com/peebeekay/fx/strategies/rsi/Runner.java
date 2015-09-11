@@ -13,6 +13,9 @@ import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.session.Credentials;
 import com.peebeekay.fx.session.Credentials.LoginProperties;
 import com.peebeekay.fx.trades.ITradeInfoProvider;
+import com.peebeekay.fx.trades.Trade;
+import com.peebeekay.fx.trades.TradeNotFoundException;
+import com.peebeekay.fx.utils.Logger;
 
 public class Runner {
 
@@ -26,7 +29,7 @@ public class Runner {
 	
 	static void standard(){
 		
-		Interval interval = Interval.M1;
+		Interval interval = Interval.M30;
 		
 		List<Pair> pairs = new ArrayList<Pair>();
 		pairs.add(Pair.EURUSD);
@@ -56,11 +59,17 @@ public class Runner {
 
 	}
 	
-	public static void main(String[] args){
+	public static void main(String[] args) throws TradeNotFoundException, InterruptedException{
 		standard();
-//		FxcmSessionManager fx = getSession();
-//		Logger.debug(fx.getTotalAccountBalance()+"");
-//		Logger.debug(fx.getLots(Pair.EURUSD, fx.getAvailableAccountBalance())+"");
+//		FxcmSessionManager fx = getSession(demo_creds);
+//		ITradeInfoProvider ip = new FxcmTradeInfoProvider(fx);
+//		Thread.sleep(5000);
+////		Trade t = ip.getTrade(Pair.AUDUSD);
+////		for(int i=1;i<100;i++){
+////			Logger.debug(t.getStopPrice()+"");
+////			Thread.sleep(1000);
+////		}
+//		fx.ordersTable.printTable();
 		
 	}
 	

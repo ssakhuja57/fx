@@ -80,6 +80,15 @@ public class FxcmTradeInfoProvider implements ITradeInfoProvider, SessionDepende
 		throw new TradeNotFoundException();
 	}
 	
+	@Override
+	public Order getOrder(Pair pair) throws TradeNotFoundException{
+		for(Order order: orders.values()){
+			if(order.getPair() == pair)
+				return order;
+		}
+		throw new TradeNotFoundException();
+	}
+	
 //	@Override
 //	public double getStopSize(String orderId) throws TradeNotFoundException {
 //		Trade trade = trades.get(orderId);
@@ -114,6 +123,8 @@ public class FxcmTradeInfoProvider implements ITradeInfoProvider, SessionDepende
 			fx.getTable(O2GTableType.ORDERS).subscribeUpdate(O2GTableUpdateType.INSERT, this);
 			fx.getTable(O2GTableType.ORDERS).subscribeUpdate(O2GTableUpdateType.DELETE, this);
 			fx.getTable(O2GTableType.ORDERS).subscribeUpdate(O2GTableUpdateType.UPDATE, this);
+			for(Order o: fx.ordersTable.getAllOrders())
+				orders.put(o.getId(), o);
 		}
 	
 		@Override
@@ -159,12 +170,17 @@ public class FxcmTradeInfoProvider implements ITradeInfoProvider, SessionDepende
 			fx.getTable(O2GTableType.TRADES).subscribeUpdate(O2GTableUpdateType.INSERT, this);
 			fx.getTable(O2GTableType.TRADES).subscribeUpdate(O2GTableUpdateType.DELETE, this);
 			fx.getTable(O2GTableType.TRADES).subscribeUpdate(O2GTableUpdateType.UPDATE, this);
+			for(Trade t: fx.tradesTable.getAllTrades())
+				trades.put(t.getId(), t);
 		}
 
 		@Override
 		public void onAdded(String arg0, O2GRow row) {
 			O2GTradeTableRow tradeRow = (O2GTradeTableRow)row;
 			Trade trade = FxcmUtils.getTrade(tradeRow);
+			trade.setOpenPrice(tradeRow.getOpenRate());
+			trade.setOpenTime(tradeRow.getOpenTime().getTime());
+			trade.setInitialStopPrice(tradeRow.getStop());
 			trades.put(trade.getId(), trade);
 		}
 

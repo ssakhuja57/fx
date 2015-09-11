@@ -76,16 +76,16 @@ public class FxcmOrderActions {
 	        return createOrder(sessionMgr, valuemap, responseListener);
 	    }
 	   
-//	   public static void adjustStop(FxcmSessionManager sessionMgr, String accountID, String tradeID, int newStop, ResponseListener responseListener){
-//		   	
-//		   O2GValueMap valuemap = getEmptyValMap(sessionMgr);
-//		   	valuemap.setString(O2GRequestParamsEnum.COMMAND, Constants.Commands.);
-//		   	valuemap.setString(O2GRequestParamsEnum.ACCOUNT_ID, accountID);
-//		   	valuemap.setString(O2GRequestParamsEnum.ORDER_ID, shortOrderID);
-//		   	valuemap.setDouble(O2GRequestParamsEnum.RATE, newShortRate);
-//		   	
-//		   	createOrder(sessionMgr, valuemap, responseListener);
-//	   }
+	   public static void adjustOrder(FxcmSessionManager sessionMgr, String accountID, String orderID, double newPrice, ResponseListener responseListener){
+		   	
+		   O2GValueMap valuemap = getEmptyValMap(sessionMgr);
+		   	valuemap.setString(O2GRequestParamsEnum.COMMAND, Constants.Commands.EditOrder);
+		   	valuemap.setString(O2GRequestParamsEnum.ACCOUNT_ID, accountID);
+		   	valuemap.setString(O2GRequestParamsEnum.ORDER_ID, orderID);
+		   	valuemap.setDouble(O2GRequestParamsEnum.RATE, newPrice);
+		   	
+		   	createOrder(sessionMgr, valuemap, responseListener);
+	   }
 	   
 	   public static String createOpposingOCOEntryOrdersWithStops(FxcmSessionManager sessionMgr, String accountID, Pair pair,
 			   int amount, double longRate, double shortRate, int stopOffset, boolean trailStop, ResponseListener responseListener){

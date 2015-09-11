@@ -19,7 +19,9 @@ import com.peebeekay.fx.trades.IAccountInfoProvider;
 import com.peebeekay.fx.trades.ITradeActionProvider;
 import com.peebeekay.fx.trades.ITradeInfoProvider;
 import com.peebeekay.fx.trades.OrderCreationException;
+import com.peebeekay.fx.trades.StopAdjuster;
 import com.peebeekay.fx.trades.Trade;
+import com.peebeekay.fx.trades.TradeNotFoundException;
 import com.peebeekay.fx.trades.specs.CreateTradeSpec;
 import com.peebeekay.fx.trades.specs.CreateTradeSpec.CloseTradeType;
 import com.peebeekay.fx.trades.specs.CreateTradeSpec.OpenTradeType;
@@ -44,6 +46,11 @@ public class RsiTrader extends ATrader implements SessionDependent{
 		OhlcDataDistributor ohlcDD;
 		IDataProvider dp;
 		IAccountInfoProvider aip;
+		
+		ITradeActionProvider ap;
+		ITradeInfoProvider info;
+		
+		StopAdjuster adjuster;
 		
 		private RateStats stats;
 		
@@ -77,6 +84,8 @@ public class RsiTrader extends ATrader implements SessionDependent{
 			this.ohlcDD = ohlcDD;
 			this.aip = aip;
 			this.dp = dp;
+			this.ap = ap;
+			this.info = ip;
 			this.interval = interval;
 			this.maxStopSize = maxStopSize;
 			this.maxConcurrentTrades = maxConcurrentTrades;
@@ -123,13 +132,12 @@ public class RsiTrader extends ATrader implements SessionDependent{
 		
 		@Override
 		public void accept(Tick price) {
-//			Logger.debug("received tick " + price.getTime());
-
-			
+			if(adjuster != null)
+				adjuster.accept(price);
 		}
 		
 		void execute(){
-			
+//			signal = signal.BUY; // temp
 			if(signal == Signal.HOLD)
 				return;
 			
@@ -141,19 +149,29 @@ public class RsiTrader extends ATrader implements SessionDependent{
 				double stop = stats.getRecentExtremum(1, 3, !tradeLong, tradeLong);
 				Tick t = dp.getTick(pair);
 //				int initialOffset = (int)RateUtils.getAbsPipDistance(price.getExitPrice(tradeLong), stop);
-				int initialOffset = (int)RateUtils.getAbsPipDistance(t.getExitPrice(tradeLong), stop);
+				int stopSize = (int)RateUtils.getAbsPipDistance(t.getExitPrice(tradeLong), stop);
 				
 				if(RateUtils.isEqualOrBetter(t, stop, tradeLong, true))
-					initialOffset = MIN_STOP; // if tick is better price than recent extremum, then use min stop size
-				else if(initialOffset > maxStopSize)
-					initialOffset = maxStopSize;
-				else if(initialOffset < MIN_STOP)
-					initialOffset = MIN_STOP;
+					stopSize = MIN_STOP; // if tick is better price than recent extremum, then use min stop size
+				else if(stopSize > maxStopSize)
+					stopSize = maxStopSize;
+				else if(stopSize < MIN_STOP)
+					stopSize = MIN_STOP;
 				CreateTradeSpec spec = new CreateTradeSpec(pair, getLots(), tradeLong, OpenTradeType.MARKET_OPEN, CloseTradeType.STOP_CLOSE);
-				spec.setTradeProperty(TradeProperty.STOP_SIZE, String.valueOf(initialOffset));
-				super.createOrder(spec);
+				spec.setTradeProperty(TradeProperty.STOP_SIZE, String.valueOf(stopSize));
+				if(super.createOrder(spec)){
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					adjuster = new StopAdjuster(ap, info, super.getOpenTrades(pair).get(0), stopSize, maxStopSize);
+				}
 				// end: lines for recent extremum
 			} catch (OrderCreationException e) {
+				e.printStackTrace();
+			} catch (TradeNotFoundException e) {
 				e.printStackTrace();
 			} finally{
 				signal = Signal.HOLD;
@@ -190,31 +208,32 @@ public class RsiTrader extends ATrader implements SessionDependent{
 		}
 		
 		private int getLots(){
-			int openTrades = super.getNumberOfOpenTrades();
-			double neededMargin = aip.getPercentMaxAccountUse()/(openTrades+1);
-			double availableMargin = aip.getAvailableUsablePercentAccountBalance();
-			if (availableMargin >= neededMargin)
-				return aip.getLots(pair, availableMargin*aip.getTotalUsableAccountBalance());
-			
-			double marginToOpen = neededMargin - availableMargin;
-			List<Trade> trades = super.getOpenTrades();
-			List<Trade> tradesToAdjust = new ArrayList<Trade>();
-			for(Trade trade: trades){
-				double percentMargin = trade.getLots()/aip.getTotalUsableAccountBalance();
-				if(percentMargin > neededMargin)
-					tradesToAdjust.add(trade);
-			}
-			
-			double tradesToAdjustTargetMargin = marginToOpen/tradesToAdjust.size();
-			
-			for(Trade trade: tradesToAdjust){
-				double percentMargin = trade.getLots()/aip.getTotalUsableAccountBalance();
-				double toClose = percentMargin - tradesToAdjustTargetMargin;
-				int lots = aip.getLots(pair, aip.getTotalUsableAccountBalance()*toClose);
-				fx.partialClose(trade, lots);
-			}
-			
-			return aip.getLots(pair, aip.getTotalUsableAccountBalance()*neededMargin);
+			return LOTS;
+//			int openTrades = super.getNumberOfOpenTrades();
+//			double neededMargin = aip.getPercentMaxAccountUse()/(openTrades+1);
+//			double availableMargin = aip.getAvailableUsablePercentAccountBalance();
+//			if (availableMargin >= neededMargin)
+//				return aip.getLots(pair, availableMargin*aip.getTotalUsableAccountBalance());
+//			
+//			double marginToOpen = neededMargin - availableMargin;
+//			List<Trade> trades = super.getOpenTrades();
+//			List<Trade> tradesToAdjust = new ArrayList<Trade>();
+//			for(Trade trade: trades){
+//				double percentMargin = trade.getLots()/aip.getTotalUsableAccountBalance();
+//				if(percentMargin > neededMargin)
+//					tradesToAdjust.add(trade);
+//			}
+//			
+//			double tradesToAdjustTargetMargin = marginToOpen/tradesToAdjust.size();
+//			
+//			for(Trade trade: tradesToAdjust){
+//				double percentMargin = trade.getLots()/aip.getTotalUsableAccountBalance();
+//				double toClose = percentMargin - tradesToAdjustTargetMargin;
+//				int lots = aip.getLots(pair, aip.getTotalUsableAccountBalance()*toClose);
+//				fx.partialClose(trade, lots);
+//			}
+//			
+//			return aip.getLots(pair, aip.getTotalUsableAccountBalance()*neededMargin);
 		}
 		
 

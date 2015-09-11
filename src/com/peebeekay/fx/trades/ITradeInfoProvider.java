@@ -15,6 +15,8 @@ public interface ITradeInfoProvider {
 	public Order getOrder(String orderId) throws TradeNotFoundException;
 	
 	public TradingStatus getTradingStatus(String orderId);
+
+	public Order getOrder(Pair pair) throws TradeNotFoundException;
 	
 	
 }
