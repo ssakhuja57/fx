@@ -14,7 +14,7 @@ public interface ITradeActionProvider {
 
 		public void cancelOrder(Order order);
 		
-		public void adjustStop(Order order, double newPrice);
+		public void adjustStop(Order order, int newStopOffset);
 
 
 }

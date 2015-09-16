@@ -19,7 +19,6 @@ public class FxcmTickDataDistributor extends ATickDataDistributor implements IO2
 	public FxcmTickDataDistributor(FxcmSessionManager fx) {
 		this.fx = fx;
 		fx.registerDependent(this);
-		fx.getTable(O2GTableType.OFFERS).subscribeUpdate(O2GTableUpdateType.UPDATE, this);
 	}
 	
 
@@ -51,6 +50,11 @@ public class FxcmTickDataDistributor extends ATickDataDistributor implements IO2
 	}
 	
 	@Override
+	public void start() {
+		fx.getTable(O2GTableType.OFFERS).subscribeUpdate(O2GTableUpdateType.UPDATE, this);
+	}
+	
+	@Override
 	public void close(){
 		fx.getTable(O2GTableType.OFFERS).unsubscribeUpdate(O2GTableUpdateType.UPDATE, this);
 	}
@@ -61,5 +65,6 @@ public class FxcmTickDataDistributor extends ATickDataDistributor implements IO2
 		// TODO Auto-generated method stub
 		
 	}
+
 
 }

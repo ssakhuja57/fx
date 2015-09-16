@@ -334,9 +334,9 @@ public class FxcmSessionManager implements SessionHolder, ITradeActionProvider, 
 
 
 	@Override
-	public void adjustStop(Order order, double newPrice) {
+	public void adjustStop(Order order, int newStopOffset) {
 //		Logger.debug("adjusting order for " + order.getPair());
-		FxcmOrderActions.adjustOrder(this, accounts[0], order.getId(), newPrice, responseListener);
+		FxcmOrderActions.adjustStop(this, accounts[0], order.getId(), newStopOffset, responseListener);
 	}
 	
 	@Override

@@ -11,7 +11,7 @@ import com.peebeekay.fx.simulation.data.IDataSubscriber;
 
 public abstract class ADataDistributor{
 	
-	protected ArrayList<IDataSubscriber> subscribers = new ArrayList<IDataSubscriber>();
+	protected List<IDataSubscriber> subscribers = new ArrayList<IDataSubscriber>();
 	protected Map<IDataSubscriber, List<Pair>> subscriberPairs = new HashMap<IDataSubscriber, List<Pair>>();
 	protected Map<IDataSubscriber, List<Interval>> subscriberIntervals = new HashMap<IDataSubscriber, List<Interval>>();
 	
@@ -21,6 +21,8 @@ public abstract class ADataDistributor{
 		subscriberPairs.put(ds, pairs);
 		subscriberIntervals.put(ds, intervals);
 	}
+	
+	public abstract void start();
 	
 	public void close(){
 		unsubscribeAll();

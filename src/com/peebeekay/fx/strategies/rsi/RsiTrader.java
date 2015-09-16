@@ -137,7 +137,7 @@ public class RsiTrader extends ATrader implements SessionDependent{
 		}
 		
 		void execute(){
-//			signal = signal.BUY; // temp
+//			signal = Signal.SELL; // temp
 			if(signal == Signal.HOLD)
 				return;
 			

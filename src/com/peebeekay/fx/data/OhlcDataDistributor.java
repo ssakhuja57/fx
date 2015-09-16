@@ -28,6 +28,10 @@ public class OhlcDataDistributor extends ADataDistributor{
 		this.dp = dp;
 		this.pairs = pairs;
 		this.intervals = intervals;
+	}
+	
+	@Override
+	public void start() {
 		for(Interval interval: intervals){
 			if(interval == Interval.T)
 				continue;
@@ -90,6 +94,7 @@ public class OhlcDataDistributor extends ADataDistributor{
 		}
 		
 	}
+
 	
 	
 	

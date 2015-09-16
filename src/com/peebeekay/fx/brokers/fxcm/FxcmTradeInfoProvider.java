@@ -16,6 +16,7 @@ import com.peebeekay.fx.trades.ITradeInfoProvider;
 import com.peebeekay.fx.trades.Order;
 import com.peebeekay.fx.trades.Trade;
 import com.peebeekay.fx.trades.TradeNotFoundException;
+import com.peebeekay.fx.utils.Logger;
 
 public class FxcmTradeInfoProvider implements ITradeInfoProvider, SessionDependent{
 	
@@ -180,14 +181,24 @@ public class FxcmTradeInfoProvider implements ITradeInfoProvider, SessionDepende
 			Trade trade = FxcmUtils.getTrade(tradeRow);
 			trade.setOpenPrice(tradeRow.getOpenRate());
 			trade.setOpenTime(tradeRow.getOpenTime().getTime());
-			trade.setInitialStopPrice(tradeRow.getStop());
+			double initialStop = tradeRow.getStop();
+			trade.setInitialStopPrice(initialStop);
 			trades.put(trade.getId(), trade);
+			Logger.info("new trade added for " + trade.getPair() + " at price " + trade.getOpenPrice());
+			if(initialStop != 0)
+				Logger.info("setting initial stop to " + initialStop);
 		}
 
 		@Override
 		public void onChanged(String arg0, O2GRow row) {
 			O2GTradeTableRow tradeRow = (O2GTradeTableRow)row;
 			Trade trade = trades.get(tradeRow.getOpenOrderReqID());
+			double stop = tradeRow.getStop();
+			if(trade.getInitialStopPrice() == 0 && stop != 0){
+				trade.setInitialStopPrice(stop);
+				Logger.debug(trade.getPair() + " trade initial stop is " + stop);
+			}
+				
 			trade.updateStopPrice(tradeRow.getStop());
 			trade.updateLots(tradeRow.getAmount()/1000);
 		}

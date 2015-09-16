@@ -1,5 +1,5 @@
 package com.peebeekay.fx.data;
 
-public class ATickDataDistributor extends ADataDistributor{
+public abstract class ATickDataDistributor extends ADataDistributor{
 
 }
