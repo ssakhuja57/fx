@@ -7,6 +7,7 @@ import com.fxcore2.O2GTradeTableRow;
 import com.peebeekay.fx.info.Pair;
 import com.peebeekay.fx.simulation.data.types.Tick;
 import com.peebeekay.fx.trades.Order;
+import com.peebeekay.fx.trades.Order.OrderType;
 import com.peebeekay.fx.trades.Trade;
 import com.peebeekay.fx.utils.PairUtils;
 
@@ -25,14 +26,24 @@ public class FxcmUtils {
 		boolean isLong = row.getBuySell() == Constants.Buy ? true : false;
 		int lots = row.getAmount()/1000;
 		double stopPrice = row.getStop();
-		return new Order(orderId, pair, isLong, lots, stopPrice);
+		
+		String orderTypeStr = row.getType();
+		OrderType orderType = null;
+		if(orderTypeStr == "OM")
+			orderType = OrderType.Market;
+		if(orderTypeStr == "STE")
+			orderType = OrderType.Stop;
+		else
+			orderType = OrderType.Unknown;
+		
+		return new Order(orderId, orderType, pair, isLong, lots, stopPrice);
 	}
 	
 	public static Trade getTrade(O2GTradeTableRow row){
 		String orderId = row.getOpenOrderReqID();
 		String accountId = row.getAccountID();
 		Pair pair = Pair.valueOf(Integer.parseInt(row.getOfferID()));
-		boolean isLong = row.getBuySell() == Constants.Buy ? true : false;
+		boolean isLong = (row.getBuySell().equals(Constants.Buy)) ? true : false;
 		int lots = row.getAmount()/1000;
 		double stopPrice = row.getStop();
 		return new Trade(orderId, accountId, pair, isLong, lots, stopPrice);

@@ -131,6 +131,7 @@ public class FxcmTradeInfoProvider implements ITradeInfoProvider, SessionDepende
 		@Override
 		public void onAdded(String rowId, O2GRow row) {
 			O2GOrderTableRow orderRow = (O2GOrderTableRow)row;
+//			Logger.debug("adding new order of type " + orderRow.getType());
 			Order order = FxcmUtils.getOrder(orderRow);
 			orders.put(order.getId(), order);
 		}
@@ -186,7 +187,7 @@ public class FxcmTradeInfoProvider implements ITradeInfoProvider, SessionDepende
 			trades.put(trade.getId(), trade);
 			Logger.info("new trade added for " + trade.getPair() + " at price " + trade.getOpenPrice());
 			if(initialStop != 0)
-				Logger.info("setting initial stop to " + initialStop);
+				Logger.info("setting " + trade.getPair() + " initial stop to " + initialStop);
 		}
 
 		@Override

@@ -21,7 +21,9 @@ public class StopAdjuster implements ITradeMonitor{
 	
 	boolean isLong;
 	
-	Tick lastPrice;
+//	Tick lastPrice;
+	
+	Tick bestPrice;
 	
 	boolean active = true;
 	
@@ -48,8 +50,11 @@ public class StopAdjuster implements ITradeMonitor{
 	public void accept(Tick price) {
 		if(!active)
 			return;
+		
+		if(bestPrice == null)
+			bestPrice = price;
 
-		if(lastPrice != null){
+//		if(lastPrice != null){
 				
 				boolean adjust = true;
 				
@@ -62,30 +67,41 @@ public class StopAdjuster implements ITradeMonitor{
 				}
 				else{
 					distanceFromOpenStop = RateUtils.getAbsPipDistanceDbl(openStopPrice, price.getExitPrice(isLong));
-					if(distanceFromOpenStop >= maxStopSize
-							|| info.getTradingStatus(trade.getId()) == TradingStatus.NOT_FOUND){
-//						Logger.debug("open stop price: " + openStopPrice + " status: " + info.getTradingStatus(trade.getId()));
-						Logger.debug("ending stop adjuster for " + trade.getPair() 
-								+ " (stop size: " + distanceFromOpenStop + " status: " + info.getTradingStatus(trade.getId()) + ")");
-						active = false; // stop is at max price, this stop adjuster's job is done
-						adjust = false;
-					}
-					if(distanceFromOpenStop <= minStopSize)
-						adjust = false;
 				}
 				
+//				Logger.debug(trade.getPair() + " trade stop: " + distanceFromOpenStop);
 				
-				if(!RateUtils.isEqualOrBetter(price, lastPrice, isLong, false))
+				if(distanceFromOpenStop >= maxStopSize
+						|| info.getTradingStatus(trade.getId()) == TradingStatus.NOT_FOUND){
+//					Logger.debug("open stop price: " + openStopPrice + " status: " + info.getTradingStatus(trade.getId()));
+					Logger.debug("ending stop adjuster for " + trade.getPair() 
+							+ " (stop size: " + distanceFromOpenStop + " status: " + info.getTradingStatus(trade.getId()) + ")");
+					
+					distanceFromOpenStop = maxStopSize; // still adjust, but only up to the max stop size
+					active = false; // stop is at max price, this stop adjuster's job is done
+				}
+				
+				if(distanceFromOpenStop <= minStopSize){
+//					Logger.debug(" --- no adjust, because " + trade.getPair() + " "+ distanceFromOpenStop + " is < min stop size " + minStopSize );
+					adjust = false;
+				}
+				
+//				Logger.debug("current price: " + price.getExitPrice(isLong) + " - best: " + bestPrice.getExitPrice(isLong));
+				if(RateUtils.isEqualOrBetter(price, bestPrice, isLong, false))
+					bestPrice = price;
+				else
 					adjust = false;
 				
 				if(adjust){
-					Logger.debug("adjusting stop for " + trade.getPair() + " to " + distanceFromOpenStop);
-					ap.adjustStop(order, (int)distanceFromOpenStop);
+					Logger.debug("adjusting stop for " + trade.getPair() + " to " + openStopPrice 
+							+ " (stop size: " + distanceFromOpenStop + ")");
+//					ap.adjustStop(order, (int)distanceFromOpenStop);
+					ap.adjustStop(order, openStopPrice);
 				}
-		}
+//		}
 		
 		
-		lastPrice = price;
+//		lastPrice = price;
 	}
 
 	

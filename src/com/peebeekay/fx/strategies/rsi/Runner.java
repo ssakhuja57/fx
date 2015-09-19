@@ -25,7 +25,7 @@ public class Runner {
 		creds.add(new Credentials("D172901772001", "600", "Demo", new String[]{"2904130"}));
 		creds.add(new Credentials("D172929194001", "9819", "Demo", new String[]{"2931551"}));
 		
-		stops.put(Interval.M1, new int[]{5,5,5,5,5,5});
+		stops.put(Interval.M1, new int[]{7,7,7,7,7,7});
 		stops.put(Interval.M15, new int[]{15,20,20,20,20,20});
 		stops.put(Interval.M30, new int[]{15,20,20,20,20,20});
 	}
@@ -64,6 +64,25 @@ public class Runner {
 		new RsiTrader("test4", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(3), maxStops[3], 1).run();
 		new RsiTrader("test5", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(4), maxStops[4], 1).run();
 		new RsiTrader("test6", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(5), maxStops[5], 1).run();
+		
+//		try {
+//			CreateTradeSpec spec = new CreateTradeSpec(Pair.EURUSD, 1, true, OpenTradeType.MARKET_OPEN, CloseTradeType.STOP_CLOSE);
+//			spec.setTradeProperty(TradeProperty.STOP_SIZE, "5");
+//			fx.createOrder(spec);
+//			Thread.sleep(3000);
+//			Order stop = ip.getOrder(Pair.EURUSD);
+//			fx.adjustStop(stop, 1.12000);
+//			Thread.sleep(5000);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (TradeNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (OrderCreationException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		
 		tDD.start();
 		ohlcDD.start();

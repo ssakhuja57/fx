@@ -7,13 +7,19 @@ public class Order {
 	private String id;
 	private Pair pair;
 	private boolean isLong;
+	private OrderType orderType;
 	
 	// can be modified by trade table listener
 	private int lots;
 	private double stopPrice;
 	
-	public Order(String id, Pair pair, boolean isLong, int lots, double stopPrice){
+	public enum OrderType{
+		Market,Entry,Stop,Limit,Unknown;
+	}
+	
+	public Order(String id, OrderType orderType, Pair pair, boolean isLong, int lots, double stopPrice){
 		this.id = id;
+		this.orderType = orderType;
 		this.pair = pair;
 		this.isLong = isLong;
 		this.lots = lots;
@@ -22,6 +28,9 @@ public class Order {
 	
 	public String getId(){
 		return id;
+	}
+	public OrderType getOrderType(){
+		return orderType;
 	}
 	public Pair getPair(){
 		return pair;

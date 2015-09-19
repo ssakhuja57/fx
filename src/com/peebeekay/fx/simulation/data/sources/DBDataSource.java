@@ -94,7 +94,7 @@ public class DBDataSource implements IDataSource{
 				+ " FROM data." + interval.value 
 				+ " WHERE ts >= '" + DateUtils.calToString(start) + "'"
 				+ " AND ts <= '" + DateUtils.calToString(end) + "'"
-				+ " AND pair = '" + pair + "'"
+				+ " AND pair like '%" + pair + "%'"
 				+ " ORDER BY ts"
 				+ ";";
 		ArrayList<String[]> rows = null;

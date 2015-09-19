@@ -137,7 +137,7 @@ public class RsiTrader extends ATrader implements SessionDependent{
 		}
 		
 		void execute(){
-//			signal = Signal.SELL; // temp
+			signal = Signal.BUY; // only for testing
 			if(signal == Signal.HOLD)
 				return;
 			
@@ -232,7 +232,7 @@ public class RsiTrader extends ATrader implements SessionDependent{
 //				int lots = aip.getLots(pair, aip.getTotalUsableAccountBalance()*toClose);
 //				fx.partialClose(trade, lots);
 //			}
-//			
+			
 //			return aip.getLots(pair, aip.getTotalUsableAccountBalance()*neededMargin);
 		}
 		

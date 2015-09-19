@@ -77,15 +77,25 @@ public class FxcmOrderActions {
 	    }
 	   
 	   public static void adjustStop(FxcmSessionManager sessionMgr, String accountID, String orderID, int newStopOffset, ResponseListener responseListener){
-		   	
+		   
 		   O2GValueMap valuemap = getEmptyValMap(sessionMgr);
 		   	valuemap.setString(O2GRequestParamsEnum.COMMAND, Constants.Commands.EditOrder);
 		   	valuemap.setString(O2GRequestParamsEnum.ACCOUNT_ID, accountID);
 		   	valuemap.setString(O2GRequestParamsEnum.ORDER_ID, orderID);
-		   	valuemap.setString(O2GRequestParamsEnum.PEG_TYPE_STOP, Constants.Peg.FromClose);
-		   	valuemap.setInt(O2GRequestParamsEnum.PEG_OFFSET_STOP, newStopOffset);
-		   	valuemap.setInt(O2GRequestParamsEnum.TRAIL_STEP_STOP, 1);
+		   	valuemap.setString(O2GRequestParamsEnum.PEG_TYPE, Constants.Peg.FromClose);
+		   	valuemap.setInt(O2GRequestParamsEnum.PEG_OFFSET, newStopOffset);
 		   	
+		   	createOrder(sessionMgr, valuemap, responseListener);
+	   }
+	   
+	   public static void adjustStop(FxcmSessionManager sessionMgr, String accountID, String orderID, double newRate, ResponseListener responseListener){
+		   
+		   O2GValueMap valuemap = getEmptyValMap(sessionMgr);
+		   	valuemap.setString(O2GRequestParamsEnum.COMMAND, Constants.Commands.EditOrder);
+		   	valuemap.setString(O2GRequestParamsEnum.ACCOUNT_ID, accountID);
+		   	valuemap.setString(O2GRequestParamsEnum.ORDER_ID, orderID);
+		   	valuemap.setDouble(O2GRequestParamsEnum.RATE, newRate);
+		   	valuemap.setInt(O2GRequestParamsEnum.TRAIL_STEP, 1);
 		   	
 		   	createOrder(sessionMgr, valuemap, responseListener);
 	   }

@@ -3,7 +3,6 @@ package com.peebeekay.fx.trades;
 import java.util.Date;
 
 import com.peebeekay.fx.info.Pair;
-import com.peebeekay.fx.simulation.data.types.Tick;
 import com.peebeekay.fx.simulation.monitors.cancel.ACancelTradeMonitor;
 import com.peebeekay.fx.simulation.monitors.close.ACloseTradeMonitor;
 import com.peebeekay.fx.simulation.monitors.open.AOpenTradeMonitor;
