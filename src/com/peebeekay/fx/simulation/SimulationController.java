@@ -41,8 +41,8 @@ public class SimulationController implements Runnable{
 	}
 	
 	private void advanceTick(){
-		Logger.debug(tickClock.getTime().toString());
-		Logger.debug("advancing tick");
+//		Logger.debug(tickClock.getTime().toString());
+//		Logger.debug("advancing tick");
 		Tick tick = null;
 		try{
 			tick = dataSource.getTickRow();

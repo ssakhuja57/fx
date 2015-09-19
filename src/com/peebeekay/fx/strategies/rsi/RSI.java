@@ -97,7 +97,7 @@ public class RSI implements IIndicator {
 		rsi = 100 - (100/(1+(averageGain/averageLoss)));
 		lastPrice = p;
 		
-		Logger.debug(rsi + " --- updated " + p.getPair() + " rsi for " + DateUtils.dateToString(p.getTime()) + " (prev: " + priorRsi + ")");
+//		Logger.debug(rsi + " --- updated " + p.getPair() + " rsi for " + DateUtils.dateToString(p.getTime()) + " (prev: " + priorRsi + ")");
 		
 //		Logger.debug(p.getTime().toString() + " : " + rsi + " (" + p.getBidClose() + ")");
 		
