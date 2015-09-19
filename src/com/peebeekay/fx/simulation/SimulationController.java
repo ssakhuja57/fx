@@ -75,9 +75,15 @@ public class SimulationController implements Runnable{
 				continue;
 			if(interval != Interval.M30) //tmp
 				continue;
+			
 			if(DateUtils.isMultipleOf(ohlcClock.getTime(), interval.minutes)){
+				
+				Calendar time = Calendar.getInstance();
+				time.setTime(ohlcClock.getTime());
+				time.add(Calendar.MINUTE, -interval.minutes); // to get period that just closed
+				
 				for(ATrader t: traders){
-					OhlcPrice price = dataSource.getOhlcPrice(pair, interval, ohlcClock);
+					OhlcPrice price = dataSource.getOhlcPrice(pair, interval, time);
 					if(price != null)
 						t.accept(price);
 				}
