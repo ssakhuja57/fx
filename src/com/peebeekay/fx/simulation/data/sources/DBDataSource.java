@@ -121,7 +121,7 @@ public class DBDataSource implements IDataSource{
 		String sql = "SELECT " + StringUtils.arrayToString(OhlcPrice.FIELDS,",").replace("interval,", "'" + interval.value + "',") 
 				+ " FROM data." + interval.value 
 				+ " WHERE ts = '" + DateUtils.calToString(time) + "'"
-				+ " AND pair = '" + pair + "'"
+				+ " AND pair like '%" + pair + "%'"
 				+ " ORDER BY ts"
 				+ ";";
 		try {
