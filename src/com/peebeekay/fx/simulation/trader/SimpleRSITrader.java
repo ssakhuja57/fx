@@ -22,7 +22,7 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 	private Calendar startTime;
 	private Pair pair;
 	private int stopOffset;
-	public final Interval INTERVAL = Interval.M30;
+	private Interval interval;
 	public final int period = 14;
 	public final int HIGH_MARK = 70;
 	public final double LOW_MARK = 30;
@@ -30,15 +30,16 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 	private volatile Boolean isReady;
 	private Boolean stillRunning;
 	private Signal signal = Signal.HOLD;
-	private RateStats stats = new RateStats(96, INTERVAL);;
+	private RateStats stats = new RateStats(96, interval);;
 	
 	private enum Signal{
 		HOLD,BUY,SELL
 	}
 	
-	public SimpleRSITrader(String name, String outputFolder, Pair pair, IDataSource ds, 
+	public SimpleRSITrader(String name, Interval interval, String outputFolder, Pair pair, IDataSource ds, 
 			Calendar startTime, int stopOffset, int maxConcurrentTrades){
 		super(ds, name, outputFolder, maxConcurrentTrades);
+		this.interval = interval;
 		this.startTime = startTime;
 		this.pair = pair;
 		this.stopOffset = stopOffset;
@@ -48,8 +49,8 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 		//nowMinusPeriod.add(Calendar.MINUTE, -period*INTERVAL.minutes);
 		nowMinusPeriod.add(Calendar.HOUR, -120); // add extra in case run over weekend data
 		
-		ArrayList<OhlcPrice> historicalPrices = ds.getOhlcPrices(pair, INTERVAL, nowMinusPeriod, startTime);
-		rsi = new RSI(INTERVAL, period, true, true, historicalPrices);
+		ArrayList<OhlcPrice> historicalPrices = ds.getOhlcPrices(pair, interval, nowMinusPeriod, startTime);
+		rsi = new RSI(interval, period, true, true, historicalPrices);
 		prevRsi = rsi.getValue();
 		isReady = true;
 		stillRunning = true;
@@ -96,7 +97,7 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 	@Override
 	public void accept(OhlcPrice price) {
 //		Logger.debug("received " + price.getInterval() + " at " + price.getTime());
-		if(price.getInterval() == INTERVAL){
+		if(price.getInterval() == interval){
 			rsi.addDataPoint(price);			
 			signal = chooseAction();
 			prevRsi = rsi.getValue();

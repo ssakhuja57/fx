@@ -24,6 +24,7 @@ public class SimulationRunner {
 	public static void main(String[] args) throws ParseException{
 		
 		Pair pair = Pair.EURUSD;
+		Interval interval = Interval.M30;
 		String dataFolder = "C:\\fx-data\\final\\recent\\EUR-USD\\";
 		int maxConcurrentTrades = 1;
 		
@@ -67,7 +68,8 @@ public class SimulationRunner {
 			SimulationController controller = new SimulationController(pair, starts[x], ends[x], dataSource);
 			for(int i=10; i<=30; i+=1){
 //				ATrader t = new SimpleRSITrader("months-7thru12-m30RSI-stop" + i + ".csv", "C:\\fx-data\\results", 
-				ATrader t = new SimpleRSITrader("year2014-m30RSI-recent-extremum-stop" + i + ".csv", "C:\\fx-data\\results",
+				ATrader t = new SimpleRSITrader("year2014-m30RSI-recent-extremum-stop" + i + ".csv", 
+						interval, "C:\\fx-data\\results",
 						pair, dataSource, starts[x], i, maxConcurrentTrades);
 				controller.addTrader(t);
 			}
