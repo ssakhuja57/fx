@@ -73,7 +73,7 @@ public class SimulationController implements Runnable{
 		for(Interval interval: EnumSet.allOf(Interval.class)){
 			if(interval == Interval.T)
 				continue;
-			if(interval != Interval.M30) //tmp
+			if(interval != Interval.M30 || interval != Interval.M15) //tmp
 				continue;
 			
 			if(DateUtils.isMultipleOf(ohlcClock.getTime(), interval.minutes)){
