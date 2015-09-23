@@ -14,6 +14,7 @@ import com.peebeekay.fx.simulation.monitors.close.StopClose;
 import com.peebeekay.fx.simulation.monitors.open.MarketOpen;
 import com.peebeekay.fx.simulation.trades.Trade;
 import com.peebeekay.fx.strategies.rsi.RSI;
+import com.peebeekay.fx.utils.Logger;
 import com.peebeekay.fx.utils.RateUtils;
 
 public class SimpleRSITrader extends ATrader implements Runnable{
@@ -84,8 +85,9 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 			int initialOffset = (int)RateUtils.getAbsPipDistance(price.getExitPrice(tradeLong), stop);
 			if(initialOffset > stopOffset)
 				initialOffset = stopOffset;
-			//super.tradeMgr.updateTrade(trade, new StopClose(trade, stopOffset, initialOffset)); // for adjusting stop
-			super.tradeMgr.updateTrade(trade, new StopClose(trade, stopOffset, true)); // for not adjusting stop
+			Logger.debug("time: " + price.getTime() + ", rsi: " + rsi + ", prev: " + prevRsi);
+			super.tradeMgr.updateTrade(trade, new StopClose(trade, stopOffset, initialOffset)); // for adjusting stop
+//			super.tradeMgr.updateTrade(trade, new StopClose(trade, stopOffset, true)); // for not adjusting stop
 			// end: lines for recent extremum
 			
 		} catch (TradeCreationException e) {
