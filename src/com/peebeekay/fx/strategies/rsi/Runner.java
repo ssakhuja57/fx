@@ -20,14 +20,19 @@ import com.peebeekay.fx.trades.TradeNotFoundException;
 public class Runner {
 
 	static List<Credentials> creds = new ArrayList<Credentials>();
-	static Map<Interval,int[]> stops = new HashMap<Interval,int[]>();
+	static Map<Interval,int[]> maxStops = new HashMap<Interval,int[]>();
+	static Map<Interval,int[]> minStops = new HashMap<Interval,int[]>();
 	static{
 		creds.add(new Credentials("D172901772001", "600", "Demo", new String[]{"2904130"}));
 		creds.add(new Credentials("D172929194001", "9819", "Demo", new String[]{"2931551"}));
 		
-		stops.put(Interval.M1, new int[]{7,7,7,7,7,7});
-		stops.put(Interval.M15, new int[]{15,20,20,20,20,20});
-		stops.put(Interval.M30, new int[]{15,20,20,20,20,20});
+		maxStops.put(Interval.M1, new int[]{7,7,7,7,7,7});
+		maxStops.put(Interval.M15, new int[]{8,8,8,8,8,8});
+		maxStops.put(Interval.M30, new int[]{15,20,20,20,20,20});
+		
+		minStops.put(Interval.M1, new int[]{3,3,3,3,3,3});
+		minStops.put(Interval.M15, new int[]{2,2,2,2,2,2});
+		minStops.put(Interval.M30, new int[]{3,3,3,3,3,3});
 	}
 	
 	static FxcmSessionManager getSession(Credentials creds){
@@ -56,14 +61,15 @@ public class Runner {
 		OhlcDataDistributor ohlcDD = new OhlcDataDistributor(fx, pairs, intervals);
 		ITradeInfoProvider ip = new FxcmTradeInfoProvider(fx);
 		
-		int[] maxStops = stops.get(interval);
+		int[] maxStopSizes = maxStops.get(interval);
+		int[] minStopSizes = minStops.get(interval);
 		
-		new RsiTrader("test1", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(0), maxStops[0], 1).run();
-		new RsiTrader("test2", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(1), maxStops[1], 1).run();
-		new RsiTrader("test3", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(2), maxStops[2], 1).run();
-		new RsiTrader("test4", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(3), maxStops[3], 1).run();
-		new RsiTrader("test5", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(4), maxStops[4], 1).run();
-		new RsiTrader("test6", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(5), maxStops[5], 1).run();
+		new RsiTrader("test1", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(0), minStopSizes[0], maxStopSizes[0], 1).run();
+		new RsiTrader("test2", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(1), minStopSizes[1], maxStopSizes[1], 1).run();
+		new RsiTrader("test3", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(2), minStopSizes[2], maxStopSizes[2], 1).run();
+		new RsiTrader("test4", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(3), minStopSizes[3], maxStopSizes[3], 1).run();
+		new RsiTrader("test5", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(4), minStopSizes[4], maxStopSizes[4], 1).run();
+		new RsiTrader("test6", fx, fx, fx, ip, fx, tDD, ohlcDD, interval, pairs.get(5), minStopSizes[5], maxStopSizes[5], 1).run();
 		
 //		try {
 //			CreateTradeSpec spec = new CreateTradeSpec(Pair.EURUSD, 1, true, OpenTradeType.MARKET_OPEN, CloseTradeType.STOP_CLOSE);

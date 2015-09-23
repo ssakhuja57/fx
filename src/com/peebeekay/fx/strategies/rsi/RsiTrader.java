@@ -39,6 +39,7 @@ public class RsiTrader extends ATrader implements SessionDependent{
 		private RSI rsi;
 		private double prevRsi;
 		private int maxStopSize;
+		private int minStopSize;
 		int maxConcurrentTrades;
 		Interval interval;
 		
@@ -57,7 +58,7 @@ public class RsiTrader extends ATrader implements SessionDependent{
 		public final int PERIOD = 14;
 		public final int HIGH_MARK = 70;
 		public final double LOW_MARK = 30;
-		final int MIN_STOP = 3;
+//		final int MIN_STOP = 3;
 		
 		final int LOTS = 1;
 		
@@ -72,7 +73,7 @@ public class RsiTrader extends ATrader implements SessionDependent{
 		public RsiTrader(String name, FxcmSessionManager fx, IAccountInfoProvider aip, ITradeActionProvider ap, 
 				ITradeInfoProvider ip,
 				IDataProvider dp, ATickDataDistributor tDD, OhlcDataDistributor ohlcDD,
-				Interval interval, Pair pair, int maxStopSize, int maxConcurrentTrades){
+				Interval interval, Pair pair, int minStopSize, int maxStopSize, int maxConcurrentTrades){
 			super(ap, ip, name);
 			
 			Logger.info("initializing RSI trader " + name);
@@ -88,6 +89,7 @@ public class RsiTrader extends ATrader implements SessionDependent{
 			this.info = ip;
 			this.interval = interval;
 			this.maxStopSize = maxStopSize;
+			this.minStopSize = minStopSize;
 			this.maxConcurrentTrades = maxConcurrentTrades;
 			
 			stats = new RateStats(96, interval);
@@ -137,7 +139,7 @@ public class RsiTrader extends ATrader implements SessionDependent{
 		}
 		
 		void execute(){
-			signal = Signal.BUY; // only for testing
+//			signal = Signal.BUY; // only for testing
 			if(signal == Signal.HOLD)
 				return;
 			
@@ -152,11 +154,11 @@ public class RsiTrader extends ATrader implements SessionDependent{
 				int stopSize = (int)RateUtils.getAbsPipDistance(t.getExitPrice(tradeLong), stop);
 				
 				if(RateUtils.isEqualOrBetter(t, stop, tradeLong, true))
-					stopSize = MIN_STOP; // if tick is better price than recent extremum, then use min stop size
+					stopSize = minStopSize; // if tick is better price than recent extremum, then use min stop size
 				else if(stopSize > maxStopSize)
 					stopSize = maxStopSize;
-				else if(stopSize < MIN_STOP)
-					stopSize = MIN_STOP;
+				else if(stopSize < minStopSize)
+					stopSize = minStopSize;
 				CreateTradeSpec spec = new CreateTradeSpec(pair, getLots(), tradeLong, OpenTradeType.MARKET_OPEN, CloseTradeType.STOP_CLOSE);
 				spec.setTradeProperty(TradeProperty.STOP_SIZE, String.valueOf(stopSize));
 				if(super.createOrder(spec)){

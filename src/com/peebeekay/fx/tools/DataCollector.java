@@ -100,27 +100,20 @@ public class DataCollector implements Runnable{
 			this.id = id;
 			fileName = output + "_" + id;
 			f = new File(fileName);
-			this.sm = new FxcmSessionManager(creds);
+			this.sm = new FxcmSessionManager(creds, 0);
 			this.start = start;
 			this.end = end;
 			
-			try{
-				if(f.exists()){
-					Logger.error("file " + fileName + " already exists");
-					throw new IOException();
-				}
-				fw = new FileWriter(f);
-				bfw = new BufferedWriter(fw);
+			if(f.exists()){
+				Logger.info("appending to file " + fileName);
 			}
-			catch(IOException e){
-				Logger.error("error in trying to create file");
-				e.printStackTrace();
-				throw e;
-			}
+			fw = new FileWriter(f, true);
+			bfw = new BufferedWriter(fw);
+			
 		}
 		
 		
-		void writeData(Calendar startTime, Calendar endTime) throws IllegalArgumentException, IllegalAccessException, IOException{
+		void writeData(Calendar startTime, Calendar endTime) throws IllegalArgumentException, IllegalAccessException, IOException, InterruptedException{
 			if(this.sm == null)
 				return;
 			Map<Calendar, double[]> data;
@@ -128,6 +121,7 @@ public class DataCollector implements Runnable{
 				data = FxcmRateHistory.getTickData(sm, pair, startTime, endTime);
 			else
 				data = FxcmRateHistory.getOHLCData(sm, pair, interval, startTime, endTime);
+			Logger.debug("retrieved " + data.size() + " rows of data");
 			for(Calendar time: data.keySet()){
 				String meta;
 				if(interval == Interval.T)
@@ -135,9 +129,11 @@ public class DataCollector implements Runnable{
 				else
 					meta = pair + "," + interval.name() + "," + DateUtils.dateToString(time.getTime(), DateUtils.DATE_FORMAT_MILLI) + ",";
 				String values = StringUtils.arrayToString(data.get(time), ",");
+//				Logger.debug(meta + values);
 				fw.write(meta + values + "\n");
 				fw.flush();
 			}
+			data.clear();
 		}
 		@Override
 		public void run() {
@@ -147,7 +143,7 @@ public class DataCollector implements Runnable{
 			try{
 				writeData(DateUtils.getCalendar(start), DateUtils.getCalendar(end));
 			} catch (IllegalArgumentException | IllegalAccessException
-					| IOException e) {
+					| IOException | InterruptedException e) {
 				e.printStackTrace();
 			}
 			finally{
@@ -167,10 +163,10 @@ public class DataCollector implements Runnable{
 	{
 		
 		// modify these
-		Pair pair = Pair.USDJPY;
+		Pair pair = Pair.EURUSD;
 		Interval interval = Interval.T;
-		String parentFolder = "C:\\fx-data\\final\\tick";
-		String folder = parentFolder + "\\USD-JPY\\";
+		String parentFolder = "C:\\fx\\data\\tick";
+		String folder = parentFolder + "\\" + pair + "\\";
 		new File(folder).mkdirs();
 		int accounts = 1;
 		int sessionLimit = 1;
@@ -211,22 +207,26 @@ public class DataCollector implements Runnable{
 		Credentials[] creds = new Credentials[accounts];
 		for(int i=0; i<accounts;i++){
 			//creds[i] = FXUtils.createDemoAccount();
-			creds[i] = new Credentials("your account id", "your password", "Real", new String[] { "your account number", ""});
+			creds[i] = new Credentials("D172929194001", "9819", "Demo", new String[] { "your account number", ""});
 		}
 		
-		
-				
+		int days = 1;
+		Calendar start = DateUtils.getCalendar("2015-04-08 20:00:00");
+		Calendar end = DateUtils.getCalendar("2015-09-23 00:00:00");
+		Calendar endPart = Calendar.getInstance();
+		endPart.setTime(start.getTime());
+		endPart.add(Calendar.DATE, days);
 //		List<Thread> threads = new LinkedList<Thread>();
-		for(int i=0; i<starts.length; i++){
+		while(endPart.before(end)){
 //			Credentials creds = new Credentials("D172741206001", "1008", Credentials.DEMO, null);
-			Thread t = new Thread(new DataCollector(creds[i%accounts], pair, interval, starts[i], ends[i], sessionLimit, folder 
-					+ pair + "-" + interval + "-" + i + ".csv"));
-			
-//			new DataCollector(creds[i%accounts], pair, Interval.M30, starts[i], ends[i], sessionLimit, folder + i + ".csv").run();
-//			threads.add(t);
-			t.start();
+			new DataCollector(creds[0], pair, interval, start.getTime(), endPart.getTime(), sessionLimit, folder 
+					+ pair + "-" + interval + ".csv").run();
+			start.setTime(endPart.getTime());
+			endPart.add(Calendar.DATE, days);
+			Thread.sleep(30*1000);
 		}
-		
+					
+
 //		for(Thread th: threads){
 //			th.join();
 //		}

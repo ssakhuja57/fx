@@ -58,11 +58,14 @@ public class DBDataSource implements IDataSource{
 		endChunk.add(Calendar.DATE, CACHE_DAYS);
 		if(endChunk.after(end))
 			endChunk = end;
+		Logger.debug("clearing tick cache");
 		tickCache.clear();
 		try {
 			Logger.debug("updating cache with tick data from " 
 							+ DateUtils.calToString(startChunk) + " to " + DateUtils.calToString(endChunk));
-			tickCache.addAll(DBUtils.readQuery(config, getQuery(startChunk, endChunk)));
+			ArrayList<String[]> data = DBUtils.readQuery(config, getQuery(startChunk, endChunk));
+			Logger.info("adding " + data.size() + " rows to tick cache");
+			tickCache.addAll(data);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw new RuntimeException();
