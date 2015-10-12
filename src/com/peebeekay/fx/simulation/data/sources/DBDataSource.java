@@ -1,10 +1,8 @@
 package com.peebeekay.fx.simulation.data.sources;
 
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 
 import com.peebeekay.fx.info.Interval;
 import com.peebeekay.fx.info.Pair;
@@ -23,7 +21,7 @@ public class DBDataSource implements IDataSource{
 	private Calendar start;
 	private Calendar end;
 	private boolean cache;
-	private final int CACHE_DAYS = 20;
+	private final int CACHE_DAYS = 5;
 	private Calendar startChunk;
 	private int cacheRow = 0;
 	private ArrayList<String[]> tickCache = new ArrayList<String[]>();
@@ -90,9 +88,10 @@ public class DBDataSource implements IDataSource{
 	@Override
 	public ArrayList<OhlcPrice> getOhlcPrices(Pair pair, Interval interval,
 			Calendar start, Calendar end) {
-		String sql = "SELECT " + StringUtils.arrayToString(OhlcPrice.FIELDS,",").replace("interval,", "'" + interval.value + "',")
-				+ " FROM data." + interval.value 
-				+ " WHERE ts >= '" + DateUtils.calToString(start) + "'"
+		String sql = "SELECT " + StringUtils.arrayToString(OhlcPrice.FIELDS,",")
+				+ " FROM data.ohlc"
+				+ " WHERE interval = '" + interval + "'"
+				+ " AND ts >= '" + DateUtils.calToString(start) + "'"
 				+ " AND ts <= '" + DateUtils.calToString(end) + "'"
 				+ " AND pair = '" + pair + "'"
 				+ " ORDER BY ts"
@@ -118,9 +117,10 @@ public class DBDataSource implements IDataSource{
 	public OhlcPrice getOhlcPrice(Pair pair, Interval interval,
 			Calendar time) {
 		ArrayList<String[]> rows = new ArrayList<String[]>();
-		String sql = "SELECT " + StringUtils.arrayToString(OhlcPrice.FIELDS,",").replace("interval,", "'" + interval.value + "',") 
-				+ " FROM data." + interval.value 
-				+ " WHERE ts = '" + DateUtils.calToString(time) + "'"
+		String sql = "SELECT " + StringUtils.arrayToString(OhlcPrice.FIELDS,",")
+				+ " FROM data.ohlc"
+				+ " WHERE interval = '" + interval + "'"
+				+ " AND ts = '" + DateUtils.calToString(time) + "'"
 				+ " AND pair = '" + pair + "'"
 				+ " ORDER BY ts"
 				+ ";";

@@ -43,12 +43,17 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 		this.pair = pair;
 		this.stopOffset = stopOffset;
 		
-		Calendar nowMinusPeriod = Calendar.getInstance();
-		nowMinusPeriod.setTime(startTime.getTime());
-		//nowMinusPeriod.add(Calendar.MINUTE, -period*INTERVAL.minutes);
-		nowMinusPeriod.add(Calendar.HOUR, -120); // add extra in case run over weekend data
+		Calendar historicalPriceStart = Calendar.getInstance();
+		Calendar historicalPriceEnd = Calendar.getInstance();
 		
-		ArrayList<OhlcPrice> historicalPrices = ds.getOhlcPrices(pair, INTERVAL, nowMinusPeriod, startTime);
+		historicalPriceStart.setTime(startTime.getTime());
+		historicalPriceStart.add(Calendar.HOUR, -100);
+		
+		historicalPriceEnd.setTime(startTime.getTime());
+		historicalPriceEnd.add(Calendar.MINUTE, -INTERVAL.minutes);
+
+		
+		ArrayList<OhlcPrice> historicalPrices = ds.getOhlcPrices(pair, INTERVAL, historicalPriceStart, historicalPriceEnd);
 		rsi = new RSI(INTERVAL, period, true, true, historicalPrices);
 		prevRsi = rsi.getValue();
 		isReady = true;
@@ -105,10 +110,6 @@ public class SimpleRSITrader extends ATrader implements Runnable{
 	}
 	
 
-	@Override
-	public Boolean isReady() {
-		return isReady;
-	}
 	
 
 	@Override

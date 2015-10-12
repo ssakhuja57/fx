@@ -30,6 +30,7 @@ public class DBUtils {
 		Statement st = null;
 		ResultSet rs = null;
 		st = conn.createStatement();
+//		Logger.debug("reading query: " + sql);
 		rs = st.executeQuery(sql);
 		int columnCount = rs.getMetaData().getColumnCount();
 		
